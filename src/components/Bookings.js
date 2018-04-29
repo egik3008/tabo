@@ -1,5 +1,9 @@
 import React, { Component } from 'react';
-import { database } from "../services/database";
+import ReactTable from 'react-table';
+import axios from 'axios';
+// import map from 'lodash/map';
+import 'react-table/react-table.css';
+// import { database } from "../services/database";
 
 import Page from '../Page';
 
@@ -7,51 +11,83 @@ class Bookings extends Component {
   constructor() {
     super();
     this.state = {
-      bookings: []
+      users: {
+        loading: false,
+        loaded: false,
+        data: [],
+        totalData: 0
+      }
     };
   }
 
+  fetchUsersData = state => {
+    const { pageSize, page, sorted, filtered } = state;
+    let queryParams = `page=${page}`;
+
+    if (filtered.length > 0) {
+      filtered.forEach(item => {
+        queryParams = queryParams + `&filter[${item.id}]=${item.value}`;
+      });
+    }
+
+    axios
+      .get(`${process.env.REACT_APP_API_HOSTNAME}/api/admin/users/?${queryParams}`)
+      .then(response => {
+        if (response.data.data.length > 0) {
+          this.setState(prevState => {
+            return {
+              users: {
+                ...prevState.users,
+                loading: false,
+                loaded: true,
+                data: response.data.data,
+                totalData: response.data.metaInfo.nbHits
+              }
+            }
+          });
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
+
   render() {
+    const columns = [
+      {
+        Header: 'Name',
+        accessor: 'displayName'
+      },
+      {
+        Header: 'Registered',
+        accessor: 'created'
+      },
+      {
+        Header: 'Email',
+        accessor: 'email'
+      },
+      {
+        Header: 'Country',
+        accessor: 'countryName'
+      }
+    ];
+
+    const pages = Math.ceil(this.state.users.totalData / 50);
+
     return (
       <Page>
-        <h2>Bookings</h2>
-        <table className="table">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>X</th>
-              <th>Y</th>
-              <th>Z</th>
-              <th>I</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            <tr>
-              <td>1</td>
-              <td>X Content 1</td>
-              <td>Y Content 1</td>
-              <td>Z Content 1</td>
-              <td>I Content 1</td>
-            </tr>
-
-            <tr>
-              <td>2</td>
-              <td>X Content 2</td>
-              <td>Y Content 2</td>
-              <td>Z Content 2</td>
-              <td>I Content 2</td>
-            </tr>
-
-            <tr>
-              <td>3</td>
-              <td>X Content 3</td>
-              <td>Y Content 3</td>
-              <td>Z Content 3</td>
-              <td>I Content 3</td>
-            </tr>
-          </tbody>
-        </table>
+        <h2>Users</h2>
+        <ReactTable
+          columns={columns}
+          manual
+          data={this.state.users.data}
+          pages={pages}
+          loading={this.state.users.loading}
+          onFetchData={this.fetchUsersData}
+          filterable
+          defaultPageSize={50}
+          className="-striped -highlight"
+        />
       </Page>
     );
   }

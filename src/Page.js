@@ -14,7 +14,7 @@ export default (props) => (
     </header>
 
     <main role="main">
-      <div className="container" style={{ marginTop: '25px' }}>
+      <div className="container-fluid" style={{ marginTop: '25px' }}>
         { props.children }
       </div>
     </main>
