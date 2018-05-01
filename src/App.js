@@ -4,13 +4,13 @@ import history from './services/history';
 import ScrollToTop from './ScrollToTop';
 
 import Home from './components/Home';
-import Bookings from './components/Bookings';
+import Users from './components/Users';
 
 const App = (props) => (
   <Router history={history}>
     <ScrollToTop>
       <Switch>
-        <Route exact path="/bookings" component={Bookings} />
+        <Route exact path="/bookings" component={Users} />
         <Route exact path="/" component={Home} />
       </Switch>
     </ScrollToTop>

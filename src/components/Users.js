@@ -7,7 +7,7 @@ import 'react-table/react-table.css';
 
 import Page from '../Page';
 
-class Bookings extends Component {
+class Users extends Component {
   constructor() {
     super();
     this.state = {
@@ -21,6 +21,8 @@ class Bookings extends Component {
   }
 
   fetchUsersData = state => {
+    this.setState(prevState => ({ users: { ...prevState.users, loading: true } }));
+
     const { pageSize, page, sorted, filtered } = state;
     let queryParams = `page=${page}`;
 
@@ -59,8 +61,17 @@ class Bookings extends Component {
         accessor: 'displayName'
       },
       {
+        Header: 'Type',
+        accessor: 'userType'
+      },
+      {
         Header: 'Registered',
         accessor: 'created'
+      },
+      {
+        Header: 'Status',
+        accessor: 'enable',
+        Cell: row => row.value === 1 ? 'Active' :'Suspend'
       },
       {
         Header: 'Email',
@@ -69,6 +80,15 @@ class Bookings extends Component {
       {
         Header: 'Country',
         accessor: 'countryName'
+      },
+      {
+        Header: 'Actions',
+        accessor: 'uid',
+        Cell: row => (
+          <div style={{ textAlign: 'center' }}>
+            <a className="btn btn-info btn-sm" href={`/sesuatu/${row.value}`}>Manage</a>
+          </div>
+        )
       }
     ];
 
@@ -93,4 +113,4 @@ class Bookings extends Component {
   }
 }
 
-export default Bookings;
+export default Users;
