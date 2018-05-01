@@ -10,7 +10,7 @@ const App = (props) => (
   <Router history={history}>
     <ScrollToTop>
       <Switch>
-        <Route exact path="/bookings" component={Users} />
+        <Route exact path="/users" component={Users} />
         <Route exact path="/" component={Home} />
       </Switch>
     </ScrollToTop>
