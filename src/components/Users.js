@@ -24,7 +24,7 @@ class Users extends Component {
     this.setState(prevState => ({ users: { ...prevState.users, loading: true } }));
 
     const { pageSize, page, sorted, filtered } = state;
-    let queryParams = `page=${page}`;
+    let queryParams = `userType=${this.props.match.params.usertype}&page=${page}`;
 
     if (filtered.length > 0) {
       filtered.forEach(item => {
@@ -76,6 +76,14 @@ class Users extends Component {
       {
         Header: 'Email',
         accessor: 'email'
+      },
+      {
+        Header: 'Phone country code',
+        accessor: 'phoneDialCode'
+      },
+      {
+        Header: 'Phone number',
+        accessor: 'phoneNumber'
       },
       {
         Header: 'Country',
