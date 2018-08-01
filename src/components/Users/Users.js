@@ -1,13 +1,13 @@
-import React, { Component } from 'react';
-import ReactTable from 'react-table';
-import axios from 'axios';
-// import map from 'lodash/map';
-import 'react-table/react-table.css';
-// import { database } from "../services/database";
+import React, { Component } from 'react'
+import ReactTable from 'react-table'
+import axios from 'axios'
+// import map from 'lodash/map'
+import 'react-table/react-table.css'
+// import { database } from "../services/database"
 
 class Users extends Component {
   constructor() {
-    super();
+    super()
     this.state = {
       users: {
         loading: false,
@@ -15,19 +15,19 @@ class Users extends Component {
         data: [],
         totalData: 0
       }
-    };
+    }
   }
 
   fetchUsersData = state => {
-    this.setState(prevState => ({ users: { ...prevState.users, loading: true } }));
+    this.setState(prevState => ({ users: { ...prevState.users, loading: true } }))
 
-    const { pageSize, page, sorted, filtered } = state;
-    let queryParams = `userType=${this.props.match.params.usertype}&page=${page}`;
+    const { pageSize, page, sorted, filtered } = state
+    let queryParams = `userType=${this.props.match.params.usertype}&page=${page}`
 
     if (filtered.length > 0) {
       filtered.forEach(item => {
-        queryParams = queryParams + `&filter[${item.id}]=${item.value}`;
-      });
+        queryParams = queryParams + `&filter[${item.id}]=${item.value}`
+      })
     }
 
     axios
@@ -44,13 +44,13 @@ class Users extends Component {
                 totalData: response.data.metaInfo.nbHits
               }
             }
-          });
+          })
         }
       })
       .catch((error) => {
-        console.error(error);
-      });
-  };
+        console.error(error)
+      })
+  }
 
   render() {
     const columns = [
@@ -96,9 +96,9 @@ class Users extends Component {
           </div>
         )
       }
-    ];
+    ]
 
-    const pages = Math.ceil(this.state.users.totalData / 50);
+    const pages = Math.ceil(this.state.users.totalData / 50)
 
     return (
       <div>
@@ -115,8 +115,8 @@ class Users extends Component {
           className="-striped -highlight"
         />
       </div>
-    );
+    )
   }
 }
 
-export default Users;
+export default Users

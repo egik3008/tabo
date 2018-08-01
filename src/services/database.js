@@ -1,4 +1,4 @@
-import firebase from 'firebase';
+import firebase from 'firebase'
 
 const config = {
   apiKey: process.env.REACT_APP_FIREBASE_WEB_API_KEY,
@@ -7,8 +7,8 @@ const config = {
   projectId: process.env.REACT_APP_FIREBASE_WEB_PROJECT_ID,
   storageBucket: process.env.REACT_APP_FIREBASE_WEB_STORAGE_BUCKET,
   messagingSenderId: process.env.REACT_APP_FIREBASE_WEB_MESSAGING_SENDER_ID,
-};
+}
 
-export const database = firebase.initializeApp(config);
-export const facebookAuthProvider = new firebase.auth.FacebookAuthProvider();
-export const googleAuthProvider = new firebase.auth.GoogleAuthProvider();
+export const database = firebase.initializeApp(config)
+export const facebookAuthProvider = new firebase.auth.FacebookAuthProvider()
+export const googleAuthProvider = new firebase.auth.GoogleAuthProvider()

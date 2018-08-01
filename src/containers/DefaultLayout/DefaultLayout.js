@@ -1,6 +1,6 @@
-import React, { Component } from 'react';
-import { Redirect, Route, Switch } from 'react-router-dom';
-import { Container } from 'reactstrap';
+import React, { Component } from 'react'
+import { Redirect, Route, Switch } from 'react-router-dom'
+import { Container } from 'reactstrap'
 
 import {
   AppBreadcrumb,
@@ -12,13 +12,13 @@ import {
   AppSidebarHeader,
   AppSidebarMinimizer,
   AppSidebarNav,
-} from '@coreui/react';
+} from '@coreui/react'
 // sidebar nav config
-import navigation from '../../_nav';
+import navigation from '../../_nav'
 // routes config
-import routes from '../../routes';
-import DefaultFooter from './DefaultFooter';
-import DefaultHeader from './DefaultHeader';
+import routes from '../../routes'
+import DefaultFooter from './DefaultFooter'
+import DefaultHeader from './DefaultHeader'
 
 class DefaultLayout extends Component {
   render() {
@@ -43,7 +43,7 @@ class DefaultLayout extends Component {
                     return route.component ? (<Route key={idx} path={route.path} exact={route.exact} name={route.name} render={props => (
                         <route.component {...props} />
                       )} />)
-                      : (null);
+                      : (null)
                   },
                 )}
                 <Redirect from="/" to="/dashboard" />
@@ -55,8 +55,8 @@ class DefaultLayout extends Component {
           <DefaultFooter />
         </AppFooter>
       </div>
-    );
+    )
   }
 }
 
-export default DefaultLayout;
+export default DefaultLayout

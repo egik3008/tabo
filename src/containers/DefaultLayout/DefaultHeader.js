@@ -1,16 +1,16 @@
-import React, { Component } from 'react';
-import { Badge, DropdownItem, DropdownMenu, DropdownToggle, Nav, NavItem, NavLink } from 'reactstrap';
-import { AppAsideToggler, AppHeaderDropdown, AppNavbarBrand, AppSidebarToggler } from '@coreui/react';
-import logo from '../../assets/img/brand/logo.png';
-import defaultAvatar from '../../assets/img/avatar/user.png';
+import React, { Component } from 'react'
+import { Badge, DropdownItem, DropdownMenu, DropdownToggle, Nav, NavItem, NavLink } from 'reactstrap'
+import { AppAsideToggler, AppHeaderDropdown, AppNavbarBrand, AppSidebarToggler } from '@coreui/react'
+import logo from '../../assets/img/brand/logo.png'
+import defaultAvatar from '../../assets/img/avatar/user.png'
 
-const defaultProps = {};
+const defaultProps = {}
 
 class DefaultHeader extends Component {
   render() {
 
     // eslint-disable-next-line
-    const { children, ...attributes } = this.props;
+    const { children, ...attributes } = this.props
 
     return (
       <React.Fragment>
@@ -33,10 +33,10 @@ class DefaultHeader extends Component {
           </AppHeaderDropdown>
         </Nav>
       </React.Fragment>
-    );
+    )
   }
 }
 
-DefaultHeader.defaultProps = defaultProps;
+DefaultHeader.defaultProps = defaultProps
 
-export default DefaultHeader;
+export default DefaultHeader

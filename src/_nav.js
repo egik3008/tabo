@@ -36,4 +36,4 @@ export default {
       icon: 'fa fa-tasks fa-fw',
     },
   ]
-};
+}

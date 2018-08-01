@@ -1,22 +1,22 @@
-import React from 'react';
-import { Router, Route, Switch } from 'react-router-dom';
-import { History } from './services';
+import React from 'react'
+import { Router, Route, Switch } from 'react-router-dom'
+import { History } from './services'
 
 // Styles
 // CoreUI Icons Set
-import '@coreui/icons/css/coreui-icons.min.css';
+import '@coreui/icons/css/coreui-icons.min.css'
 // Import Font Awesome Icons Set
-import 'font-awesome/css/font-awesome.min.css';
+import 'font-awesome/css/font-awesome.min.css'
 // Import Main styles for this application
-import './scss/style.css';
+import './scss/style.css'
 
 // Containers
-import { DefaultLayout } from './containers';
+import { DefaultLayout } from './containers'
 
 const App = (props) => (
   <Router history={ History }>
     <DefaultLayout/>
   </Router>
-);
+)
 
-export default App;
+export default App

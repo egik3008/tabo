@@ -1,3 +1,3 @@
-import DefaultLayout from './DefaultLayout/DefaultLayout';
+import DefaultLayout from './DefaultLayout/DefaultLayout'
 
-export { DefaultLayout };
+export { DefaultLayout }
