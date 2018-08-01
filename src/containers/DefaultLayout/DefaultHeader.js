@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { DropdownItem, DropdownMenu, DropdownToggle, Nav } from 'reactstrap'
 import { AppHeaderDropdown, AppNavbarBrand, AppSidebarToggler } from '@coreui/react'
 import logo from '../../assets/img/brand/logo.png'
+import icon from '../../assets/img/brand/icon_black.ico'
 import defaultAvatar from '../../assets/img/avatar/user.png'
 
 const defaultProps = {}
@@ -17,6 +18,7 @@ class DefaultHeader extends Component {
         <AppSidebarToggler className="d-lg-none" display="md" mobile />
         <AppNavbarBrand
           full={{ src: logo, height: 25, alt: 'Takapic Logo' }}
+          minimized={{ src: icon, width: 30, height: 30, alt: 'Takapic Logo' }}
         />
         <AppSidebarToggler className="d-md-down-none" display="lg" />
 
