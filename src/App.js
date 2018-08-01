@@ -1,18 +1,23 @@
 import React from 'react';
 import { Router, Route, Switch } from 'react-router-dom';
-import history from './services/history';
-import ScrollToTop from './ScrollToTop';
+import ScrollToTop from './components/ScrollToTop';
+import { History } from './services';
 
-import Home from './components/Home';
-import Users from './components/Users';
+// Styles
+// CoreUI Icons Set
+import '@coreui/icons/css/coreui-icons.min.css';
+// Import Font Awesome Icons Set
+import 'font-awesome/css/font-awesome.min.css';
+// Import Main styles for this application
+import './scss/style.css';
+
+// Containers
+import { DefaultLayout } from './containers';
 
 const App = (props) => (
-  <Router history={history}>
+  <Router history={ History }>
     <ScrollToTop>
-      <Switch>
-        <Route exact path="/users/:usertype" component={Users} />
-        <Route exact path="/" component={Home} />
-      </Switch>
+      <DefaultLayout/>
     </ScrollToTop>
   </Router>
 );

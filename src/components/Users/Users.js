@@ -1,11 +1,9 @@
-import React, { Component } from 'react';
+import { React, Component } from 'react';
 import ReactTable from 'react-table';
 import axios from 'axios';
 // import map from 'lodash/map';
 import 'react-table/react-table.css';
 // import { database } from "../services/database";
-
-import Page from '../Page';
 
 class Users extends Component {
   constructor() {
@@ -103,7 +101,7 @@ class Users extends Component {
     const pages = Math.ceil(this.state.users.totalData / 50);
 
     return (
-      <Page>
+      <div>
         <h2>Users</h2>
         <ReactTable
           columns={columns}
@@ -116,7 +114,7 @@ class Users extends Component {
           defaultPageSize={50}
           className="-striped -highlight"
         />
-      </Page>
+      </div>
     );
   }
 }
