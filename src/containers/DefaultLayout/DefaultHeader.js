@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
-import { Badge, DropdownItem, DropdownMenu, DropdownToggle, Nav, NavItem, NavLink } from 'reactstrap'
-import { AppAsideToggler, AppHeaderDropdown, AppNavbarBrand, AppSidebarToggler } from '@coreui/react'
+import { DropdownItem, DropdownMenu, DropdownToggle, Nav } from 'reactstrap'
+import { AppHeaderDropdown, AppNavbarBrand, AppSidebarToggler } from '@coreui/react'
 import logo from '../../assets/img/brand/logo.png'
 import defaultAvatar from '../../assets/img/avatar/user.png'
 
