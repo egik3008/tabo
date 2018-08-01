@@ -15,5 +15,25 @@ export default {
       url: '/photographer',
       icon: 'fa fa-camera fa-fw',
     },
+    {
+      name: 'Reservation',
+      url: '/reservation',
+      icon: 'fa fa-address-book fa-fw',
+    },
+    {
+      name: 'Photo Album',
+      url: '/photo-album',
+      icon: 'fa fa-book fa-fw',
+    },
+    {
+      name: 'Finance',
+      url: '/finance',
+      icon: 'fa fa-money fa-fw',
+    },
+    {
+      name: 'Management',
+      url: '/management',
+      icon: 'fa fa-tasks fa-fw',
+    },
   ]
 };
