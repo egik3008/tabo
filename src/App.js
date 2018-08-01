@@ -1,6 +1,5 @@
 import React from 'react';
 import { Router, Route, Switch } from 'react-router-dom';
-import ScrollToTop from './components/ScrollToTop';
 import { History } from './services';
 
 // Styles
@@ -16,9 +15,7 @@ import { DefaultLayout } from './containers';
 
 const App = (props) => (
   <Router history={ History }>
-    <ScrollToTop>
-      <DefaultLayout/>
-    </ScrollToTop>
+    <DefaultLayout/>
   </Router>
 );
 
