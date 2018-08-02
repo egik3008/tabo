@@ -11,15 +11,14 @@ const Dashboard = Loadable({
 })
 
 const User = Loadable({
-  loader: () => import('./components/Users/Users'),
+  loader: () => import('./components/Users'),
   loading: Loading,
 })
 
 // https://github.com/ReactTraining/react-router/tree/master/packages/react-router-config
 const routes = [
   { path: '/dashboard', name: 'Dashboard', component: Dashboard },
-  { path: '/traveler', name: 'Traveler', component: User },
-  { path: '/photographer', name: 'Photographer', component: User },
+  { path: '/user/:type', name: 'User', component: User },
 ]
 
 export default routes
