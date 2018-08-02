@@ -22,6 +22,8 @@ import DefaultHeader from './DefaultHeader'
 
 class DefaultLayout extends Component {
   render() {
+    const props = this.props
+
     return (
       <div className="app">
         <AppHeader fixed>
@@ -40,10 +42,10 @@ class DefaultLayout extends Component {
             <Container fluid>
               <Switch>
                 {routes.map((route, idx) => {
-                    return route.component ? (<Route key={idx} path={route.path} exact={route.exact} name={route.name} render={props => (
-                        <route.component {...props} />
-                      )} />)
-                      : (null)
+                  return route.component ? (<Route key={idx} path={route.path} exact={route.exact} name=   {route.name} render={p => (
+                      <route.component {...p} {...props} />
+                    )} />)
+                  : (null)
                   },
                 )}
                 <Redirect from="/" to="/dashboard" />
