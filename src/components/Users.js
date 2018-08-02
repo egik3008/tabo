@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import ReactTable from 'react-table'
+import { Card, CardBody, CardHeader, Col, Row } from 'reactstrap'
 import axios from 'axios'
 // import map from 'lodash/map'
 import 'react-table/react-table.css'
@@ -21,8 +22,8 @@ class Users extends Component {
   fetchUsersData = state => {
     this.setState(prevState => ({ users: { ...prevState.users, loading: true } }))
 
-    const { pageSize, page, sorted, filtered } = state
-    let queryParams = `userType=${this.props.match.params.usertype}&page=${page}`
+    const { defaultPageSize, page, filtered } = state
+    let queryParams = `userType=${this.props.match.params.type}&page=${page}&limit=${defaultPageSize}`
 
     if (filtered.length > 0) {
       filtered.forEach(item => {
@@ -98,22 +99,32 @@ class Users extends Component {
       }
     ]
 
-    const pages = Math.ceil(this.state.users.totalData / 50)
+    const pages = Math.ceil(this.state.users.totalData / 5)
 
     return (
-      <div>
-        <h2>Users</h2>
-        <ReactTable
-          columns={columns}
-          manual
-          data={this.state.users.data}
-          pages={pages}
-          loading={this.state.users.loading}
-          onFetchData={this.fetchUsersData}
-          filterable
-          defaultPageSize={50}
-          className="-striped -highlight"
-        />
+      <div className="animated fadeIn">
+        <Row>
+          <Col>
+            <Card>
+              <CardHeader>
+                Traveler List
+              </CardHeader>
+              <CardBody>
+                <ReactTable
+                  columns={columns}
+                  manual
+                  data={this.state.users.data}
+                  pages={pages}
+                  loading={this.state.users.loading}
+                  onFetchData={this.fetchUsersData}
+                  filterable
+                  defaultPageSize={5}
+                  className="-striped -highlight"
+                />
+              </CardBody>
+            </Card>
+          </Col>
+        </Row>
       </div>
     )
   }
