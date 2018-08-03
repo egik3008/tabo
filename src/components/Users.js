@@ -1,7 +1,10 @@
 import React, { Component } from 'react'
 import ReactTable from 'react-table'
 import { Card, CardBody, CardHeader, Col, Row } from 'reactstrap'
+import { Link } from 'react-router-dom';
 import axios from 'axios'
+import moment from'moment'
+import 'moment/locale/id'
 // import map from 'lodash/map'
 import 'react-table/react-table.css'
 // import { database } from "../services/database"
@@ -78,44 +81,39 @@ class Users extends Component {
         accessor: 'displayName'
       },
       {
-        Header: 'Type',
-        accessor: 'userType'
-      },
-      {
-        Header: 'Registered',
-        accessor: 'created'
-      },
-      {
-        Header: 'Status',
-        accessor: 'enable',
-        Cell: row => row.value === 1 ? 'Active' :'Suspend'
+        Header: 'Country',
+        accessor: 'countryName'
       },
       {
         Header: 'Email',
         accessor: 'email'
       },
       {
-        Header: 'Phone country code',
-        accessor: 'phoneDialCode'
+        Header: 'Signed Up',
+        accessor: 'created',
+        Cell: row => moment(row.value).locale('id').format('ll')
       },
       {
-        Header: 'Phone number',
-        accessor: 'phoneNumber'
-      },
-      {
-        Header: 'Country',
-        accessor: 'countryName'
+        Header: 'Status',
+        accessor: 'enable',
+        Cell: row => row.value === 1 ? 'Active' : 'Blocked'
       },
       {
         Header: 'Actions',
         accessor: 'uid',
         Cell: row => (
           <div style={{ textAlign: 'center' }}>
-            <a className="btn btn-info btn-sm" href={`/sesuatu/${row.value}`}>Manage</a>
+            <Link to={"users/"+this.props.match.params.type+"/"+row.value}><i className="fa fa-pencil"></i></Link>
           </div>
         )
       }
     ]
+
+    if (this.props.match.params.type === 'p')
+      columns.splice(2, 0, {
+        Header: 'Currency',
+        accessor: 'currency'
+      })
 
     return (
       <div className="animated fadeIn">
