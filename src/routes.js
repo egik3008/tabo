@@ -15,9 +15,15 @@ const User = Loadable({
   loading: Loading,
 })
 
+const UserDetail = Loadable({
+  loader: () => import('./components/UserDetail'),
+  loading: Loading,
+})
+
 // https://github.com/ReactTraining/react-router/tree/master/packages/react-router-config
 const routes = [
   { path: '/dashboard', name: 'Dashboard', component: Dashboard },
+  { path: '/user/:type/:id', name: 'User Detail', component: UserDetail },
   { path: '/user/:type', name: 'User', component: User },
 ]
 
