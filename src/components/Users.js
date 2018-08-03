@@ -10,6 +10,10 @@ class Users extends Component {
   constructor() {
     super()
     this.state = {
+      type: '',
+      filtered: [],
+      page: 0,
+      defaultPageSize: 5,
       users: {
         loading: false,
         loaded: false,
@@ -19,8 +23,21 @@ class Users extends Component {
     }
   }
 
+  componentWillMount() {
+    this.setState({ type: this.props.match.params.type })
+  }
+
+  componentDidUpdate(prevProps) {
+    if (this.props.match.params.type !== prevProps.match.params.type) {
+      this.setState({ type: this.props.match.params.type })
+      this.fetchUsersData(this.state)
+    }
+  }
+
   fetchUsersData = state => {
-    this.setState(prevState => ({ users: { ...prevState.users, loading: true } }))
+    this.setState(prevState => ({
+      users: { ...prevState.users, loading: true }
+    }))
 
     const { defaultPageSize, page, filtered } = state
     let queryParams = `userType=${this.props.match.params.type}&page=${page}&limit=${defaultPageSize}`
@@ -42,7 +59,8 @@ class Users extends Component {
                 loading: false,
                 loaded: true,
                 data: response.data.data,
-                totalData: response.data.metaInfo.nbHits
+                totalData: response.data.metaInfo.nbHits,
+                totalPages: response.data.metaInfo.nbPages
               }
             }
           })
@@ -99,8 +117,6 @@ class Users extends Component {
       }
     ]
 
-    const pages = Math.ceil(this.state.users.totalData / 5)
-
     return (
       <div className="animated fadeIn">
         <Row>
@@ -114,11 +130,12 @@ class Users extends Component {
                   columns={columns}
                   manual
                   data={this.state.users.data}
-                  pages={pages}
+                  pages={this.state.users.totalPages}
                   loading={this.state.users.loading}
                   onFetchData={this.fetchUsersData}
+                  type={this.state.type}
                   filterable
-                  defaultPageSize={5}
+                  defaultPageSize={this.state.defaultPageSize}
                   className="-striped -highlight"
                 />
               </CardBody>
