@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import ReactTable from 'react-table'
 import { Card, CardBody, CardHeader, Col, Row } from 'reactstrap'
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router-dom'
 import axios from 'axios'
 import moment from'moment'
 import 'moment/locale/id'
@@ -103,7 +103,7 @@ class Users extends Component {
         accessor: 'uid',
         Cell: row => (
           <div style={{ textAlign: 'center' }}>
-            <Link to={"users/"+this.props.match.params.type+"/"+row.value}><i className="fa fa-pencil"></i></Link>
+            <Link to={"/user/"+this.props.match.params.type+"/"+row.value}><i className="fa fa-pencil"></i></Link>
           </div>
         )
       }
