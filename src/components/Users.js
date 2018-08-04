@@ -103,7 +103,7 @@ class Users extends Component {
         accessor: 'uid',
         Cell: row => (
           <div style={{ textAlign: 'center' }}>
-            <Link to={"/user/"+this.props.match.params.type+"/"+row.value}><i className="fa fa-pencil"></i></Link>
+            <Link to={"/users/"+this.props.match.params.type+"/"+row.value}><i className="fa fa-pencil"></i></Link>
           </div>
         )
       }
@@ -118,7 +118,7 @@ class Users extends Component {
     return (
       <div className="animated fadeIn">
         <Row>
-          <Col>
+          <Col className="mt-2">
             <Card>
               <CardHeader>
                 Traveler List
