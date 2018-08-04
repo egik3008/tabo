@@ -23,8 +23,8 @@ const UserDetail = Loadable({
 // https://github.com/ReactTraining/react-router/tree/master/packages/react-router-config
 const routes = [
   { path: '/dashboard', name: 'Dashboard', component: Dashboard },
-  { path: '/user/:type/:id', name: 'User Detail', component: UserDetail },
-  { path: '/user/:type', name: 'User', component: User },
+  { path: '/users/:type/:id', name: 'User Detail', component: UserDetail },
+  { path: '/users/:type', name: 'User', component: User },
 ]
 
 export default routes
