@@ -7,12 +7,12 @@ export default {
     },
     {
       name: 'Traveler',
-      url: '/users/t',
+      url: '/users/traveler',
       icon: 'fa fa-suitcase fa-fw',
     },
     {
       name: 'Photographer',
-      url: '/users/p',
+      url: '/users/photographer',
       icon: 'fa fa-camera fa-fw',
     },
     {
