@@ -161,9 +161,9 @@ class UserDetail extends Component {
                   <Label htmlFor="status">Status</Label>
                 </Col>
                 <Col xs="12" md="9">
-                  <Input type="select" id="status" name="status">
-                    <option value="1" className={classnames({ selected: this.state.user.enable === 1 })}>Active</option>
-                    <option value="0" className={classnames({ selected: this.state.user.enable === 0 })}>Blocked</option>
+                  <Input type="select" id="status" name="status" value={this.state.user.enable}>
+                    <option value="1">Active</option>
+                    <option value="0">Blocked</option>
                   </Input>
                 </Col>
               </FormGroup>
@@ -336,9 +336,9 @@ class UserDetail extends Component {
                   <Label htmlFor="status">Status</Label>
                 </Col>
                 <Col xs="12" md="9">
-                  <Input type="select" id="status" name="status">
-                    <option value="1" className={classnames({ selected: this.state.user.enable === 1 })}>Active</option>
-                    <option value="0" className={classnames({ selected: this.state.user.enable === 0 })}>Blocked</option>
+                  <Input type="select" id="status" name="status" value={this.state.user.enable}>
+                    <option value="1">Active</option>
+                    <option value="0">Blocked</option>
                   </Input>
                 </Col>
               </FormGroup>
