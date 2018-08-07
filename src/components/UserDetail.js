@@ -39,7 +39,7 @@ class UserDetail extends Component {
     axios
       .get(`${process.env.REACT_APP_API_HOSTNAME}/api/${url}/${id}`)
       .then(response => {
-        if (type === 't')
+        if (type === 'traveler')
           this.setState({
             user: response.data.data
           })
