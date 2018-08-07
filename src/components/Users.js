@@ -43,7 +43,8 @@ class Users extends Component {
     }))
 
     const { defaultPageSize, page, filtered } = state
-    let queryParams = `userType=${this.props.match.params.type}&page=${page}&limit=${defaultPageSize}`
+    let type = this.props.match.params.type === 'photographer' ? 'p' : 't'
+    let queryParams = `userType=${type}&page=${page}&limit=${defaultPageSize}`
 
     if (filtered.length > 0) {
       filtered.forEach(item => {
@@ -77,6 +78,10 @@ class Users extends Component {
   render() {
     const columns = [
       {
+        Header: 'ID Traveler',
+        accessor: 'uid'
+      },
+      {
         Header: 'Name',
         accessor: 'displayName'
       },
@@ -91,16 +96,25 @@ class Users extends Component {
       {
         Header: 'Signed Up',
         accessor: 'created',
+        maxWidth: 200,
+        Cell: row => moment(row.value).locale('id').format('lll')
+      },
+      {
+        Header: 'Last Sign In',
+        accessor: 'created',
+        maxWidth: 200,
         Cell: row => moment(row.value).locale('id').format('ll')
       },
       {
         Header: 'Status',
         accessor: 'enable',
+        maxWidth: 50,
         Cell: row => row.value === 1 ? 'Active' : 'Blocked'
       },
       {
         Header: 'Actions',
         accessor: 'uid',
+        maxWidth: 50,
         Cell: row => (
           <div style={{ textAlign: 'center' }}>
             <Link to={"/users/"+this.props.match.params.type+"/"+row.value}><i className="fa fa-pencil"></i></Link>
