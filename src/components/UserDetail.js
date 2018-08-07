@@ -35,7 +35,7 @@ class UserDetail extends Component {
   }
 
   fetchUser(type, id) {
-    const url = type === 't' ? 'users' : 'photographers'
+    const url = type === 'traveler' ? 'users' : 'photographers'
     axios
       .get(`${process.env.REACT_APP_API_HOSTNAME}/api/${url}/${id}`)
       .then(response => {
