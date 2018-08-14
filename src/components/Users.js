@@ -61,7 +61,6 @@ class Users extends Component {
     }))
 
     let { defaultPageSize, page, filtered } = state
-    console.log(filtered)
     const type = this.props.match.params.type === 'photographer' ? 'p' : 't'
     let queryParams = `userType=${type}&page=${page}&limit=${defaultPageSize}`
     queryParams += filtered.some(e => e.hasOwnProperty('search'))
