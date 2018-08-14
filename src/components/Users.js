@@ -14,7 +14,7 @@ class Users extends Component {
     super()
     this.state = {
       type: '',
-      filtered: [{ search: '' }],
+      filtered: [{ search: '', enable: 'all' }],
       page: 0,
       defaultPageSize: 10,
       users: {
@@ -29,7 +29,7 @@ class Users extends Component {
   componentWillMount() {
     this.setState({
       type: this.props.match.params.type,
-      filtered: [{ search: '' }],
+      filtered: [{ search: '', enable: 'all' }],
     })
   }
 
@@ -37,7 +37,7 @@ class Users extends Component {
     if (this.props.match.params.type !== prevProps.match.params.type) {
       this.setState({
         type: this.props.match.params.type,
-        filtered: [{ search: '' }],
+        filtered: [{ search: '', enable: 'all' }],
       })
       this.fetchUsersData(this.state)
     }
@@ -45,6 +45,12 @@ class Users extends Component {
 
   onInputChange(e) {
     this.setState({ filtered: [{ search: e.target.value }] }, () => {
+      this.fetchUsersData(this.state)
+    })
+  }
+
+  onSelectChange(e) {
+    this.setState({ filtered: [{ enable: e.target.value }] }, () => {
       this.fetchUsersData(this.state)
     })
   }
@@ -64,8 +70,9 @@ class Users extends Component {
 
     if (filtered.length > 0) {
       filtered.forEach(item => {
-        if (item.id === 'enable' && item.value !== 'all')
-          queryParams = queryParams + `&filter[${item.id}]=${item.value}`
+        if ('enable' in item && item.enable !== 'all') {
+          queryParams = queryParams + `&filter[enable]=${item.enable}`
+        }
       })
     }
 
@@ -183,11 +190,25 @@ class Users extends Component {
             <Card>
               <CardHeader>{this.state.type} List</CardHeader>
               <CardBody>
-                <Row>
-                  <Col md="4">
-                    <Form className="pb-3" inline>
+                <Row className="pb-2">
+                  <Col>
+                    <Form inline>
                       <FormGroup>
-                        <Label className="pr-1">Search:</Label>
+                        <Label className="pr-1">Filter by Status : </Label>
+                        <Input type="select" onChange={this.onSelectChange.bind(this)}>
+                          <option value="all">All</option>
+                          <option value="1">Active</option>
+                          <option value="0">Blocked</option>
+                        </Input>
+                      </FormGroup>
+                    </Form>
+                  </Col>
+
+                  <Col />
+
+                  <Col>
+                    <Form>
+                      <FormGroup>
                         <Input type="text" placeholder="Enter keyword" onChange={this.onInputChange.bind(this)} />
                       </FormGroup>
                     </Form>
