@@ -1,19 +1,7 @@
 import React, { Component } from 'react'
 import axios from 'axios'
 import classnames from 'classnames'
-import {
-  Col,
-  Row,
-  Nav,
-  NavItem,
-  NavLink,
-  TabContent,
-  TabPane,
-  Form,
-  FormGroup,
-  Label,
-  Input,
-} from 'reactstrap';
+import { Col, Row, Nav, NavItem, NavLink, TabContent, TabPane, Form, FormGroup, Label, Input } from 'reactstrap'
 
 class UserDetail extends Component {
   constructor(props) {
@@ -21,7 +9,7 @@ class UserDetail extends Component {
     this.toggle = this.toggle.bind(this)
     this.state = {
       activeTab: 'detail',
-      user: {}
+      user: {},
     }
     this.fetchUser(props.match.params.type, props.match.params.id)
   }
@@ -36,19 +24,17 @@ class UserDetail extends Component {
 
   fetchUser(type, id) {
     const url = type === 'traveler' ? 'users' : 'photographers'
-    axios
-      .get(`${process.env.REACT_APP_API_HOSTNAME}/api/${url}/${id}`)
-      .then(response => {
-        if (type === 'traveler')
-          this.setState({
-            user: response.data.data
-          })
-        else
-          this.setState({
-            ...response,
-            user: response.data.data.userMetadata,
-          })
-      })
+    axios.get(`${process.env.REACT_APP_API_HOSTNAME}/api/${url}/${id}`).then(response => {
+      if (type === 'traveler')
+        this.setState({
+          user: response.data.data,
+        })
+      else
+        this.setState({
+          ...response,
+          user: response.data.data.userMetadata,
+        })
+    })
   }
 
   renderTraveler() {
@@ -58,24 +44,27 @@ class UserDetail extends Component {
           <NavItem>
             <NavLink
               className={classnames({ active: this.state.activeTab === 'detail' })}
-              onClick={() => { this.toggle('detail'); }}
-            >
+              onClick={() => {
+                this.toggle('detail')
+              }}>
               Detail
             </NavLink>
           </NavItem>
           <NavItem>
             <NavLink
               className={classnames({ active: this.state.activeTab === 'history' })}
-              onClick={() => { this.toggle('history'); }}
-            >
+              onClick={() => {
+                this.toggle('history')
+              }}>
               History
             </NavLink>
           </NavItem>
           <NavItem>
             <NavLink
               className={classnames({ active: this.state.activeTab === 'messages' })}
-              onClick={() => { this.toggle('messages'); }}
-            >
+              onClick={() => {
+                this.toggle('messages')
+              }}>
               Messages
             </NavLink>
           </NavItem>
@@ -116,7 +105,13 @@ class UserDetail extends Component {
                   <Label htmlFor="country">Country</Label>
                 </Col>
                 <Col xs="12" md="9">
-                  <Input type="text" id="country" name="country" value={this.state.user.country ? this.state.user.country : ''} placeholder="Insert country" />
+                  <Input
+                    type="text"
+                    id="country"
+                    name="country"
+                    value={this.state.user.country ? this.state.user.country : ''}
+                    placeholder="Insert country"
+                  />
                 </Col>
               </FormGroup>
 
@@ -125,7 +120,13 @@ class UserDetail extends Component {
                   <Label htmlFor="phone">Phone</Label>
                 </Col>
                 <Col xs="12" md="9">
-                  <Input type="text" id="phone" name="phone" value={this.state.user.phone ? this.state.user.phone : ''} placeholder="Insert phone" />
+                  <Input
+                    type="text"
+                    id="phone"
+                    name="phone"
+                    value={this.state.user.phone ? this.state.user.phone : ''}
+                    placeholder="Insert phone"
+                  />
                 </Col>
               </FormGroup>
 
@@ -134,7 +135,13 @@ class UserDetail extends Component {
                   <Label htmlFor="address">Address</Label>
                 </Col>
                 <Col xs="12" md="9">
-                  <Input type="text" id="address" name="address" value={this.state.user.address ? this.state.user.address : ''} placeholder="Insert address" />
+                  <Input
+                    type="text"
+                    id="address"
+                    name="address"
+                    value={this.state.user.address ? this.state.user.address : ''}
+                    placeholder="Insert address"
+                  />
                 </Col>
               </FormGroup>
 
@@ -143,7 +150,13 @@ class UserDetail extends Component {
                   <Label htmlFor="currency">Currency</Label>
                 </Col>
                 <Col xs="12" md="9">
-                  <Input type="text" id="currency" name="currency" value={this.state.user.currency ? this.state.user.currency : ''} placeholder="Insert currency" />
+                  <Input
+                    type="text"
+                    id="currency"
+                    name="currency"
+                    value={this.state.user.currency ? this.state.user.currency : ''}
+                    placeholder="Insert currency"
+                  />
                 </Col>
               </FormGroup>
 
@@ -152,7 +165,13 @@ class UserDetail extends Component {
                   <Label htmlFor="language">Language</Label>
                 </Col>
                 <Col xs="12" md="9">
-                  <Input type="text" id="language" name="language" value={this.state.user.language ? this.state.user.language : ''} placeholder="Insert language" />
+                  <Input
+                    type="text"
+                    id="language"
+                    name="language"
+                    value={this.state.user.language ? this.state.user.language : ''}
+                    placeholder="Insert language"
+                  />
                 </Col>
               </FormGroup>
 
@@ -170,13 +189,9 @@ class UserDetail extends Component {
             </Form>
           </TabPane>
 
-          <TabPane tabId="history">
-          this is history
-          </TabPane>
+          <TabPane tabId="history">this is history</TabPane>
 
-          <TabPane tabId="messages">
-          this is messages
-          </TabPane>
+          <TabPane tabId="messages">this is messages</TabPane>
         </TabContent>
       </div>
     )
@@ -189,64 +204,72 @@ class UserDetail extends Component {
           <NavItem>
             <NavLink
               className={classnames({ active: this.state.activeTab === 'detail' })}
-              onClick={() => { this.toggle('detail'); }}
-            >
+              onClick={() => {
+                this.toggle('detail')
+              }}>
               Detail
             </NavLink>
           </NavItem>
           <NavItem>
             <NavLink
               className={classnames({ active: this.state.activeTab === 'equipment' })}
-              onClick={() => { this.toggle('equipment'); }}
-            >
+              onClick={() => {
+                this.toggle('equipment')
+              }}>
               Equipment
             </NavLink>
           </NavItem>
           <NavItem>
             <NavLink
               className={classnames({ active: this.state.activeTab === 'package' })}
-              onClick={() => { this.toggle('package'); }}
-            >
+              onClick={() => {
+                this.toggle('package')
+              }}>
               Package
             </NavLink>
           </NavItem>
           <NavItem>
             <NavLink
               className={classnames({ active: this.state.activeTab === 'meeting-point' })}
-              onClick={() => { this.toggle('meeting-point'); }}
-            >
+              onClick={() => {
+                this.toggle('meeting-point')
+              }}>
               Meeting Point
             </NavLink>
           </NavItem>
           <NavItem>
             <NavLink
               className={classnames({ active: this.state.activeTab === 'unavailable-time' })}
-              onClick={() => { this.toggle('unavailable-time'); }}
-            >
+              onClick={() => {
+                this.toggle('unavailable-time')
+              }}>
               Unavailable Time
             </NavLink>
           </NavItem>
           <NavItem>
             <NavLink
               className={classnames({ active: this.state.activeTab === 'portfolio' })}
-              onClick={() => { this.toggle('portfolio'); }}
-            >
+              onClick={() => {
+                this.toggle('portfolio')
+              }}>
               Portfolio
             </NavLink>
           </NavItem>
           <NavItem>
             <NavLink
               className={classnames({ active: this.state.activeTab === 'history' })}
-              onClick={() => { this.toggle('history'); }}
-            >
+              onClick={() => {
+                this.toggle('history')
+              }}>
               History
             </NavLink>
           </NavItem>
           <NavItem>
             <NavLink
               className={classnames({ active: this.state.activeTab === 'messages' })}
-              onClick={() => { this.toggle('messages'); }}
-            >
+              onClick={() => {
+                this.toggle('messages')
+              }}>
               Messages
             </NavLink>
           </NavItem>
@@ -287,10 +310,13 @@ class UserDetail extends Component {
                   <Label htmlFor="phone">Phone</Label>
                 </Col>
                 <Col xs="12" md="9">
-                  <Input type="text" id="phone" name="phone" value={
-                    this.state.user.phoneDialCode + ' ' +
-                      this.state.user.phoneNumber}
-                    placeholder="Insert phone" />
+                  <Input
+                    type="text"
+                    id="phone"
+                    name="phone"
+                    value={this.state.user.phoneDialCode + ' ' + this.state.user.phoneNumber}
+                    placeholder="Insert phone"
+                  />
                 </Col>
               </FormGroup>
 
@@ -299,7 +325,13 @@ class UserDetail extends Component {
                   <Label htmlFor="country">Country</Label>
                 </Col>
                 <Col xs="12" md="9">
-                  <Input type="text" id="country" name="country" value={this.state.user.countryName} placeholder="Insert country" />
+                  <Input
+                    type="text"
+                    id="country"
+                    name="country"
+                    value={this.state.user.countryName}
+                    placeholder="Insert country"
+                  />
                 </Col>
               </FormGroup>
 
@@ -308,7 +340,13 @@ class UserDetail extends Component {
                   <Label htmlFor="address">City</Label>
                 </Col>
                 <Col xs="12" md="9">
-                  <Input type="text" id="city" name="city" value={this.state.user.locationMerge} placeholder="Insert address" />
+                  <Input
+                    type="text"
+                    id="city"
+                    name="city"
+                    value={this.state.user.locationMerge}
+                    placeholder="Insert address"
+                  />
                 </Col>
               </FormGroup>
 
@@ -317,8 +355,14 @@ class UserDetail extends Component {
                   <Label htmlFor="about">About Photographer</Label>
                 </Col>
                 <Col xs="12" md="9">
-                  <Input type="textarea" id="about" name="about" rows="5"
-                    value={this.state.user.selfDescription} placeholder="5000 max char" />
+                  <Input
+                    type="textarea"
+                    id="about"
+                    name="about"
+                    rows="5"
+                    value={this.state.user.selfDescription}
+                    placeholder="5000 max char"
+                  />
                 </Col>
               </FormGroup>
 
@@ -345,33 +389,19 @@ class UserDetail extends Component {
             </Form>
           </TabPane>
 
-          <TabPane tabId="equipment">
-          this is equipment
-          </TabPane>
+          <TabPane tabId="equipment">this is equipment</TabPane>
 
-          <TabPane tabId="package">
-          this is package
-          </TabPane>
+          <TabPane tabId="package">this is package</TabPane>
 
-          <TabPane tabId="meeting-point">
-          this is meeting point
-          </TabPane>
+          <TabPane tabId="meeting-point">this is meeting point</TabPane>
 
-          <TabPane tabId="unavailable-time">
-          this is unavailable time
-          </TabPane>
+          <TabPane tabId="unavailable-time">this is unavailable time</TabPane>
 
-          <TabPane tabId="portfolio">
-          this is portfolio
-          </TabPane>
+          <TabPane tabId="portfolio">this is portfolio</TabPane>
 
-          <TabPane tabId="history">
-          this is history
-          </TabPane>
+          <TabPane tabId="history">this is history</TabPane>
 
-          <TabPane tabId="messages">
-          this is messages
-          </TabPane>
+          <TabPane tabId="messages">this is messages</TabPane>
         </TabContent>
       </div>
     )
@@ -382,10 +412,7 @@ class UserDetail extends Component {
       <div className="animated fadeIn">
         <Row>
           <Col className="mt-2">
-            {this.state.user.userType === 'traveller' ?
-              this.renderTraveler()
-              : this.renderPhotographer()
-            }
+            {this.state.user.userType === 'traveller' ? this.renderTraveler() : this.renderPhotographer()}
           </Col>
         </Row>
       </div>

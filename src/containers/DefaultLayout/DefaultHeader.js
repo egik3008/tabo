@@ -9,7 +9,6 @@ const defaultProps = {}
 
 class DefaultHeader extends Component {
   render() {
-
     // eslint-disable-next-line
     const { children, ...attributes } = this.props
 
@@ -28,9 +27,15 @@ class DefaultHeader extends Component {
               <img src={defaultAvatar} className="img-avatar" alt="admin@bootstrapmaster.com" />
             </DropdownToggle>
             <DropdownMenu right style={{ right: 'auto' }}>
-              <DropdownItem header tag="div" className="text-center"><strong>Account</strong></DropdownItem>
-              <DropdownItem><i className="fa fa-user"></i> Profile</DropdownItem>
-              <DropdownItem><i className="fa fa-lock"></i> Logout</DropdownItem>
+              <DropdownItem header tag="div" className="text-center">
+                <strong>Account</strong>
+              </DropdownItem>
+              <DropdownItem>
+                <i className="fa fa-user" /> Profile
+              </DropdownItem>
+              <DropdownItem>
+                <i className="fa fa-lock" /> Logout
+              </DropdownItem>
             </DropdownMenu>
           </AppHeaderDropdown>
         </Nav>

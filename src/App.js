@@ -13,9 +13,9 @@ import './scss/style.css'
 // Containers
 import { DefaultLayout } from './containers'
 
-const App = (props) => (
-  <Router history={ History }>
-    <DefaultLayout/>
+const App = props => (
+  <Router history={History}>
+    <DefaultLayout />
   </Router>
 )
 

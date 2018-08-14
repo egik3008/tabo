@@ -35,5 +35,5 @@ export default {
       url: '/management',
       icon: 'fa fa-tasks fa-fw',
     },
-  ]
+  ],
 }

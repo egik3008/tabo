@@ -42,12 +42,16 @@ class DefaultLayout extends Component {
             <Container fluid>
               <Switch>
                 {routes.map((route, idx) => {
-                  return route.component ? (<Route key={idx} path={route.path} exact={route.exact} name=   {route.name} render={p => (
-                      <route.component {...p} {...props} />
-                    )} />)
-                  : (null)
-                  },
-                )}
+                  return route.component ? (
+                    <Route
+                      key={idx}
+                      path={route.path}
+                      exact={route.exact}
+                      name={route.name}
+                      render={p => <route.component {...p} {...props} />}
+                    />
+                  ) : null
+                })}
                 <Redirect from="/" to="/dashboard" />
               </Switch>
             </Container>

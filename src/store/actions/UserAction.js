@@ -1,51 +1,42 @@
 import firebase from 'firebase'
 import axios from 'axios'
 import history from '../../services/history'
-import {
-  database,
-  facebookAuthProvider,
-  googleAuthProvider
-} from '../../services/firebase'
-import {
-  fetchPhotographerServiceInformation,
-  tellThemThatWasSuccessOrFailed
-} from "./photographerServiceInfoActions"
+import { database, facebookAuthProvider, googleAuthProvider } from '../../services/firebase'
+import { fetchPhotographerServiceInformation, tellThemThatWasSuccessOrFailed } from './photographerServiceInfoActions'
 import { USER_PHOTOGRAPHER } from '../../services/userTypes'
 
 const initialiazePhotographerProfileData = uid => {
   const db = database.database()
 
-  db
-    .ref('photographer_service_information')
+  db.ref('photographer_service_information')
     .child(uid)
     .once('value')
-    .then((snapshot) => {
+    .then(snapshot => {
       const vals = snapshot.val()
       if (vals === null) {
         const initialProfileData = {
           serviceReviews: {
             rating: {
               label: 'Rating',
-              value: 3
+              value: 3,
             },
             impressions: [
               { label: 'Friendly', value: 0.5 },
               { label: 'Skillful', value: 0.5 },
-              { label: 'Creative', value: 0.5 }
-            ]
-          }
+              { label: 'Creative', value: 0.5 },
+            ],
+          },
         }
 
-        db
-          .ref('photographer_service_information')
+        db.ref('photographer_service_information')
           .child(uid)
           .set(initialProfileData)
-          .catch((error) => {
+          .catch(error => {
             console.log(error)
           })
       }
     })
-    .catch((error) => {
+    .catch(error => {
       console.log(error)
     })
 }
@@ -66,7 +57,7 @@ const createUserMetadata = async (accountProvider, uid, email, userType, display
         displayName,
         phoneNumber: '-',
         created: firebase.database.ServerValue.TIMESTAMP,
-        enable: 1
+        enable: 1,
       }
 
       if (userType === USER_PHOTOGRAPHER) {
@@ -78,7 +69,9 @@ const createUserMetadata = async (accountProvider, uid, email, userType, display
       }
 
       await child.set(metaData)
-      notifyToSlack(`New user registered via ${accountProvider} - Name: ${displayName}, Email: ${email}, Type: ${userType}`)
+      notifyToSlack(
+        `New user registered via ${accountProvider} - Name: ${displayName}, Email: ${email}, Type: ${userType}`
+      )
       return true
     }
   } catch (error) {
@@ -86,41 +79,35 @@ const createUserMetadata = async (accountProvider, uid, email, userType, display
   }
 }
 
-const notifyToSlack = (text) => {
+const notifyToSlack = text => {
   const fixText = `[${process.env.REACT_APP_MY_NODE_ENV}] ${text}`
   axios
     .post(`${process.env.REACT_APP_API_HOSTNAME}/api/slack-integration/notify-userbase-status`, { text: fixText })
-    .then(function (response) {
+    .then(function(response) {
       console.log(response.data)
     })
-    .catch(function (error) {
+    .catch(function(error) {
       console.log(error)
     })
 }
 
-export const userSignupByEmailPassword = (
-  email,
-  password,
-  displayName,
-  userType
-) => {
+export const userSignupByEmailPassword = (email, password, displayName, userType) => {
   return dispatch => {
     database
       .auth()
       .createUserWithEmailAndPassword(email, password)
       .then(function(result) {
-
         // Here we send email the email verification
         axios
           .post(process.env.REACT_APP_API_HOSTNAME + '/api/email-service/email-verification', {
             receiverEmail: email,
             receiverName: displayName,
-            uid: result.uid
+            uid: result.uid,
           })
-          .then((response) => {
+          .then(response => {
             console.log(response.data)
           })
-          .catch((error) => {
+          .catch(error => {
             console.log(error)
           })
 
@@ -130,14 +117,15 @@ export const userSignupByEmailPassword = (
               initialiazePhotographerProfileData(result.uid)
             }
             // Logout Implicitly
-            database.auth()
+            database
+              .auth()
               .signOut()
               .catch(error => {
                 console.log(error)
               })
             // End Logout
           })
-          .catch((error) => {
+          .catch(error => {
             console.log(error)
           })
 
@@ -186,26 +174,24 @@ export const userSignupByFacebook = userType => {
               emailVerified: result.user.emailVerified,
               displayName,
               photoURL: result.user.photoURL,
-              refreshToken: result.user.refreshToken
+              refreshToken: result.user.refreshToken,
             }
 
             dispatch({ type: 'USER_AUTH_LOGIN_SUCCESS', payload })
             return true
-
           })
           .then(() => {
             fetchUserMetadata(result.user.uid, dispatch)
-              .then((data) => {
+              .then(data => {
                 if (data.userType === USER_PHOTOGRAPHER && data.firstLogin) {
                   history.push('/photographer-registration/s2')
                 } else {
                   history.push('/')
                 }
               })
-              .catch((error) => {
+              .catch(error => {
                 console.log(error)
               })
-
           })
           .catch(error => {
             console.log(error)
@@ -239,7 +225,6 @@ export const userSignupByGoogle = userType => {
               initialiazePhotographerProfileData(uid)
             }
             return true
-
           })
           .then(() => {
             const payload = {
@@ -248,31 +233,28 @@ export const userSignupByGoogle = userType => {
               emailVerified: true,
               displayName,
               photoURL: result.user.photoURL,
-              refreshToken: result.user.refreshToken
+              refreshToken: result.user.refreshToken,
             }
 
             dispatch({ type: 'USER_AUTH_LOGIN_SUCCESS', payload })
             return true
-
           })
           .then(() => {
             fetchUserMetadata(uid, dispatch)
-              .then((data) => {
+              .then(data => {
                 if (data.userType === USER_PHOTOGRAPHER && data.firstLogin) {
                   history.push('/photographer-registration/s2')
                 } else {
                   history.push('/')
                 }
               })
-              .catch((error) => {
+              .catch(error => {
                 console.log(error)
               })
-
           })
           .catch(error => {
             console.log(error)
           })
-
       })
       .catch(error => {
         console.log(error)
@@ -285,7 +267,10 @@ export const userSignupByGoogle = userType => {
 }
 
 const fetchUserMetadata = async (uid, dispatch) => {
-  const child = database.database().ref('user_metadata').child(uid)
+  const child = database
+    .database()
+    .ref('user_metadata')
+    .child(uid)
   const retrieveResult = await child.once('value')
   const data = await retrieveResult.val()
 
@@ -307,8 +292,8 @@ export const loggingIn = (email, password) => {
     // Checking wether the email is registered as google or facebook
     axios
       .get(`${process.env.REACT_APP_API_HOSTNAME}/api/auth/accountType/?email=${email}`)
-      .then((response) => {
-        const providers = response.data.data.map((item) => item.providerId)
+      .then(response => {
+        const providers = response.data.data.map(item => item.providerId)
 
         if (providers.includes('password')) {
           const firebaseAuth = database.auth()
@@ -323,7 +308,7 @@ export const loggingIn = (email, password) => {
                     emailVerified: user.emailVerified,
                     displayName: user.displayName,
                     photoURL: user.photoURL,
-                    refreshToken: user.refreshToken
+                    refreshToken: user.refreshToken,
                   }
 
                   if (!user.emailVerified) {
@@ -331,22 +316,19 @@ export const loggingIn = (email, password) => {
                       type: 'USER_AUTH_LOGIN_ERROR',
                       payload: { message: 'User not verified.' },
                     })
-
                   } else {
                     dispatch({ type: 'USER_AUTH_LOGIN_SUCCESS', payload })
 
-                    fetchUserMetadata(user.uid, dispatch)
-                      .then((data) => {
-                        if (data.userType === USER_PHOTOGRAPHER && data.firstLogin) {
-                          history.push('/photographer-registration/s2')
-                        } else {
-                          history.push('/')
-                        }
-                      })
+                    fetchUserMetadata(user.uid, dispatch).then(data => {
+                      if (data.userType === USER_PHOTOGRAPHER && data.firstLogin) {
+                        history.push('/photographer-registration/s2')
+                      } else {
+                        history.push('/')
+                      }
+                    })
                   }
                 }
               })
-
             })
             .catch(error => {
               dispatch({
@@ -354,23 +336,23 @@ export const loggingIn = (email, password) => {
                 payload: error,
               })
             })
-
         } else {
           const provider = response.data.data[0].providerId
           const mapInfo = {
-            "google.com": "Google",
-            "facebook.com": "Facebook"
+            'google.com': 'Google',
+            'facebook.com': 'Facebook',
           }
-          const message = `Your account is registered using ${mapInfo[provider]}. Then you must click "Login with ${mapInfo[provider]}" button.`
+          const message = `Your account is registered using ${mapInfo[provider]}. Then you must click "Login with ${
+            mapInfo[provider]
+          }" button.`
 
           dispatch({
             type: 'USER_AUTH_LOGIN_ERROR',
-            payload: { message }
+            payload: { message },
           })
         }
-
       })
-      .catch((error) => {
+      .catch(error => {
         dispatch({
           type: 'USER_AUTH_LOGIN_ERROR',
           payload: { message: error.response.data.message },
@@ -402,7 +384,7 @@ export const searchInformationLog = (location, datetime) => {
   return dispatch => {
     dispatch({
       type: 'SEARCH_INFORMATION_SUBMIT_SEARCH_LOG',
-      payload: { location, datetime }
+      payload: { location, datetime },
     })
   }
 }
@@ -413,37 +395,32 @@ export const updatePhotographerServiceInfoPhotosPortofolio = (uid, data, isIniti
 
     if (isInitiation) {
       // Update defaultDisplayPictureUrl in user metadata
-      db
-        .ref('user_metadata')
+      db.ref('user_metadata')
         .child(uid)
         .update({
           defaultDisplayPictureUrl: data[0].url,
           defaultDisplayPicturePublicId: data[0].publicId,
-          updated: firebase.database.ServerValue.TIMESTAMP
+          updated: firebase.database.ServerValue.TIMESTAMP,
         })
         .then(() => {
-
           // Update photos portofolio in photographer service information
-          const photos = data.map((item, index) => index === 0
-            ? { ...item, defaultPicture: true }
-            : { ...item, defaultPicture: false })
+          const photos = data.map(
+            (item, index) => (index === 0 ? { ...item, defaultPicture: true } : { ...item, defaultPicture: false })
+          )
 
-          db
-            .ref('photographer_service_information')
+          db.ref('photographer_service_information')
             .child(uid)
             .update({
               photosPortofolio: photos,
-              updated: firebase.database.ServerValue.TIMESTAMP
+              updated: firebase.database.ServerValue.TIMESTAMP,
             })
         })
-
     } else {
-      db
-        .ref('photographer_service_information')
+      db.ref('photographer_service_information')
         .child(uid)
         .update({
           photosPortofolio: data,
-          updated: firebase.database.ServerValue.TIMESTAMP
+          updated: firebase.database.ServerValue.TIMESTAMP,
         })
     }
   }
@@ -457,24 +434,24 @@ export const updateUserMetadataDefaultDisplayPicture = (reference, pictureUrl, p
   userRef.update({
     defaultDisplayPictureUrl: pictureUrl,
     defaultDisplayPicturePublicId: picturePublicId,
-    updated: firebase.database.ServerValue.TIMESTAMP
+    updated: firebase.database.ServerValue.TIMESTAMP,
   })
 }
 
 export const deletePortfolioPhotos = (uid, photosDeleted, imagesExisting) => {
-  return (dispatch) => {
+  return dispatch => {
     if (photosDeleted.length > 0) {
       dispatch({ type: 'PROFILE_MANAGER_DELETE_PHOTOS_PORTFOLIO_START' })
-      const publicIdList = photosDeleted.map((item) => item.publicId)
+      const publicIdList = photosDeleted.map(item => item.publicId)
 
       axios({
         method: 'DELETE',
         url: `${process.env.REACT_APP_API_HOSTNAME}/api/cloudinary-images/delete`,
         params: {
-          public_ids: publicIdList
-        }
+          public_ids: publicIdList,
+        },
       })
-        .then((response) => {
+        .then(response => {
           database
             .database()
             .ref('photographer_service_information')
@@ -487,7 +464,7 @@ export const deletePortfolioPhotos = (uid, photosDeleted, imagesExisting) => {
           dispatch(fetchPhotographerServiceInformation(uid))
           dispatch(tellThemThatWasSuccessOrFailed('success'))
         })
-        .catch((error) => {
+        .catch(error => {
           console.error(error)
         })
     }
