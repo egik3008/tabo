@@ -1,7 +1,28 @@
 import React, { Component } from 'react'
+import ReactTable from 'react-table'
+import {
+  Card,
+  CardHeader,
+  CardBody,
+  CardFooter,
+  Col,
+  Row,
+  Nav,
+  NavItem,
+  NavLink,
+  TabContent,
+  TabPane,
+  Form,
+  FormGroup,
+  Label,
+  Input,
+  Button,
+} from 'reactstrap'
 import axios from 'axios'
 import classnames from 'classnames'
-import { Col, Row, Nav, NavItem, NavLink, TabContent, TabPane, Form, FormGroup, Label, Input } from 'reactstrap'
+import moment from 'moment'
+import 'moment/locale/id'
+import 'react-table/react-table.css'
 
 class UserDetail extends Component {
   constructor(props) {
@@ -10,8 +31,22 @@ class UserDetail extends Component {
     this.state = {
       activeTab: 'detail',
       user: {},
+      title: '',
+      loading: false,
     }
-    this.fetchUser(props.match.params.type, props.match.params.id)
+  }
+
+  componentWillMount() {
+    if ('id' in this.props.match.params) {
+      this.setState({
+        title: this.props.match.params.type + ' Detail',
+      })
+      this.fetchUser(this.props.match.params.type, this.props.match.params.id)
+    } else {
+      this.setState({
+        title: 'Add ' + this.props.match.params.type,
+      })
+    }
   }
 
   toggle(tab) {
@@ -23,21 +58,75 @@ class UserDetail extends Component {
   }
 
   fetchUser(type, id) {
+    this.setState({
+      loading: true,
+    })
+
     const url = type === 'traveler' ? 'users' : 'photographers'
     axios.get(`${process.env.REACT_APP_API_HOSTNAME}/api/${url}/${id}`).then(response => {
       if (type === 'traveler')
         this.setState({
           user: response.data.data,
+          loading: false,
         })
       else
         this.setState({
           ...response,
           user: response.data.data.userMetadata,
+          loading: false,
         })
     })
   }
 
   renderTraveler() {
+    const columns = [
+      {
+        Header: 'No.',
+        maxWidth: 40,
+        Cell: row => {
+          return <span>{row.index + 1}</span>
+        },
+      },
+      {
+        Header: 'ID Reservation',
+        accessor: 'reservationId',
+      },
+      {
+        Header: 'ID Photographer',
+        accessor: 'photographerId',
+      },
+      {
+        Header: 'Date',
+        accessor: 'created',
+        Cell: row =>
+          moment(row.value)
+            .locale('id')
+            .format('lll'),
+      },
+      {
+        Header: 'Booking Date',
+        accessor: 'startDateTime',
+        Cell: row =>
+          moment(row.value)
+            .locale('id')
+            .format('lll'),
+      },
+      {
+        Header: 'Package',
+        accessor: 'packageId',
+        maxWidth: 80,
+      },
+      {
+        Header: 'Service Fee',
+        accessor: 'photographerFee',
+      },
+      {
+        Header: 'Status',
+        accessor: 'status',
+        maxWidth: 80,
+      },
+    ]
+
     return (
       <div>
         <Nav tabs>
@@ -189,7 +278,16 @@ class UserDetail extends Component {
             </Form>
           </TabPane>
 
-          <TabPane tabId="history">this is history</TabPane>
+          <TabPane tabId="history">
+            <ReactTable
+              className="-striped -hightlight"
+              columns={columns}
+              manual
+              sortable={false}
+              data={this.state.user.reservationHistory}
+              loading={this.state.loading}
+            />
+          </TabPane>
 
           <TabPane tabId="messages">this is messages</TabPane>
         </TabContent>
@@ -412,7 +510,15 @@ class UserDetail extends Component {
       <div className="animated fadeIn">
         <Row>
           <Col className="mt-2">
-            {this.state.user.userType === 'traveller' ? this.renderTraveler() : this.renderPhotographer()}
+            <Card>
+              <CardHeader>{this.state.title}</CardHeader>
+              <CardBody>
+                {this.state.user.userType === 'traveller' ? this.renderTraveler() : this.renderPhotographer()}
+              </CardBody>
+              <CardFooter>
+                <Button color="primary">Save</Button>
+              </CardFooter>
+            </Card>
           </Col>
         </Row>
       </div>
