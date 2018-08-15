@@ -23,6 +23,7 @@ const UserDetail = Loadable({
 // https://github.com/ReactTraining/react-router/tree/master/packages/react-router-config
 const routes = [
   { path: '/dashboard', name: 'Dashboard', component: Dashboard },
+  { path: '/users/:type/add', name: 'Add User', component: UserDetail },
   { path: '/users/:type/:id', name: 'User Detail', component: UserDetail },
   { path: '/users/:type', name: 'User', component: User },
 ]
