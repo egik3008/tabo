@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import ReactTable from 'react-table'
-import { Card, CardBody, CardHeader, Col, Row, Form, FormGroup, Label, Input } from 'reactstrap'
+import { Card, CardBody, CardHeader, Col, Row, Form, FormGroup, Label, Input, Button } from 'reactstrap'
 import { Link } from 'react-router-dom'
 import axios from 'axios'
 import moment from 'moment'
@@ -111,6 +111,7 @@ class Users extends Component {
       {
         Header: 'Country',
         accessor: 'countryName',
+        maxWidth: 80,
       },
       {
         Header: 'Email',
@@ -127,12 +128,7 @@ class Users extends Component {
       },
       {
         Header: 'Last Sign In',
-        accessor: 'created',
-        maxWidth: 200,
-        Cell: row =>
-          moment(row.value)
-            .locale('id')
-            .format('ll'),
+        maxWidth: 80,
       },
       {
         Header: 'Status',
@@ -180,6 +176,7 @@ class Users extends Component {
       columns.splice(2, 0, {
         Header: 'Currency',
         accessor: 'currency',
+        maxWidth: 70,
       })
 
     return (
@@ -189,8 +186,18 @@ class Users extends Component {
             <Card>
               <CardHeader>{this.state.type} List</CardHeader>
               <CardBody>
-                <Row className="pb-2">
-                  <Col>
+                {this.props.match.params.type === 'photographer' && (
+                  <Row className="mb-2 justify-content-end">
+                    <Col md="3">
+                      <Button tag={Link} to="/users/photographer/add" block color="primary">
+                        Add Photographer
+                      </Button>
+                    </Col>
+                  </Row>
+                )}
+
+                <Row className="mb-1 justify-content-between">
+                  <Col md="4">
                     <Form inline>
                       <FormGroup>
                         <Label className="pr-1">Filter by Status : </Label>
@@ -203,9 +210,7 @@ class Users extends Component {
                     </Form>
                   </Col>
 
-                  <Col />
-
-                  <Col>
+                  <Col md="4">
                     <Form>
                       <FormGroup>
                         <Input type="text" placeholder="Enter keyword" onChange={this.onInputChange.bind(this)} />
@@ -215,7 +220,7 @@ class Users extends Component {
                 </Row>
 
                 <ReactTable
-                  className="mt-1 -striped -hightlight"
+                  className="-striped -hightlight"
                   columns={columns}
                   manual
                   sortable={false}
