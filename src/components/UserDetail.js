@@ -4,7 +4,6 @@ import {
   Card,
   CardHeader,
   CardBody,
-  CardFooter,
   Col,
   Row,
   Nav,
@@ -161,7 +160,7 @@ class UserDetail extends Component {
 
         <TabContent activeTab={this.state.activeTab}>
           <TabPane tabId="detail">
-            <Form action="" method="post" className="form-horizontal">
+            <Form action="" method="post" className="form-horizontal p-3">
               <FormGroup row>
                 <Col md="3">
                   <Label htmlFor="id">ID</Label>
@@ -275,6 +274,10 @@ class UserDetail extends Component {
                   </Input>
                 </Col>
               </FormGroup>
+
+              <FormGroup row>
+                <Button color="primary">Save</Button>
+              </FormGroup>
             </Form>
           </TabPane>
 
@@ -289,7 +292,18 @@ class UserDetail extends Component {
             />
           </TabPane>
 
-          <TabPane tabId="messages">this is messages</TabPane>
+          <TabPane tabId="messages">
+            <Form className="p-3">
+              <FormGroup row>
+                <Label htmlFor="textarea-input">Messages :</Label>
+                <Input type="textarea" name="textarea-input" id="textarea-input" rows="9" placeholder="Content..." />
+              </FormGroup>
+
+              <FormGroup row>
+                <Button color="primary">Send</Button>
+              </FormGroup>
+            </Form>
+          </TabPane>
         </TabContent>
       </div>
     )
@@ -515,9 +529,6 @@ class UserDetail extends Component {
               <CardBody>
                 {this.state.user.userType === 'traveller' ? this.renderTraveler() : this.renderPhotographer()}
               </CardBody>
-              <CardFooter>
-                <Button color="primary">Save</Button>
-              </CardFooter>
             </Card>
           </Col>
         </Row>
