@@ -13,8 +13,10 @@ class Users extends Component {
   constructor() {
     super()
     this.state = {
+      count: 1,
       type: '',
       filtered: [{ search: '', enable: 'all' }],
+      sort: [{ key: '', method: '' }],
       page: 0,
       defaultPageSize: 10,
       users: {
@@ -30,6 +32,7 @@ class Users extends Component {
     this.setState({
       type: this.props.match.params.type,
       filtered: [{ search: '', enable: 'all' }],
+      sort: [{ key: '', method: '' }],
     })
   }
 
@@ -38,6 +41,7 @@ class Users extends Component {
       this.setState({
         type: this.props.match.params.type,
         filtered: [{ search: '', enable: 'all' }],
+        sort: [{ key: '', method: '' }],
       })
       this.fetchUsersData(this.state)
     }
@@ -60,9 +64,10 @@ class Users extends Component {
       users: { ...prevState.users, loading: true },
     }))
 
-    let { defaultPageSize, page, filtered } = state
+    let { defaultPageSize, page, filtered, sort } = state
     const type = this.props.match.params.type === 'photographer' ? 'p' : 't'
     let queryParams = `userType=${type}&page=${page}&limit=${defaultPageSize}`
+    queryParams += `&sort[method]=${sort.method}&sort[key]=${sort.key}`
     queryParams += filtered.some(e => e.hasOwnProperty('search'))
       ? `&filter[search]=${filtered.map(e => e.search)}`
       : ``
@@ -78,6 +83,12 @@ class Users extends Component {
     axios
       .get(`${process.env.REACT_APP_API_HOSTNAME}/api/admin/users/?${queryParams}`)
       .then(response => {
+        if (JSON.stringify(response.data.data) === JSON.stringify(this.state.users.data) && this.state.count == 1) {
+          this.setState({ count: 2 })
+          this.fetchUsersData(this.state)
+        }
+
+        this.setState({ count: 1 })
         // if (response.data.data.length > 0) {
         this.setState(prevState => {
           return {
@@ -112,6 +123,7 @@ class Users extends Component {
         Header: 'Country',
         accessor: 'countryName',
         maxWidth: 80,
+        Cell: row => (row.value ? row.value : 'No Data!'),
       },
       {
         Header: 'Email',
@@ -128,7 +140,12 @@ class Users extends Component {
       },
       {
         Header: 'Last Sign In',
-        maxWidth: 80,
+        accessor: 'updated',
+        maxWidth: 220,
+        Cell: row =>
+          moment(row.value)
+            .locale('id')
+            .format('lll'),
       },
       {
         Header: 'Status',
@@ -227,7 +244,7 @@ class Users extends Component {
                   className="-striped -hightlight"
                   columns={columns}
                   manual={true}
-                  sortable={false}
+                  sortable={true}
                   data={this.state.users.data}
                   pages={this.state.users.totalPages}
                   loading={this.state.users.loading}
@@ -239,9 +256,18 @@ class Users extends Component {
                   type={this.state.type}
                   filtered={this.state.filtered}
                   defaultPageSize={this.state.defaultPageSize}
+                  onPageChange={e => {
+                    this.setState({ page: e })
+                  }}
                   onPageSizeChange={e => {
-                    this.setState({ defaultPageSize: e }, () => {
-                      return
+                    this.setState({ defaultPageSize: e })
+                  }}
+                  onSortedChange={e => {
+                    this.setState({
+                      sort: {
+                        method: e[0].desc ? 'desc' : 'asc',
+                        key: e[0].id,
+                      },
                     })
                   }}
                 />
