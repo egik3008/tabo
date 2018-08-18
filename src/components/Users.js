@@ -184,7 +184,11 @@ class Users extends Component {
         <Row>
           <Col className="mt-2">
             <Card>
-              <CardHeader>{this.state.type} List</CardHeader>
+              <CardHeader>
+                <h3>
+                  <strong>{this.state.type} List</strong>
+                </h3>
+              </CardHeader>
               <CardBody>
                 {this.props.match.params.type === 'photographer' && (
                   <Row className="mb-2 justify-content-end">
