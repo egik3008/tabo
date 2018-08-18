@@ -232,8 +232,17 @@ class Users extends Component {
                   </Col>
 
                   <Col md="4">
-                    <Form>
+                    <Form inline>
                       <FormGroup>
+                        <Input type="select">
+                          <option disabled selected>
+                            Filter By
+                          </option>
+                          <option value="uid">UUID</option>
+                          <option value="displayName">Display Name</option>
+                          <option value="countryName">Country</option>
+                          <option value="email">Email</option>
+                        </Input>
                         <Input type="text" placeholder="Enter keyword" onChange={this.onInputChange.bind(this)} />
                       </FormGroup>
                     </Form>
