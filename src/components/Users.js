@@ -222,15 +222,24 @@ class Users extends Component {
                 <ReactTable
                   className="-striped -hightlight"
                   columns={columns}
-                  manual
+                  manual={true}
                   sortable={false}
                   data={this.state.users.data}
                   pages={this.state.users.totalPages}
                   loading={this.state.users.loading}
-                  onFetchData={this.fetchUsersData}
+                  onFetchData={() => {
+                    setTimeout(() => {
+                      this.fetchUsersData(this.state)
+                    }, 1)
+                  }}
                   type={this.state.type}
                   filtered={this.state.filtered}
                   defaultPageSize={this.state.defaultPageSize}
+                  onPageSizeChange={e => {
+                    this.setState({ defaultPageSize: e }, () => {
+                      return
+                    })
+                  }}
                 />
               </CardBody>
             </Card>
