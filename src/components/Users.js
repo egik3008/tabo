@@ -83,7 +83,7 @@ class Users extends Component {
     axios
       .get(`${process.env.REACT_APP_API_HOSTNAME}/api/admin/users/?${queryParams}`)
       .then(response => {
-        if (JSON.stringify(response.data.data) === JSON.stringify(this.state.users.data) && this.state.count == 1) {
+        if (JSON.stringify(response.data.data) === JSON.stringify(this.state.users.data) && this.state.count === 1) {
           this.setState({ count: 2 })
           this.fetchUsersData(this.state)
         }
