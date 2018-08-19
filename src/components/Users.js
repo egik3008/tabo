@@ -221,7 +221,7 @@ class Users extends Component {
                   <Col md="4">
                     <Form inline>
                       <FormGroup>
-                        <Label className="pr-1">Filter by Status : </Label>
+                        <Label className="mr-2">Filter by Status : </Label>
                         <Input type="select" onChange={this.onSelectChange.bind(this)}>
                           <option value="all">All</option>
                           <option value="1">Active</option>
@@ -231,10 +231,10 @@ class Users extends Component {
                     </Form>
                   </Col>
 
-                  <Col md="4">
+                  <Col md="6" className="justify-content-end">
                     <Form inline>
                       <FormGroup>
-                        <Input type="select">
+                        <Input type="select" className="mr-2">
                           <option disabled selected>
                             Filter By
                           </option>
