@@ -78,6 +78,12 @@ class UserDetail extends Component {
           uid: '',
           displayName: '',
           email: '',
+          phoneDialCode: '',
+          phoneNumber: '',
+          countryName: '',
+          locationMerge: '',
+          enable: 1,
+          reason: '',
         },
       },
       title: '',
@@ -172,14 +178,21 @@ class UserDetail extends Component {
     } else {
       const { photographer } = this.state
       const uid = photographer.userMetadata.uid
-      axios.put(`${process.env.REACT_APP_API_HOSTNAME}/api/users/${uid}`, photographer.userMetadata).then(() => {
-        delete photographer['userMetadata']
-        delete photographer['reservationHistory']
 
-        axios.put(`${process.env.REACT_APP_API_HOSTNAME}/api/photographers/${uid}`, photographer).then(response => {
+      if (uid !== '') {
+        axios.put(`${process.env.REACT_APP_API_HOSTNAME}/api/users/${uid}`, photographer.userMetadata).then(() => {
+          delete photographer['userMetadata']
+          delete photographer['reservationHistory']
+
+          axios.put(`${process.env.REACT_APP_API_HOSTNAME}/api/photographers/${uid}`, photographer).then(response => {
+            Swal('Success!', response.data.message, 'success')
+          })
+        })
+      } else {
+        axios.post(`${process.env.REACT_APP_API_HOSTNAME}/api/photographers`, photographer).then(response => {
           Swal('Success!', response.data.message, 'success')
         })
-      })
+      }
     }
   }
 
@@ -651,20 +664,22 @@ class UserDetail extends Component {
             <Row>
               <Col md="7">
                 <Form action="" className="form-horizontal px-3">
-                  <FormGroup row>
-                    <Col md="3">
-                      <Label htmlFor="id">ID</Label>
-                    </Col>
-                    <Col xs="12" md="9">
-                      <Input
-                        type="text"
-                        id="id"
-                        name="id"
-                        placeholder={this.state.photographer.userMetadata.uid}
-                        disabled
-                      />
-                    </Col>
-                  </FormGroup>
+                  {this.state.photographer.userMetadata.uid !== '' && (
+                    <FormGroup row>
+                      <Col md="3">
+                        <Label htmlFor="id">ID</Label>
+                      </Col>
+                      <Col xs="12" md="9">
+                        <Input
+                          type="text"
+                          id="id"
+                          name="id"
+                          placeholder={this.state.photographer.userMetadata.uid}
+                          disabled
+                        />
+                      </Col>
+                    </FormGroup>
+                  )}
 
                   <FormGroup row>
                     <Col md="3">
