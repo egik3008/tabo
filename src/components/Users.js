@@ -84,25 +84,27 @@ class Users extends Component {
       .get(`${process.env.REACT_APP_API_HOSTNAME}/api/admin/users/?${queryParams}`)
       .then(response => {
         if (JSON.stringify(response.data.data) === JSON.stringify(this.state.users.data) && this.state.count === 1) {
-          this.setState({ count: 2 })
-          this.fetchUsersData(this.state)
+          const count = this.state.count + 1
+          this.setState({ count: count }, () => {
+            this.fetchUsersData(this.state)
+          })
+        } else {
+          this.setState({ count: 1 })
+          // if (response.data.data.length > 0) {
+          this.setState(prevState => {
+            return {
+              users: {
+                ...prevState.users,
+                loading: false,
+                loaded: true,
+                data: response.data.data,
+                totalData: response.data.metaInfo.nbHits,
+                totalPages: response.data.metaInfo.nbPages,
+              },
+            }
+          })
+          // }
         }
-
-        this.setState({ count: 1 })
-        // if (response.data.data.length > 0) {
-        this.setState(prevState => {
-          return {
-            users: {
-              ...prevState.users,
-              loading: false,
-              loaded: true,
-              data: response.data.data,
-              totalData: response.data.metaInfo.nbHits,
-              totalPages: response.data.metaInfo.nbPages,
-            },
-          }
-        })
-        // }
       })
       .catch(error => {
         console.error(error)
