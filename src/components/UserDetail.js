@@ -1034,19 +1034,25 @@ class UserDetail extends Component {
           </TabPane>
 
           <TabPane tabId="portfolio">
-            <Row>
-              <Col md="7">
-                <Row className="no-gutters">
-                  {this.state.photographer.photosPortofolio.map((item, i) => (
-                    <Col md="4">
-                      <img src={item.url} alt={'photo-' + i} style={{ width: '150px', height: '150px' }} />
-                    </Col>
-                  ))}
-                </Row>
-              </Col>
+            {this.state.photographer.photosPortofolio && this.state.photographer.photosPortofolio.length !== 0 ? (
+              <Row>
+                <Col md="7">
+                  <Row className="no-gutters">
+                    {this.state.photographer.photosPortofolio.map((item, i) => (
+                      <Col md="4">
+                        <img src={item.url} alt={'photo-' + i} style={{ width: '150px', height: '150px' }} />
+                      </Col>
+                    ))}
+                  </Row>
+                </Col>
 
-              <Col md="5" />
-            </Row>
+                <Col md="5" />
+              </Row>
+            ) : (
+              <span>
+                <strong>No photos to show!</strong>
+              </span>
+            )}
           </TabPane>
 
           <TabPane tabId="history">
