@@ -235,12 +235,12 @@ class Users extends Component {
 
                   <Col md="6" className="justify-content-end">
                     <Form inline>
-                      <FormGroup>
+                      <FormGroup className="ml-auto">
                         <Input type="select" className="mr-2">
                           <option disabled selected>
                             Filter By
                           </option>
-                          <option value="uid">UUID</option>
+                          <option value="uid">ID</option>
                           <option value="displayName">Display Name</option>
                           <option value="countryName">Country</option>
                           <option value="email">Email</option>
@@ -270,8 +270,8 @@ class Users extends Component {
                   onPageChange={e => {
                     this.setState({ page: e })
                   }}
-                  onPageSizeChange={e => {
-                    this.setState({ defaultPageSize: e })
+                  onPageSizeChange={(pageSize, page) => {
+                    this.setState({ page: page, defaultPageSize: pageSize })
                   }}
                   onSortedChange={e => {
                     this.setState({
