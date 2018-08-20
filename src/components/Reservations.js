@@ -40,7 +40,7 @@ class Reservations extends Component {
             ...prevState.reservations,
             loading: false,
             loaded: true,
-            data: response.data.data,
+            data: response.data,
           },
         }
       })
