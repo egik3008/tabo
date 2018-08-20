@@ -33,17 +33,25 @@ class Users extends Component {
       type: this.props.match.params.type,
       filtered: [{ search: '', enable: 'all' }],
       sort: [{ key: '', method: '' }],
+      page: 0,
+      defaultPageSize: 10,
     })
   }
 
   componentDidUpdate(prevProps) {
     if (this.props.match.params.type !== prevProps.match.params.type) {
-      this.setState({
-        type: this.props.match.params.type,
-        filtered: [{ search: '', enable: 'all' }],
-        sort: [{ key: '', method: '' }],
-      })
-      this.fetchUsersData(this.state)
+      this.setState(
+        {
+          type: this.props.match.params.type,
+          filtered: [{ search: '', enable: 'all' }],
+          sort: [{ key: '', method: '' }],
+          page: 0,
+          defaultPageSize: 10,
+        },
+        () => {
+          this.fetchUsersData(this.state)
+        }
+      )
     }
   }
 
@@ -266,7 +274,7 @@ class Users extends Component {
                   }}
                   type={this.state.type}
                   filtered={this.state.filtered}
-                  defaultPageSize={this.state.defaultPageSize}
+                  pageSize={this.state.defaultPageSize}
                   onPageChange={e => {
                     this.setState({ page: e })
                   }}
