@@ -23,19 +23,23 @@ class Users extends Component {
         loading: false,
         loaded: false,
         data: [],
-        totalData: 0,
       },
     }
   }
 
   componentWillMount() {
-    this.setState({
-      type: this.props.match.params.type,
-      filtered: [{ search: '', enable: 'all' }],
-      sort: [{ key: '', method: '' }],
-      page: 0,
-      defaultPageSize: 10,
-    })
+    this.setState(
+      {
+        type: this.props.match.params.type,
+        filtered: [{ search: '', enable: 'all' }],
+        sort: [{ key: '', method: '' }],
+        page: 0,
+        defaultPageSize: 10,
+      },
+      () => {
+        this.fetchUsersData(this.state)
+      }
+    )
   }
 
   componentDidUpdate(prevProps) {
@@ -55,64 +59,29 @@ class Users extends Component {
     }
   }
 
-  onInputChange(e) {
-    this.setState({ filtered: [{ search: e.target.value }] }, () => {
-      this.fetchUsersData(this.state)
-    })
-  }
-
-  onSelectChange(e) {
-    this.setState({ filtered: [{ enable: e.target.value }] }, () => {
-      this.fetchUsersData(this.state)
-    })
-  }
-
   fetchUsersData = state => {
     this.setState(prevState => ({
       users: { ...prevState.users, loading: true },
     }))
 
-    let { defaultPageSize, page, filtered, sort } = state
+    let { defaultPageSize, page } = state
     const type = this.props.match.params.type === 'photographer' ? 'p' : 't'
-    let queryParams = `userType=${type}&page=${page}&limit=${defaultPageSize}`
-    queryParams += `&sort[method]=${sort.method}&sort[key]=${sort.key}`
-    queryParams += filtered.some(e => e.hasOwnProperty('search'))
-      ? `&filter[search]=${filtered.map(e => e.search)}`
-      : ``
-
-    if (filtered.length > 0) {
-      filtered.forEach(item => {
-        if ('enable' in item && item.enable !== 'all') {
-          queryParams = queryParams + `&filter[enable]=${item.enable}`
-        }
-      })
-    }
 
     axios
-      .get(`${process.env.REACT_APP_API_HOSTNAME}/api/admin/users/?${queryParams}`)
+      .get(`${process.env.REACT_APP_API_HOSTNAME}/api/users/?type=${type}`)
       .then(response => {
-        if (JSON.stringify(response.data.data) === JSON.stringify(this.state.users.data) && this.state.count === 1) {
-          const count = this.state.count + 1
-          this.setState({ count: count }, () => {
-            this.fetchUsersData(this.state)
-          })
-        } else {
-          this.setState({ count: 1 })
-          // if (response.data.data.length > 0) {
-          this.setState(prevState => {
-            return {
-              users: {
-                ...prevState.users,
-                loading: false,
-                loaded: true,
-                data: response.data.data,
-                totalData: response.data.metaInfo.nbHits,
-                totalPages: response.data.metaInfo.nbPages,
-              },
-            }
-          })
-          // }
-        }
+        // if (response.data.data.length > 0) {
+        this.setState(prevState => {
+          return {
+            users: {
+              ...prevState.users,
+              loading: false,
+              loaded: true,
+              data: response.data,
+            },
+          }
+        })
+        // }
       })
       .catch(error => {
         console.error(error)
@@ -227,68 +196,15 @@ class Users extends Component {
                   </Row>
                 )}
 
-                <Row className="mb-1 justify-content-between">
-                  <Col md="4">
-                    <Form inline>
-                      <FormGroup>
-                        <Label className="mr-2">Filter by Status : </Label>
-                        <Input type="select" onChange={this.onSelectChange.bind(this)}>
-                          <option value="all">All</option>
-                          <option value="1">Active</option>
-                          <option value="0">Blocked</option>
-                        </Input>
-                      </FormGroup>
-                    </Form>
-                  </Col>
-
-                  <Col md="6" className="justify-content-end">
-                    <Form inline>
-                      <FormGroup className="ml-auto">
-                        <Input type="select" className="mr-2">
-                          <option disabled selected>
-                            Filter By
-                          </option>
-                          <option value="uid">ID</option>
-                          <option value="displayName">Display Name</option>
-                          <option value="countryName">Country</option>
-                          <option value="email">Email</option>
-                        </Input>
-                        <Input type="text" placeholder="Enter keyword" onChange={this.onInputChange.bind(this)} />
-                      </FormGroup>
-                    </Form>
-                  </Col>
-                </Row>
-
                 <ReactTable
                   className="-striped -hightlight"
                   columns={columns}
-                  manual={true}
+                  filterable={true}
                   sortable={true}
+                  defaultPageSize={10}
                   data={this.state.users.data}
-                  pages={this.state.users.totalPages}
                   loading={this.state.users.loading}
-                  onFetchData={() => {
-                    setTimeout(() => {
-                      this.fetchUsersData(this.state)
-                    }, 1)
-                  }}
                   type={this.state.type}
-                  filtered={this.state.filtered}
-                  pageSize={this.state.defaultPageSize}
-                  onPageChange={e => {
-                    this.setState({ page: e })
-                  }}
-                  onPageSizeChange={(pageSize, page) => {
-                    this.setState({ page: page, defaultPageSize: pageSize })
-                  }}
-                  onSortedChange={e => {
-                    this.setState({
-                      sort: {
-                        method: e[0].desc ? 'desc' : 'asc',
-                        key: e[0].id,
-                      },
-                    })
-                  }}
                 />
               </CardBody>
             </Card>
