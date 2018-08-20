@@ -17,7 +17,7 @@ export default {
     },
     {
       name: 'Reservation',
-      url: '/reservation',
+      url: '/reservations',
       icon: 'fa fa-address-book fa-fw',
     },
     {
