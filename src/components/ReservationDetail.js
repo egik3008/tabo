@@ -11,8 +11,9 @@ class ReservationDetail extends Component {
     this.toggle = this.toggle.bind(this)
     this.state = {
       activeTab: 'detail',
-      albums: [],
       reservation: {
+        albums: [],
+        credit: 0,
         meetingPoints: {
           detail: {
             formattedAddress: '',
@@ -126,26 +127,34 @@ class ReservationDetail extends Component {
 
                       <dt className="col-sm-3">Destination</dt>
                       <dd className="col-sm-9">{this.state.reservation.destination}</dd>
-
-                      <dt className="col-sm-3">Meeting Place</dt>
-                      <dd className="col-sm-9">
-                        <p>{this.state.reservation.meetingPoints.detail.meetingPointName}</p>
-                        <p>{this.state.reservation.meetingPoints.detail.formattedAddress}</p>
-                      </dd>
-
-                      <dt className="col-sm-3">Entrant</dt>
-                      <dd className="col-sm-9">
-                        {Number(this.state.reservation.passengers.adults) !== 0 && (
-                          <p>{this.state.reservation.passengers.adults} Adults</p>
-                        )}
-                        {Number(this.state.reservation.passengers.childrens) !== 0 && (
-                          <p>{this.state.reservation.passengers.childrens} Children</p>
-                        )}
-                        {Number(this.state.reservation.passengers.infants) !== 0 && (
-                          <p>{this.state.reservation.passengers.infants} Infants</p>
-                        )}
-                      </dd>
                     </dl>
+
+                    {'meetingPoints' in this.state.reservation && (
+                      <dl className="row">
+                        <dt className="col-sm-3">Meeting Place</dt>
+                        <dd className="col-sm-9">
+                          <p>{this.state.reservation.meetingPoints.detail.meetingPointName}</p>
+                          <p>{this.state.reservation.meetingPoints.detail.formattedAddress}</p>
+                        </dd>
+                      </dl>
+                    )}
+
+                    {'passengers' in this.state.reservation && (
+                      <dl className="row">
+                        <dt className="col-sm-3">Entrant</dt>
+                        <dd className="col-sm-9">
+                          {Number(this.state.reservation.passengers.adults) !== 0 && (
+                            <p>{this.state.reservation.passengers.adults} Adults</p>
+                          )}
+                          {Number(this.state.reservation.passengers.childrens) !== 0 && (
+                            <p>{this.state.reservation.passengers.childrens} Children</p>
+                          )}
+                          {Number(this.state.reservation.passengers.infants) !== 0 && (
+                            <p>{this.state.reservation.passengers.infants} Infants</p>
+                          )}
+                        </dd>
+                      </dl>
+                    )}
 
                     <h5>Photo Album</h5>
                     <hr className="mt-0 mb-1" />
@@ -190,7 +199,11 @@ class ReservationDetail extends Component {
                       </dd>
 
                       <dt className="col-sm-3">Credit</dt>
-                      <dd className="col-sm-9">-</dd>
+                      <dd className="col-sm-9">
+                        {this.state.reservation.credit === 0
+                          ? '-'
+                          : 'Rp. ' + this.state.reservation.credit.toLocaleString('id')}
+                      </dd>
 
                       <dt className="col-sm-3">Total</dt>
                       <dd className="col-sm-9">Rp. {this.state.reservation.totalPriceIDR.toLocaleString('id')}</dd>
