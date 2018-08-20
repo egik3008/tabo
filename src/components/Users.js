@@ -15,7 +15,7 @@ class Users extends Component {
     this.state = {
       count: 1,
       type: '',
-      filtered: [{ search: '', enable: 'all' }],
+      filtered: [],
       sort: [{ key: '', method: '' }],
       page: 0,
       defaultPageSize: 10,
@@ -31,7 +31,7 @@ class Users extends Component {
     this.setState(
       {
         type: this.props.match.params.type,
-        filtered: [{ search: '', enable: 'all' }],
+        filtered: [],
         sort: [{ key: '', method: '' }],
         page: 0,
         defaultPageSize: 10,
@@ -47,12 +47,13 @@ class Users extends Component {
       this.setState(
         {
           type: this.props.match.params.type,
-          filtered: [{ search: '', enable: 'all' }],
+          filtered: [],
           sort: [{ key: '', method: '' }],
           page: 0,
           defaultPageSize: 10,
         },
         () => {
+          console.log(this.state.filtered)
           this.fetchUsersData(this.state)
         }
       )
@@ -202,6 +203,10 @@ class Users extends Component {
                   filterable={true}
                   sortable={true}
                   defaultPageSize={10}
+                  filtered={this.state.filtered}
+                  onFilteredChange={filtered => {
+                    this.setState({ filtered })
+                  }}
                   data={this.state.users.data}
                   loading={this.state.users.loading}
                   type={this.state.type}
