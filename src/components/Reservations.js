@@ -11,15 +11,11 @@ class Reservations extends Component {
   constructor() {
     super()
     this.state = {
-      defaultPageSize: 10,
       filtered: [],
-      page: 0,
       reservations: {
         data: [],
         loaded: false,
         loading: false,
-        totalData: 0,
-        totalPages: 1,
       },
     }
   }
