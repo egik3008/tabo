@@ -148,7 +148,7 @@ class Users extends Component {
         Header: 'Status',
         accessor: 'enable',
         id: 'enable',
-        maxWidth: 100,
+        maxWidth: 110,
         Cell: row => (Number(row.value) === 1 ? 'Active' : 'Blocked'),
         filterMethod: (filter, row) => {
           if (filter.value === 'all') {
