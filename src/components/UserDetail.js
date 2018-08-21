@@ -19,6 +19,8 @@ import {
   Button,
   Table,
 } from 'reactstrap'
+import { CountryDropdown } from 'react-country-region-selector'
+import SelectCurrency from 'react-select-currency'
 import axios from 'axios'
 import classnames from 'classnames'
 import ReactTable from 'react-table'
@@ -88,6 +90,8 @@ class UserDetail extends Component {
       },
       title: '',
       loading: false,
+      defaultReasonBlockLength: 420,
+      reasonBlockLength: 420,
     }
     BigCalendar.setLocalizer(BigCalendar.momentLocalizer(moment))
   }
@@ -104,11 +108,15 @@ class UserDetail extends Component {
     if ('id' in this.props.match.params) {
       this.setState({
         title: this.props.match.params.type + ' Detail',
+        defaultReasonBlockLength: 420,
+        reasonBlockLength: 420,
       })
       this.fetchUser(this.props.match.params.type, this.props.match.params.id)
     } else {
       this.setState({
         title: 'Add ' + this.props.match.params.type,
+        defaultReasonBlockLength: 420,
+        reasonBlockLength: 420,
       })
     }
   }
@@ -142,28 +150,26 @@ class UserDetail extends Component {
         updatedUser['userMetadata'] = updatedUserMetadata
       }
 
-      this.setState(
-        {
-          photographer: updatedUser,
-        },
-        () => {
-          return
-        }
-      )
+      this.setState({
+        photographer: updatedUser,
+      })
     } else {
       const updatedUser = {
         ...this.state.user,
         [event.target.name]: event.target.value,
       }
 
-      this.setState(
-        {
-          user: updatedUser,
-        },
-        () => {
-          return
-        }
-      )
+      if (event.target.name === 'reason') {
+        const len = event.target.value.length
+        const remaining = this.state.defaultReasonBlockLength - len
+        this.setState({
+          reasonBlockLength: remaining,
+        })
+      }
+
+      this.setState({
+        user: updatedUser,
+      })
     }
   }
 
@@ -214,18 +220,24 @@ class UserDetail extends Component {
           loading: false,
         })
       }
+
+      const remaining =
+        this.state.defaultReasonBlockLength - ('reason' in response.data ? response.data.reason.length : 0)
+      this.setState({
+        reasonBlockLength: remaining,
+      })
     })
+  }
+
+  filterCaseInsensitive = (filter, row) => {
+    const id = filter.pivotId || filter.id
+    if (row[id] !== null) {
+      return row[id] !== undefined ? String(row[id].toLowerCase()).includes(filter.value.toLowerCase()) : true
+    }
   }
 
   renderTraveler() {
     const historyColumns = [
-      {
-        Header: 'No.',
-        maxWidth: 40,
-        Cell: row => {
-          return <span>{row.index + 1}</span>
-        },
-      },
       {
         Header: 'ID Reservation',
         accessor: 'reservationId',
@@ -258,11 +270,13 @@ class UserDetail extends Component {
       {
         Header: 'Service Fee',
         accessor: 'photographerFee',
+        maxWidth: 100,
+        Cell: row => 'Rp. ' + Number(row.value).toLocaleString('id'),
       },
       {
         Header: 'Status',
         accessor: 'status',
-        maxWidth: 80,
+        maxWidth: 120,
       },
     ]
 
@@ -347,13 +361,22 @@ class UserDetail extends Component {
                   <Label htmlFor="country">Country</Label>
                 </Col>
                 <Col xs="12" md="9">
-                  <Input
-                    type="text"
+                  <CountryDropdown
                     id="country"
                     name="country"
-                    value={this.state.user.country ? this.state.user.country : ''}
-                    placeholder="Insert country"
-                    onChange={this.handleChange}
+                    classes="form-control"
+                    value={'country' in this.state.user ? this.state.user.country : ''}
+                    onChange={val => {
+                      const updatedUser = {
+                        ...this.state.user,
+                        country: val,
+                        countryName: val,
+                      }
+
+                      this.setState({
+                        user: updatedUser,
+                      })
+                    }}
                   />
                 </Col>
               </FormGroup>
@@ -395,12 +418,11 @@ class UserDetail extends Component {
                   <Label htmlFor="currency">Currency</Label>
                 </Col>
                 <Col xs="12" md="9">
-                  <Input
-                    type="text"
+                  <SelectCurrency
                     id="currency"
                     name="currency"
-                    value={this.state.user.currency ? this.state.user.currency : ''}
-                    placeholder="Insert currency"
+                    className="form-control"
+                    value={'currency' in this.state.user ? this.state.user.currency : ''}
                     onChange={this.handleChange}
                   />
                 </Col>
@@ -445,7 +467,7 @@ class UserDetail extends Component {
                   {Number(this.state.user.enable) === 0 && (
                     <span>
                       <strong>
-                        {moment('updated' in this.state.user ? this.state.user.updated : 'now')
+                        {moment('updated' in this.state.user ? this.state.user.updated : {})
                           .locale('id')
                           .format('lll')}
                       </strong>
@@ -464,11 +486,11 @@ class UserDetail extends Component {
                       type="textarea"
                       id="reason"
                       name="reason"
-                      maxLength={420}
+                      maxLength={this.state.defaultReasonBlockLength}
                       value={this.state.user.reason}
                       onChange={this.handleChange}
                     />
-                    <FormText className="help-block">Max. 420 character</FormText>
+                    <FormText className="help-block">Max. {this.state.reasonBlockLength} character</FormText>
                   </Col>
                 </FormGroup>
               )}
@@ -479,8 +501,14 @@ class UserDetail extends Component {
             <ReactTable
               className="-striped -hightlight"
               columns={historyColumns}
-              manual
-              sortable={false}
+              sortable={true}
+              defaultSorted={[
+                {
+                  id: 'startDateTime',
+                  desc: true,
+                },
+              ]}
+              defaultPageSize={10}
               data={this.state.user.reservationHistory}
               loading={this.state.loading}
             />
@@ -505,13 +533,6 @@ class UserDetail extends Component {
 
   renderPhotographer() {
     const historyColumns = [
-      {
-        Header: 'No.',
-        maxWidth: 40,
-        Cell: row => {
-          return <span>{row.index + 1}</span>
-        },
-      },
       {
         Header: 'Traveler ID',
         accessor: 'travellerId',
@@ -788,9 +809,13 @@ class UserDetail extends Component {
                     </Col>
                     <Col xs="12" md="9">
                       <CreatableSelect
-                        value={this.state.photographer.languages.map(item => {
-                          return { value: item, label: item }
-                        })}
+                        value={
+                          'languages' in this.state.photographer
+                            ? this.state.photographer.languages.map(item => {
+                                return { value: item, label: item }
+                              })
+                            : ''
+                        }
                         onChange={selected => {
                           const arrSelected = selected.map(item => {
                             return item.value
@@ -801,14 +826,9 @@ class UserDetail extends Component {
                             languages: arrSelected,
                           }
 
-                          this.setState(
-                            {
-                              photographer: photographer,
-                            },
-                            () => {
-                              return
-                            }
-                          )
+                          this.setState({
+                            photographer: photographer,
+                          })
                         }}
                         allowCreate={true}
                         isMulti
@@ -842,7 +862,7 @@ class UserDetail extends Component {
                             {moment(
                               'updated' in this.state.photographer.userMetadata
                                 ? this.state.photographer.userMetadata.updated
-                                : 'now'
+                                : {}
                             )
                               .locale('id')
                               .format('lll')}
@@ -862,11 +882,11 @@ class UserDetail extends Component {
                           type="textarea"
                           id="reason"
                           name="reason"
-                          maxLength={420}
+                          maxLength={this.state.defaultReasonBlockLength}
                           value={this.state.photographer.userMetadata.reason}
                           onChange={this.handleChange}
                         />
-                        <FormText className="help-block">Max. 420 character</FormText>
+                        <FormText className="help-block">Max. {this.state.reasonBlockLength} character</FormText>
                       </Col>
                     </FormGroup>
                   )}
@@ -890,9 +910,15 @@ class UserDetail extends Component {
               </Col>
               <Col xs="12" md="9">
                 <CreatableSelect
-                  value={this.state.photographer.cameraEquipment.body.map(item => {
-                    return { value: item, label: item }
-                  })}
+                  value={
+                    'cameraEquipment' in this.state.photographer
+                      ? 'body' in this.state.photographer.cameraEquipment
+                        ? this.state.photographer.cameraEquipment.body.map(item => {
+                            return { value: item, label: item }
+                          })
+                        : ''
+                      : ''
+                  }
                   onChange={selected => {
                     const arrSelected = selected.map(item => {
                       return item.value
@@ -908,14 +934,9 @@ class UserDetail extends Component {
                       cameraEquipment: cameraEquipment,
                     }
 
-                    this.setState(
-                      {
-                        photographer: photographer,
-                      },
-                      () => {
-                        return
-                      }
-                    )
+                    this.setState({
+                      photographer: photographer,
+                    })
                   }}
                   allowCreate={true}
                   isMulti
@@ -929,9 +950,15 @@ class UserDetail extends Component {
               </Col>
               <Col xs="12" md="9">
                 <CreatableSelect
-                  value={this.state.photographer.cameraEquipment.lens.map(item => {
-                    return { value: item, label: item }
-                  })}
+                  value={
+                    'cameraEquipment' in this.state.photographer
+                      ? 'lens' in this.state.photographer.cameraEquipment
+                        ? this.state.photographer.cameraEquipment.lens.map(item => {
+                            return { value: item, label: item }
+                          })
+                        : ''
+                      : ''
+                  }
                   onChange={selected => {
                     const arrSelected = selected.map(item => {
                       return item.value
@@ -947,14 +974,9 @@ class UserDetail extends Component {
                       cameraEquipment: cameraEquipment,
                     }
 
-                    this.setState(
-                      {
-                        photographer: photographer,
-                      },
-                      () => {
-                        return
-                      }
-                    )
+                    this.setState({
+                      photographer: photographer,
+                    })
                   }}
                   allowCreate={true}
                   isMulti
@@ -987,11 +1009,13 @@ class UserDetail extends Component {
           <TabPane tabId="meeting-point">
             <div style={{ height: '100vh', width: '100%' }}>
               <GoogleMapReact defaultCenter={this.props.center} defaultZoom={this.props.zoom}>
-                {this.state.photographer.meetingPoints.map((p, i) => (
-                  <div key={i} lat={p.lat} lng={p.long} style={greatPlaceStyle}>
-                    {p.meetingPointName}
-                  </div>
-                ))}
+                {'meetingPoints' in this.state.photographer
+                  ? this.state.photographer.meetingPoints.map((p, i) => (
+                      <div key={i} lat={p.lat} lng={p.long} style={greatPlaceStyle}>
+                        {p.meetingPointName}
+                      </div>
+                    ))
+                  : ''}
               </GoogleMapReact>
             </div>
 
@@ -1004,28 +1028,30 @@ class UserDetail extends Component {
                 </tr>
               </thead>
               <tbody>
-                {this.state.photographer.meetingPoints.map((p, i) => (
-                  <tr key={i}>
-                    <td>{i + 1}</td>
-                    <td>{p.meetingPointName}</td>
-                    <td>
-                      <Button>Edit</Button>
-                      <Button
-                        color="danger"
-                        onClick={() => {
-                          const meetingPoints = this.state.photographer.meetingPoints
-                          meetingPoints.splice(i, 1)
+                {'meetingPoints' in this.state.photographer
+                  ? this.state.photographer.meetingPoints.map((p, i) => (
+                      <tr key={i}>
+                        <td>{i + 1}</td>
+                        <td>{p.meetingPointName}</td>
+                        <td>
+                          <Button>Edit</Button>
+                          <Button
+                            color="danger"
+                            onClick={() => {
+                              const meetingPoints = this.state.photographer.meetingPoints
+                              meetingPoints.splice(i, 1)
 
-                          this.setState({
-                            ...this.state.photographer,
-                            meetingPoints: meetingPoints,
-                          })
-                        }}>
-                        Delete
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
+                              this.setState({
+                                ...this.state.photographer,
+                                meetingPoints: meetingPoints,
+                              })
+                            }}>
+                            Delete
+                          </Button>
+                        </td>
+                      </tr>
+                    ))
+                  : ''}
               </tbody>
             </Table>
           </TabPane>
@@ -1033,15 +1059,19 @@ class UserDetail extends Component {
           <TabPane tabId="unavailable-time">
             <div style={{ height: '100vh', width: '100%' }}>
               <BigCalendar
-                events={this.state.photographer.notAvailableDates.map((item, i) => {
-                  return {
-                    id: i,
-                    title: 'Unavailable',
-                    allDay: true,
-                    start: new Date(item),
-                    end: new Date(item),
-                  }
-                })}
+                events={
+                  'notAvailableDates' in this.state.photographer
+                    ? this.state.photographer.notAvailableDates.map((item, i) => {
+                        return {
+                          id: i,
+                          title: 'Unavailable',
+                          allDay: true,
+                          start: new Date(item),
+                          end: new Date(item),
+                        }
+                      })
+                    : []
+                }
                 defaultDate={new Date()}
                 views={{ month: true }}
               />
@@ -1074,8 +1104,14 @@ class UserDetail extends Component {
             <ReactTable
               className="-striped -hightlight"
               columns={historyColumns}
-              manual
-              sortable={false}
+              sortable={true}
+              defaultSorted={[
+                {
+                  id: 'created',
+                  desc: true,
+                },
+              ]}
+              defaultPageSize={10}
               data={this.state.photographer.reservationHistory}
               loading={this.state.loading}
             />
@@ -1110,13 +1146,26 @@ class UserDetail extends Component {
                 </h3>
               </CardHeader>
               <CardBody>
-                {this.state.user.userType === 'traveller' ? this.renderTraveler() : this.renderPhotographer()}
+                {!this.state.loading ? (
+                  this.state.user.userType === 'traveller' ? (
+                    this.renderTraveler()
+                  ) : (
+                    this.renderPhotographer()
+                  )
+                ) : (
+                  <div className="row justify-content-center align-items-center" style={{ height: '100vh' }}>
+                    <i className="fa fa-spinner fa-spin fa-5x fa-fw" />
+                    <span className="sr-only">Loading...</span>
+                  </div>
+                )}
               </CardBody>
-              <CardFooter>
-                <Button color="primary" onClick={this.handleSubmit}>
-                  Save
-                </Button>
-              </CardFooter>
+              {this.state.activeTab !== 'history' && (
+                <CardFooter>
+                  <Button color="primary" onClick={this.handleSubmit}>
+                    Save
+                  </Button>
+                </CardFooter>
+              )}
             </Card>
           </Col>
         </Row>
