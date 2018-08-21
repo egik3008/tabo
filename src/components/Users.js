@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import ReactTable from 'react-table'
-import { Card, CardBody, CardHeader, Col, Row, Form, FormGroup, Label, Input, Button } from 'reactstrap'
+import { Card, CardBody, CardHeader, Col, Row, Button } from 'reactstrap'
 import { Link } from 'react-router-dom'
 import axios from 'axios'
 import moment from 'moment'
@@ -17,8 +17,6 @@ class Users extends Component {
       type: '',
       filtered: [],
       sort: [{ key: '', method: '' }],
-      page: 0,
-      defaultPageSize: 10,
       users: {
         loading: false,
         loaded: false,
@@ -33,8 +31,6 @@ class Users extends Component {
         type: this.props.match.params.type,
         filtered: [],
         sort: [{ key: '', method: '' }],
-        page: 0,
-        defaultPageSize: 10,
       },
       () => {
         this.fetchUsersData(this.state)
@@ -65,7 +61,6 @@ class Users extends Component {
       users: { ...prevState.users, loading: true },
     }))
 
-    let { defaultPageSize, page } = state
     const type = this.props.match.params.type === 'photographer' ? 'p' : 't'
 
     axios
@@ -89,6 +84,13 @@ class Users extends Component {
       })
   }
 
+  filterCaseInsensitive = (filter, row) => {
+    const id = filter.pivotId || filter.id
+    if (row[id] !== null) {
+      return row[id] !== undefined ? String(row[id].toLowerCase()).includes(filter.value.toLowerCase()) : true
+    }
+  }
+
   render() {
     const columns = [
       {
@@ -103,7 +105,7 @@ class Users extends Component {
         Header: 'Country',
         accessor: 'countryName',
         maxWidth: 80,
-        Cell: row => (row.value ? row.value : 'No Data!'),
+        Cell: row => (row.value ? row.value : '-'),
       },
       {
         Header: 'Email',
@@ -117,32 +119,47 @@ class Users extends Component {
           moment(row.value)
             .locale('id')
             .format('lll'),
+        filterMethod: (filter, row) => {
+          const dateString = moment(row.created)
+            .locale('id')
+            .format('lll')
+          return String(dateString.toLowerCase()).includes(filter.value.toLowerCase())
+        },
       },
       {
-        Header: 'Last Sign In',
+        Header: 'Last Updated',
         accessor: 'updated',
         maxWidth: 220,
-        Cell: row =>
-          moment(row.value)
+        Cell: row => {
+          return row.value
+            ? moment(row.value)
+                .locale('id')
+                .format('lll')
+            : '-'
+        },
+        filterMethod: (filter, row) => {
+          const dateString = moment(row.updated)
             .locale('id')
-            .format('lll'),
+            .format('lll')
+          return String(dateString.toLowerCase()).includes(filter.value.toLowerCase())
+        },
       },
       {
         Header: 'Status',
         accessor: 'enable',
         id: 'enable',
-        maxWidth: 70,
-        Cell: row => (row.value === 1 ? 'Active' : 'Blocked'),
+        maxWidth: 100,
+        Cell: row => (Number(row.value) === 1 ? 'Active' : 'Blocked'),
         filterMethod: (filter, row) => {
           if (filter.value === 'all') {
             return true
           }
 
           if (filter.value === '1') {
-            return row[filter.id] === 1
+            return Number(row[filter.id]) === 1
           }
 
-          return row[filter.id] === 0
+          return Number(row[filter.id]) === 0
         },
         Filter: ({ filter, onChange }) => (
           <select
@@ -201,7 +218,14 @@ class Users extends Component {
                   className="-striped -hightlight"
                   columns={columns}
                   filterable={true}
+                  defaultFilterMethod={this.filterCaseInsensitive}
                   sortable={true}
+                  defaultSorted={[
+                    {
+                      id: 'created',
+                      desc: true,
+                    },
+                  ]}
                   defaultPageSize={10}
                   filtered={this.state.filtered}
                   onFilteredChange={filtered => {
