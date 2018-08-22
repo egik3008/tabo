@@ -45,7 +45,7 @@ class UserDetail extends Component {
         displayName: '',
         email: '',
         country: '',
-        phone: '',
+        phoneNumber: '',
         address: '',
         currency: '',
         language: '',
@@ -154,17 +154,23 @@ class UserDetail extends Component {
         photographer: updatedUser,
       })
     } else {
-      const updatedUser = {
-        ...this.state.user,
-        [event.target.name]: event.target.value,
-      }
-
       if (event.target.name === 'reason') {
         const len = event.target.value.length
         const remaining = this.state.defaultReasonBlockLength - len
         this.setState({
           reasonBlockLength: remaining,
         })
+      } else if (event.target.name === 'phoneNumber') {
+        if (!Number.isInteger(Number(event.target.value))) {
+          return
+        } else {
+          event.target.value = Number(event.target.value)
+        }
+      }
+
+      const updatedUser = {
+        ...this.state.user,
+        [event.target.name]: event.target.value,
       }
 
       this.setState({
@@ -390,7 +396,7 @@ class UserDetail extends Component {
                     type="text"
                     id="phoneNumber"
                     name="phoneNumber"
-                    value={this.state.user.phoneNumber ? this.state.user.phoneNumber : ''}
+                    value={this.state.user.phoneNumber}
                     placeholder="Insert phone"
                     onChange={this.handleChange}
                   />
@@ -433,13 +439,30 @@ class UserDetail extends Component {
                   <Label htmlFor="language">Language</Label>
                 </Col>
                 <Col xs="12" md="9">
-                  <Input
-                    type="text"
-                    id="language"
-                    name="language"
-                    value={this.state.user.language ? this.state.user.language : ''}
-                    placeholder="Insert language"
-                    onChange={this.handleChange}
+                  <CreatableSelect
+                    value={
+                      'languages' in this.state.user
+                        ? this.state.user.languages.map(item => {
+                            return { value: item, label: item }
+                          })
+                        : ''
+                    }
+                    onChange={selected => {
+                      const arrSelected = selected.map(item => {
+                        return item.value
+                      })
+
+                      const user = {
+                        ...this.state.user,
+                        languages: arrSelected,
+                      }
+
+                      this.setState({
+                        user: user,
+                      })
+                    }}
+                    allowCreate={true}
+                    isMulti
                   />
                 </Col>
               </FormGroup>
@@ -736,13 +759,13 @@ class UserDetail extends Component {
 
                   <FormGroup row>
                     <Col md="3">
-                      <Label htmlFor="phone">Phone</Label>
+                      <Label htmlFor="phoneNumber">Phone</Label>
                     </Col>
                     <Col xs="12" md="9">
                       <Input
                         type="text"
-                        id="phone"
-                        name="phone"
+                        id="phoneNumber"
+                        name="phoneNumber"
                         value={
                           this.state.photographer.userMetadata.phoneDialCode +
                           ' ' +
