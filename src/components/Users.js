@@ -186,12 +186,35 @@ class Users extends Component {
       },
     ]
 
-    if (this.props.match.params.type === 'photographer')
+    if (this.props.match.params.type === 'photographer') {
       columns.splice(2, 0, {
         Header: 'Currency',
         accessor: 'currency',
         maxWidth: 70,
       })
+
+      columns.splice(6, 0, {
+        Header: 'Completion',
+        maxWidth: 90,
+        Cell: cellInfo => {
+          let completion = 100
+
+          if ('photographerInfo' in cellInfo.original) {
+            if (!('cameraEquipment' in cellInfo.original.photographerInfo)) completion -= 10
+            if (!('languages' in cellInfo.original.photographerInfo)) completion -= 10
+            if (!('location' in cellInfo.original.photographerInfo)) completion -= 10
+            if (!('meetingPoints' in cellInfo.original.photographerInfo)) completion -= 10
+            if (!('packagesPrice' in cellInfo.original.photographerInfo)) completion -= 10
+            if (!('photosPortofolio' in cellInfo.original.photographerInfo)) completion -= 10
+            if (!('selfDescription' in cellInfo.original.photographerInfo)) completion -= 10
+          } else {
+            completion = 0
+          }
+
+          return <span>{completion} %</span>
+        },
+      })
+    }
 
     return (
       <div className="animated fadeIn">
