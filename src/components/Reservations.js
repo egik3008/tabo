@@ -43,6 +43,13 @@ class Reservations extends Component {
     })
   }
 
+  filterCaseInsensitive = (filter, row) => {
+    const id = filter.pivotId || filter.id
+    if (row[id] !== null) {
+      return row[id] !== undefined ? String(row[id].toLowerCase()).includes(filter.value.toLowerCase()) : true
+    }
+  }
+
   render() {
     const columns = [
       {
@@ -70,15 +77,30 @@ class Reservations extends Component {
           moment(row.value)
             .locale('id')
             .format('lll'),
+        filterMethod: (filter, row) => {
+          const dateString = moment(row.created)
+            .locale('id')
+            .format('lll')
+          return String(dateString.toLowerCase()).includes(filter.value.toLowerCase())
+        },
       },
       {
         Header: 'Updated',
         accessor: 'updated',
         maxWidth: 220,
-        Cell: row =>
-          moment(row.value)
+        Cell: row => {
+          return row.value
+            ? moment(row.value)
+                .locale('id')
+                .format('lll')
+            : '-'
+        },
+        filterMethod: (filter, row) => {
+          const dateString = moment(row.updated)
             .locale('id')
-            .format('lll'),
+            .format('lll')
+          return String(dateString.toLowerCase()).includes(filter.value.toLowerCase())
+        },
       },
       {
         Header: 'Destination',
@@ -86,14 +108,17 @@ class Reservations extends Component {
       },
       {
         Header: 'Price',
-        accessor: 'totalPriceIDR',
-        Cell: row => 'Rp. ' + Number(row.value).toLocaleString('id'),
+        Cell: cellInfo => {
+          if ('totalPriceIDR' in cellInfo.original)
+            return 'Rp. ' + Number(cellInfo.original.totalPriceIDR).toLocaleString('id')
+          else return '$ ' + Number(cellInfo.original.total).toLocaleString('us')
+        },
       },
       {
         Header: 'Status',
         accessor: 'status',
         id: 'status',
-        maxWidth: 70,
+        maxWidth: 100,
         filterMethod: (filter, row) => {
           if (filter.value === 'all') {
             return true
@@ -144,7 +169,14 @@ class Reservations extends Component {
                   className="-striped -hightlight"
                   columns={columns}
                   filterable={true}
+                  defaultFilterMethod={this.filterCaseInsensitive}
                   sortable={true}
+                  defaultSorted={[
+                    {
+                      id: 'created',
+                      desc: true,
+                    },
+                  ]}
                   defaultPageSize={10}
                   data={this.state.reservations.data}
                   loading={this.state.reservations.loading}
