@@ -184,6 +184,12 @@ class UserDetail extends Component {
 
     if (this.props.match.params.type === 'traveler') {
       const { user } = this.state
+
+      if (Number(user.enable) === 1) {
+        user.reason = ''
+        user.blocked = {}
+      }
+
       axios.put(`${process.env.REACT_APP_API_HOSTNAME}/api/users/${user.uid}`, user).then(response => {
         Swal('Success!', response.data.message, 'success')
       })
@@ -489,11 +495,14 @@ class UserDetail extends Component {
                 <Col md="3">
                   {Number(this.state.user.enable) === 0 && (
                     <span>
-                      <strong>
-                        {moment('updated' in this.state.user ? this.state.user.updated : {})
-                          .locale('id')
-                          .format('lll')}
-                      </strong>
+                      <p>
+                        <strong>
+                          {moment('blocked' in this.state.user ? this.state.user.blocked : {})
+                            .locale('id')
+                            .format('lll')}
+                        </strong>
+                      </p>
+                      <p>{'reason' in this.state.user ? this.state.user.reason : '-'}</p>
                     </span>
                   )}
                 </Col>
@@ -510,7 +519,6 @@ class UserDetail extends Component {
                       id="reason"
                       name="reason"
                       maxLength={this.state.defaultReasonBlockLength}
-                      value={this.state.user.reason}
                       onChange={this.handleChange}
                     />
                     <FormText className="help-block">Max. {this.state.reasonBlockLength} character</FormText>
