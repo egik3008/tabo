@@ -125,18 +125,20 @@ class PortofolioForm extends React.Component {
 
 
     render() {
+        const photos = this.convertFormatToGallery(this.props.photographer.photosPortofolio) || [];
+
         return (
             <Row>
                 <Col md="5" xs={12}>
                     <Gallery 
-                        photos={this.convertFormatToGallery(this.props.photographer.photosPortofolio)} 
+                        photos={photos} 
                         onClick={!this.state.checked ? 
                             this.openLightbox : this.selectPhoto
                         }
                         ImageComponent={SelectedImage}
                         columns={2} 
                     />
-                    <Lightbox images={this.convertFormatToGallery(this.props.photographer.photosPortofolio)}
+                    <Lightbox images={photos}
                         onClose={this.closeLightbox}
                         onClickPrev={this.gotoPrevious}
                         onClickNext={this.gotoNext}
