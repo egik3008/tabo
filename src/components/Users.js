@@ -25,6 +25,10 @@ class Users extends Component {
     }
   }
 
+  isPhotographers = () => {
+    return (this.props.match.params.type === 'photographer');
+  }
+
   componentWillMount() {
     this.setState(
       {
@@ -49,7 +53,6 @@ class Users extends Component {
           defaultPageSize: 10,
         },
         () => {
-          console.log(this.state.filtered)
           this.fetchUsersData(this.state)
         }
       )
@@ -61,7 +64,7 @@ class Users extends Component {
       users: { ...prevState.users, loading: true },
     }))
 
-    const type = this.props.match.params.type === 'photographer' ? 'p' : 't'
+    const type = this.isPhotographers() ? 'p' : 't'
 
     axios
       .get(`${process.env.REACT_APP_API_HOSTNAME}/api/users/?type=${type}`)
@@ -91,10 +94,30 @@ class Users extends Component {
     }
   }
 
+  setCompletion = (data) => {
+    return data.map(d => {
+      let completion = 100
+
+      if ('photographerInfo' in d) {
+        if (!('cameraEquipment' in d.photographerInfo)) completion -= 10
+        if (!('languages' in d.photographerInfo)) completion -= 10
+        if (!('location' in d.photographerInfo)) completion -= 10
+        if (!('meetingPoints' in d.photographerInfo)) completion -= 10
+        if (!('packagesPrice' in d.photographerInfo)) completion -= 10
+        if (!('photosPortofolio' in d.photographerInfo)) completion -= 10
+        if (!('selfDescription' in d.photographerInfo)) completion -= 10
+      } else {
+        completion = 0
+      }
+      d.completion = completion;
+      return d;
+    })
+  }
+
   render() {
     const columns = [
       {
-        Header: 'ID Traveler',
+        Header: this.isPhotographers() ? 'ID Photographer' : 'ID Traveller',
         accessor: 'uid',
       },
       {
@@ -176,6 +199,7 @@ class Users extends Component {
         Header: 'Actions',
         accessor: 'uid',
         maxWidth: 70,
+        sortable: false,
         Cell: row => (
           <div style={{ textAlign: 'center' }}>
             <Link to={'/users/' + this.props.match.params.type + '/' + row.value}>
@@ -186,7 +210,7 @@ class Users extends Component {
       },
     ]
 
-    if (this.props.match.params.type === 'photographer') {
+    if (this.isPhotographers()) {
       columns.splice(2, 0, {
         Header: 'Currency',
         accessor: 'currency',
@@ -195,24 +219,9 @@ class Users extends Component {
 
       columns.splice(6, 0, {
         Header: 'Completion',
+        accessor: 'completion',
         maxWidth: 90,
-        Cell: cellInfo => {
-          let completion = 100
-
-          if ('photographerInfo' in cellInfo.original) {
-            if (!('cameraEquipment' in cellInfo.original.photographerInfo)) completion -= 10
-            if (!('languages' in cellInfo.original.photographerInfo)) completion -= 10
-            if (!('location' in cellInfo.original.photographerInfo)) completion -= 10
-            if (!('meetingPoints' in cellInfo.original.photographerInfo)) completion -= 10
-            if (!('packagesPrice' in cellInfo.original.photographerInfo)) completion -= 10
-            if (!('photosPortofolio' in cellInfo.original.photographerInfo)) completion -= 10
-            if (!('selfDescription' in cellInfo.original.photographerInfo)) completion -= 10
-          } else {
-            completion = 0
-          }
-
-          return <span>{completion} %</span>
-        },
+        Cell: row => (<span>{row.value} %</span>),
       })
     }
 
@@ -254,7 +263,7 @@ class Users extends Component {
                   onFilteredChange={filtered => {
                     this.setState({ filtered })
                   }}
-                  data={this.state.users.data}
+                  data={this.setCompletion(this.state.users.data)}
                   loading={this.state.users.loading}
                   type={this.state.type}
                 />

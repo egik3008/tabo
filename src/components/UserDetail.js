@@ -4,6 +4,7 @@ import {
   CardHeader,
   CardBody,
   CardFooter,
+  CardImg,
   Col,
   Row,
   Nav,
@@ -32,6 +33,16 @@ import BigCalendar from 'react-big-calendar'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
 import moment from 'moment'
 import 'moment/locale/id'
+import uuidv4 from 'uuid/v4'
+
+import { USER_TYPE } from '../constants/user';
+import PackageForm from './PhotographersManage/PackageForm'
+import PhotographerDetailsForm from './PhotographersManage/PhotographerDetailsForm';
+import PhotographerEquipmentForm from './PhotographersManage/EquipmentForm';
+import PortofolioForm from './PhotographersManage/PortofolioForm';
+import SendMessageForm from './commons/SendMessageForm';
+
+const MAX_TEXT_LENGTH = 5000;
 
 class UserDetail extends Component {
   constructor(props) {
@@ -90,8 +101,10 @@ class UserDetail extends Component {
       },
       title: '',
       loading: false,
-      defaultReasonBlockLength: 420,
-      reasonBlockLength: 420,
+      reasonBlockLength: MAX_TEXT_LENGTH,
+      aboutCharLeft: MAX_TEXT_LENGTH,
+      countries: [],
+      isUploading: false
     }
     BigCalendar.setLocalizer(BigCalendar.momentLocalizer(moment))
   }
@@ -108,16 +121,17 @@ class UserDetail extends Component {
     if ('id' in this.props.match.params) {
       this.setState({
         title: this.props.match.params.type + ' Detail',
-        defaultReasonBlockLength: 420,
-        reasonBlockLength: 420,
       })
-      this.fetchUser(this.props.match.params.type, this.props.match.params.id)
+      this.fetchCountries().then(() => {
+        this.fetchUser(this.props.match.params.type, this.props.match.params.id);
+      })
     } else {
-      this.setState({
-        title: 'Add ' + this.props.match.params.type,
-        defaultReasonBlockLength: 420,
-        reasonBlockLength: 420,
-      })
+      this.fetchCountries().then(() => {
+        this.setState({
+          title: 'Manage ' + this.props.match.params.type + " - Add New Data",
+          loading: false
+        })
+      });
     }
   }
 
@@ -129,20 +143,66 @@ class UserDetail extends Component {
     }
   }
 
-  handleChange = event => {
-    if (this.props.match.params.type === 'photographer') {
-      const nameArr = ['selfDescription']
-      let updatedUser
+  isPhotographers = () => {
+    return (this.props.match.params.type === USER_TYPE.PHOTOGRAPHER);
+  }
 
-      if (nameArr.indexOf(event.target.name) !== -1) {
+  isTraveller = () => {
+    return (this.props.match.params.type === USER_TYPE.TRAVELLER);
+  }
+
+  handleOnAddPackagePrice = (packagePrice) => {
+    this.setState((prevState) => {
+      let { packagesPrice } = this.state.photographer;
+      packagesPrice.push(packagePrice);
+      return {
+        photographer: {
+          ...prevState.photographer,
+          packagesPrice
+        }
+      };
+    });
+  }
+
+  handleChange = event => {
+    let inputValue, inputName;
+    if (event.label) {
+      inputName = "phoneDialCode";
+      inputValue = event.value;
+    } else {
+      inputName = event.target.name;
+      inputValue = event.target.value
+    }
+
+    if (this.isPhotographers()) {
+      const nameArr = ['selfDescription']
+      let updatedUser;
+
+      if (inputName === 'selfDescription') {
+        const len = inputValue.length
+        const remaining = MAX_TEXT_LENGTH - len
+        this.setState({
+          aboutCharLeft: remaining,
+        })
+      }
+
+      if (inputName === 'reason') {
+        const len = event.target.value.length
+        const remaining = MAX_TEXT_LENGTH - len
+        this.setState({
+          reasonBlockLength: remaining,
+        })
+      }
+
+      if (nameArr.indexOf(inputName) !== -1) {
         updatedUser = {
           ...this.state.photographer,
-          [event.target.name]: event.target.value,
+          [inputName]: inputValue,
         }
       } else {
         const updatedUserMetadata = {
           ...this.state.photographer.userMetadata,
-          [event.target.name]: event.target.value,
+          [inputName]: inputValue,
         }
 
         updatedUser = this.state.photographer
@@ -153,19 +213,16 @@ class UserDetail extends Component {
       this.setState({
         photographer: updatedUser,
       })
-    } else {
+    } 
+    
+    // handle change if the user is Traveller
+    else {
       if (event.target.name === 'reason') {
         const len = event.target.value.length
-        const remaining = this.state.defaultReasonBlockLength - len
+        const remaining = MAX_TEXT_LENGTH - len
         this.setState({
           reasonBlockLength: remaining,
         })
-      } else if (event.target.name === 'phoneNumber') {
-        if (!Number.isInteger(Number(event.target.value))) {
-          return
-        } else {
-          event.target.value = Number(event.target.value)
-        }
       }
 
       const updatedUser = {
@@ -180,9 +237,7 @@ class UserDetail extends Component {
   }
 
   handleSubmit = event => {
-    event.preventDefault()
-
-    if (this.props.match.params.type === 'traveler') {
+    if (this.isTraveller()) {
       const { user } = this.state
 
       if (Number(user.enable) === 1) {
@@ -193,8 +248,12 @@ class UserDetail extends Component {
       axios.put(`${process.env.REACT_APP_API_HOSTNAME}/api/users/${user.uid}`, user).then(response => {
         Swal('Success!', response.data.message, 'success')
       })
-    } else {
-      const { photographer } = this.state
+    } 
+    
+    // if photographers
+    else {
+      const photographer = this.state.photographer;
+      const userMetadata = photographer.userMetadata;
       const uid = photographer.userMetadata.uid
 
       if (uid !== '') {
@@ -203,7 +262,12 @@ class UserDetail extends Component {
           delete photographer['reservationHistory']
 
           axios.put(`${process.env.REACT_APP_API_HOSTNAME}/api/photographers/${uid}`, photographer).then(response => {
-            Swal('Success!', response.data.message, 'success')
+            photographer.userMetadata = userMetadata;
+            Swal('Success!', this.state.isUploading ? "Uploading success.." : response.data.message, 'success');
+            this.setState({
+              photographer: photographer,
+              isUploading: false
+            })
           })
         })
       } else {
@@ -214,14 +278,77 @@ class UserDetail extends Component {
     }
   }
 
-  fetchUser(type, id) {
-    this.setState({
-      loading: true,
+  handleImagesUpload = (files) => {
+    this.setState({isUploading: true})
+
+    const fileOutOfSize = [];
+    let uploads = [];
+    let urlUploadRequest = process.env.REACT_APP_CLOUDINARY_API_BASE_URL;
+    urlUploadRequest += '/image/upload';
+
+    // console.log(urlUploadRequest);
+    // return;
+
+    let { photosPortofolio } = this.state.photographer;
+
+    Object.keys(files).forEach((itemKey) => {
+      // Current used images upload strategy
+      const fileItemObject = files[itemKey];
+      if (fileItemObject.size <= 10000000) {
+        
+        const formData = new FormData();
+        formData.append('upload_preset', process.env.REACT_APP_CLOUDINARY_PHOTOS_PORTFOLIO_PRESET);
+        formData.append('tags', `portfolio-${this.state.user.uid}`);
+        formData.append('file', fileItemObject);
+
+        uploads.push(
+          axios
+            .post(urlUploadRequest, formData)
+            .then((response) => {
+              const newItem = {
+                id: uuidv4(),
+                publicId: response.data.public_id,
+                imageFormat: response.data.format,
+                url: response.data.secure_url,
+                width: response.data.width,
+                height: response.data.height,
+                sizebytes: response.data.bytes,
+                theme: '-',
+                defaultPicture: false
+              };
+
+              photosPortofolio.push(newItem);
+
+            })
+            .catch((error) => {
+              console.error('Catch error: ', error);
+            })
+        );
+
+        
+      } else {
+        fileOutOfSize.push(fileItemObject.name);
+      }
     })
 
-    const url = type === 'traveler' ? 'users' : 'photographers'
+    Promise.all(uploads)
+      .then(() => {
+        this.setState({
+          photographer: {
+            ...this.state.photographer,
+            photosPortofolio: photosPortofolio,
+          }
+        }, () => {
+          this.handleSubmit(); 
+        })
+      })
+
+  }
+
+  fetchUser(type, id) {
+    const url = type === USER_TYPE.TRAVELLER ? 'users' : 'photographers'
     axios.get(`${process.env.REACT_APP_API_HOSTNAME}/api/${url}/${id}`).then(response => {
-      if (type === 'traveler')
+      if (type === USER_TYPE.TRAVELLER)
         this.setState({
           user: response.data,
           loading: false,
@@ -234,10 +361,27 @@ class UserDetail extends Component {
       }
 
       const remaining =
-        this.state.defaultReasonBlockLength - ('reason' in response.data ? response.data.reason.length : 0)
+        MAX_TEXT_LENGTH - ('reason' in response.data ? response.data.reason.length : 0)
+
+      const aboutCharRemaining = this.state.aboutCharLeft - ('selfDescription' in response.data ? response.data.selfDescription.length : 0)
       this.setState({
         reasonBlockLength: remaining,
+        aboutCharLeft: aboutCharRemaining
       })
+    })
+  }
+
+  fetchCountries() {
+    this.setState({
+      loading: true,
+    })
+
+    return axios.get(`${process.env.REACT_APP_API_HOSTNAME}/api/countries`).then(response => {
+      if (response.data) {
+        this.setState({
+          countries: response.data,
+        })
+      }
     })
   }
 
@@ -399,7 +543,7 @@ class UserDetail extends Component {
                 </Col>
                 <Col xs="12" md="9">
                   <Input
-                    type="text"
+                    type="number"
                     id="phoneNumber"
                     name="phoneNumber"
                     value={this.state.user.phoneNumber}
@@ -518,7 +662,7 @@ class UserDetail extends Component {
                       type="textarea"
                       id="reason"
                       name="reason"
-                      maxLength={this.state.defaultReasonBlockLength}
+                      maxLength={MAX_TEXT_LENGTH}
                       onChange={this.handleChange}
                     />
                     <FormText className="help-block">Max. {this.state.reasonBlockLength} character</FormText>
@@ -546,20 +690,45 @@ class UserDetail extends Component {
           </TabPane>
 
           <TabPane tabId="messages">
-            <Form className="p-3">
-              <FormGroup row>
-                <Label htmlFor="textarea-input">Messages :</Label>
-                <Input type="textarea" name="textarea-input" id="textarea-input" rows="9" placeholder="Content..." />
-              </FormGroup>
-
-              <FormGroup row>
-                <Button color="primary">Send</Button>
-              </FormGroup>
-            </Form>
+            <SendMessageForm />
           </TabPane>
         </TabContent>
       </div>
     )
+  }
+
+
+  handleCreateTableChange = name => (selected) => {
+    const arrSelected = selected.map(item => {
+      return item.value
+    })
+
+    const cameraEquipment = {
+      ...this.state.photographer.cameraEquipment,
+      [name]: arrSelected,
+    }
+
+    const photographer = {
+      ...this.state.photographer,
+      cameraEquipment: cameraEquipment,
+    }
+
+    this.setState({photographer})
+  }
+
+  handleLanguagesChange = (selected) => {
+    const arrSelected = selected.map(item => {
+      return item.value
+    })
+
+    const photographer = {
+      ...this.state.photographer,
+      languages: arrSelected,
+    }
+
+    this.setState({
+      photographer: photographer,
+    })
   }
 
   renderPhotographer() {
@@ -713,328 +882,28 @@ class UserDetail extends Component {
 
         <TabContent activeTab={this.state.activeTab}>
           <TabPane tabId="detail">
-            <Row>
-              <Col md="7">
-                <Form action="" className="form-horizontal px-3">
-                  {this.state.photographer.userMetadata.uid !== '' && (
-                    <FormGroup row>
-                      <Col md="3">
-                        <Label htmlFor="id">ID</Label>
-                      </Col>
-                      <Col xs="12" md="9">
-                        <Input
-                          type="text"
-                          id="id"
-                          name="id"
-                          placeholder={this.state.photographer.userMetadata.uid}
-                          disabled
-                        />
-                      </Col>
-                    </FormGroup>
-                  )}
-
-                  <FormGroup row>
-                    <Col md="3">
-                      <Label htmlFor="displayName">Name</Label>
-                    </Col>
-                    <Col xs="12" md="9">
-                      <Input
-                        type="text"
-                        id="displayName"
-                        name="displayName"
-                        value={this.state.photographer.userMetadata.displayName}
-                        placeholder=""
-                        onChange={this.handleChange}
-                      />
-                    </Col>
-                  </FormGroup>
-
-                  <FormGroup row>
-                    <Col md="3">
-                      <Label htmlFor="email">Email</Label>
-                    </Col>
-                    <Col xs="12" md="9">
-                      <Input
-                        type="email"
-                        id="email"
-                        name="email"
-                        value={this.state.photographer.userMetadata.email}
-                        placeholder=""
-                        onChange={this.handleChange}
-                      />
-                    </Col>
-                  </FormGroup>
-
-                  <FormGroup row>
-                    <Col md="3">
-                      <Label htmlFor="phoneNumber">Phone</Label>
-                    </Col>
-                    <Col xs="12" md="9">
-                      <Input
-                        type="text"
-                        id="phoneNumber"
-                        name="phoneNumber"
-                        value={
-                          this.state.photographer.userMetadata.phoneDialCode +
-                          ' ' +
-                          this.state.photographer.userMetadata.phoneNumber
-                        }
-                        placeholder="Insert phone"
-                        onChange={this.handleChange}
-                      />
-                    </Col>
-                  </FormGroup>
-
-                  <FormGroup row>
-                    <Col md="3">
-                      <Label htmlFor="countryName">Country</Label>
-                    </Col>
-                    <Col xs="12" md="9">
-                      <Input
-                        type="text"
-                        id="countryName"
-                        name="countryName"
-                        value={this.state.photographer.userMetadata.countryName}
-                        placeholder="Insert country"
-                        onChange={this.handleChange}
-                      />
-                    </Col>
-                  </FormGroup>
-
-                  <FormGroup row>
-                    <Col md="3">
-                      <Label htmlFor="locationMerge">City</Label>
-                    </Col>
-                    <Col xs="12" md="9">
-                      <Input
-                        type="text"
-                        id="locationMerge"
-                        name="locationMerge"
-                        value={this.state.photographer.userMetadata.locationMerge}
-                        placeholder="Insert address"
-                        onChange={this.handleChange}
-                      />
-                    </Col>
-                  </FormGroup>
-
-                  <FormGroup row>
-                    <Col md="3">
-                      <Label htmlFor="selfDescription">About Photographer</Label>
-                    </Col>
-                    <Col xs="12" md="9">
-                      <Input
-                        type="textarea"
-                        id="selfDescription"
-                        name="selfDescription"
-                        rows="5"
-                        value={this.state.photographer.selfDescription}
-                        placeholder="5000 max char"
-                        onChange={this.handleChange}
-                      />
-                    </Col>
-                  </FormGroup>
-
-                  <FormGroup row>
-                    <Col md="3">
-                      <Label htmlFor="language">Language</Label>
-                    </Col>
-                    <Col xs="12" md="9">
-                      <CreatableSelect
-                        value={
-                          'languages' in this.state.photographer
-                            ? this.state.photographer.languages.map(item => {
-                                return { value: item, label: item }
-                              })
-                            : ''
-                        }
-                        onChange={selected => {
-                          const arrSelected = selected.map(item => {
-                            return item.value
-                          })
-
-                          const photographer = {
-                            ...this.state.photographer,
-                            languages: arrSelected,
-                          }
-
-                          this.setState({
-                            photographer: photographer,
-                          })
-                        }}
-                        allowCreate={true}
-                        isMulti
-                      />
-                    </Col>
-                  </FormGroup>
-
-                  <FormGroup row>
-                    <Col>
-                      <Row>
-                        <Col md="6">
-                          <Label htmlFor="enable">Status</Label>
-                        </Col>
-                        <Col xs="12" md="6">
-                          <Input
-                            type="select"
-                            id="enable"
-                            name="enable"
-                            value={this.state.photographer.userMetadata.enable}
-                            onChange={this.handleChange}>
-                            <option value="1">Active</option>
-                            <option value="0">Blocked</option>
-                          </Input>
-                        </Col>
-                      </Row>
-                    </Col>
-                    <Col>
-                      {Number(this.state.photographer.userMetadata.enable) === 0 && (
-                        <span>
-                          <strong>
-                            {moment(
-                              'updated' in this.state.photographer.userMetadata
-                                ? this.state.photographer.userMetadata.updated
-                                : {}
-                            )
-                              .locale('id')
-                              .format('lll')}
-                          </strong>
-                        </span>
-                      )}
-                    </Col>
-                  </FormGroup>
-
-                  {Number(this.state.photographer.userMetadata.enable) === 0 && (
-                    <FormGroup row>
-                      <Col md="3">
-                        <Label htmlFor="reason">Reason</Label>
-                      </Col>
-                      <Col xs="12" md="9">
-                        <Input
-                          type="textarea"
-                          id="reason"
-                          name="reason"
-                          maxLength={this.state.defaultReasonBlockLength}
-                          value={this.state.photographer.userMetadata.reason}
-                          onChange={this.handleChange}
-                        />
-                        <FormText className="help-block">Max. {this.state.reasonBlockLength} character</FormText>
-                      </Col>
-                    </FormGroup>
-                  )}
-                </Form>
-              </Col>
-
-              <Col md="5">
-                <img
-                  src={this.state.photographer.userMetadata.photoProfileUrl}
-                  alt={this.state.photographer.userMetadata.displayName}
-                  style={{ width: '100%' }}
-                />
-              </Col>
-            </Row>
+              <PhotographerDetailsForm 
+                photographer={this.state.photographer}
+                onFieldChange={this.handleChange} 
+                onLanguagesChange={this.handleLanguagesChange}
+                countries={this.state.countries}
+                onSubmit={this.handleSubmit}
+              />
           </TabPane>
 
           <TabPane tabId="equipment">
-            <FormGroup row>
-              <Col md="3">
-                <Label htmlFor="body">Body</Label>
-              </Col>
-              <Col xs="12" md="9">
-                <CreatableSelect
-                  value={
-                    'cameraEquipment' in this.state.photographer
-                      ? 'body' in this.state.photographer.cameraEquipment
-                        ? this.state.photographer.cameraEquipment.body.map(item => {
-                            return { value: item, label: item }
-                          })
-                        : ''
-                      : ''
-                  }
-                  onChange={selected => {
-                    const arrSelected = selected.map(item => {
-                      return item.value
-                    })
-
-                    const cameraEquipment = {
-                      ...this.state.photographer.cameraEquipment,
-                      body: arrSelected,
-                    }
-
-                    const photographer = {
-                      ...this.state.photographer,
-                      cameraEquipment: cameraEquipment,
-                    }
-
-                    this.setState({
-                      photographer: photographer,
-                    })
-                  }}
-                  allowCreate={true}
-                  isMulti
-                />
-              </Col>
-            </FormGroup>
-
-            <FormGroup row>
-              <Col md="3">
-                <Label htmlFor="lens">Lens</Label>
-              </Col>
-              <Col xs="12" md="9">
-                <CreatableSelect
-                  value={
-                    'cameraEquipment' in this.state.photographer
-                      ? 'lens' in this.state.photographer.cameraEquipment
-                        ? this.state.photographer.cameraEquipment.lens.map(item => {
-                            return { value: item, label: item }
-                          })
-                        : ''
-                      : ''
-                  }
-                  onChange={selected => {
-                    const arrSelected = selected.map(item => {
-                      return item.value
-                    })
-
-                    const cameraEquipment = {
-                      ...this.state.photographer.cameraEquipment,
-                      lens: arrSelected,
-                    }
-
-                    const photographer = {
-                      ...this.state.photographer,
-                      cameraEquipment: cameraEquipment,
-                    }
-
-                    this.setState({
-                      photographer: photographer,
-                    })
-                  }}
-                  allowCreate={true}
-                  isMulti
-                />
-              </Col>
-            </FormGroup>
+            <PhotographerEquipmentForm
+              photographer={this.state.photographer}
+              handleChange={this.handleCreateTableChange}
+              onSubmit={this.handleSubmit}
+            />
           </TabPane>
 
           <TabPane tabId="package">
-            <Table responsive bordered className="mt-3">
-              <thead>
-                <tr>
-                  <th>Hour</th>
-                  {/* <th>Photos</th> */}
-                  <th>Price</th>
-                </tr>
-              </thead>
-              <tbody>
-                {this.state.photographer.packagesPrice.map((p, i) => (
-                  <tr key={i}>
-                    <td>{p.packageName}</td>
-                    {/* <td>{p.requirement}</td> */}
-                    <td>{p.priceIDR ? p.priceIDR.toLocaleString('id') : Number(p.price).toLocaleString('id')}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
+            <PackageForm
+              packagesPrice={this.state.photographer.packagesPrice}
+              onAddPackagePrice={this.handleOnAddPackagePrice}
+            />
           </TabPane>
 
           <TabPane tabId="meeting-point">
@@ -1110,25 +979,11 @@ class UserDetail extends Component {
           </TabPane>
 
           <TabPane tabId="portfolio">
-            {this.state.photographer.photosPortofolio && this.state.photographer.photosPortofolio.length !== 0 ? (
-              <Row>
-                <Col md="7">
-                  <Row className="no-gutters">
-                    {this.state.photographer.photosPortofolio.map((item, i) => (
-                      <Col md="4">
-                        <img src={item.url} alt={'photo-' + i} style={{ width: '150px', height: '150px' }} />
-                      </Col>
-                    ))}
-                  </Row>
-                </Col>
-
-                <Col md="5" />
-              </Row>
-            ) : (
-              <span>
-                <strong>No photos to show!</strong>
-              </span>
-            )}
+                <PortofolioForm
+                  photographer={this.state.photographer}
+                  onUploadPhotos={this.handleImagesUpload}
+                  isUploading={this.state.isUploading}
+                />
           </TabPane>
 
           <TabPane tabId="history">
@@ -1149,16 +1004,7 @@ class UserDetail extends Component {
           </TabPane>
 
           <TabPane tabId="messages">
-            <Form className="p-3">
-              <FormGroup row>
-                <Label htmlFor="textarea-input">Messages :</Label>
-                <Input type="textarea" name="textarea-input" id="textarea-input" rows="9" placeholder="Content..." />
-              </FormGroup>
-
-              <FormGroup row>
-                <Button color="primary">Send</Button>
-              </FormGroup>
-            </Form>
+            <SendMessageForm />
           </TabPane>
         </TabContent>
       </div>
@@ -1178,7 +1024,7 @@ class UserDetail extends Component {
               </CardHeader>
               <CardBody>
                 {!this.state.loading ? (
-                  this.state.user.userType === 'traveller' ? (
+                  this.isTraveller() ? (
                     this.renderTraveler()
                   ) : (
                     this.renderPhotographer()
@@ -1190,13 +1036,13 @@ class UserDetail extends Component {
                   </div>
                 )}
               </CardBody>
-              {this.state.activeTab !== 'history' && (
+              {/* {this.state.activeTab !== 'history' && (
                 <CardFooter>
                   <Button color="primary" onClick={this.handleSubmit}>
                     Save
                   </Button>
                 </CardFooter>
-              )}
+              )} */}
             </Card>
           </Col>
         </Row>

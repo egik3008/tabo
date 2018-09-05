@@ -1,3 +1,4 @@
+import { USER_TYPE } from './constants/user';
 export default {
   items: [
     {
@@ -7,12 +8,12 @@ export default {
     },
     {
       name: 'Traveler',
-      url: '/users/traveler',
+      url: '/users/' + USER_TYPE.TRAVELLER,
       icon: 'fa fa-suitcase fa-fw',
     },
     {
       name: 'Photographer',
-      url: '/users/photographer',
+      url: '/users/' + USER_TYPE.PHOTOGRAPHER,
       icon: 'fa fa-camera fa-fw',
     },
     {
