@@ -4,9 +4,10 @@ import CreatableSelect from 'react-select/lib/Creatable'
 import {
     Col,
     FormGroup,
-    Label,
-    Button
-  } from 'reactstrap'
+    Label
+  } from 'reactstrap';
+
+  import SaveButton from '../commons/ManageSaveButton';
 
 class EquipmentForm extends React.Component {
     render() {
@@ -56,17 +57,10 @@ class EquipmentForm extends React.Component {
                 />
               </Col>
             </FormGroup>
-            <Col md={12} xs={12}>
-                <div style={{width: '100%', display: 'flex', justifyContent: 'center'}}>
-                  <Button 
-                    color="primary" 
-                    onClick={this.props.onSubmit}
-                    style={{marginTop: 20, width: 200}}
-                  >
-                    Save
-                  </Button>
-                </div>  
-            </Col>
+            <SaveButton
+              onClick={this.props.onSubmit}
+              isSubmitting={this.props.isSubmitting}
+            />
             </div>
         );
     }

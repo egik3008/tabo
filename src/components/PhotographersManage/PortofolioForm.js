@@ -6,25 +6,15 @@ import SelectedImage from "./SelectedImage";
 
 import {
     Card,
-    CardHeader,
     CardBody,
-    CardFooter,
-    CardImg,
     Col,
     Row,
-    Nav,
-    NavItem,
-    NavLink,
-    TabContent,
-    TabPane,
-    Form,
     FormGroup,
     FormText,
     Label,
-    Input,
     Button,
-    Table,
-  } from 'reactstrap'
+} from 'reactstrap'
+import ManageSaveButton from '../commons/ManageSaveButton';
 
 class PortofolioForm extends React.Component {
 
@@ -38,40 +28,60 @@ class PortofolioForm extends React.Component {
         selectedPhotos: 0
     }
 
-    convertFormatToGallery = (photosPortofolio, defaultPhotos=null) => {
-        if (photosPortofolio) {
-            let photos = photosPortofolio.map(photo => {
-                let newFormat = {
-                    src: photo.url, width: 3, height: 2
-                }
-
-                if (defaultPhotos && (defaultPhotos.length > 0)) {
-                    const def = defaultPhotos.find((item) => {
-                        return item.src === newFormat.src
-                    });
-                    if (def) {
-                        newFormat = {
-                            ...def,
-                            ...newFormat
-                        }
-                    }
-                }
-
-                return newFormat; 
+    handleOnUpload = () => {
+        this.props.onUploadPhotos(this.state.filesUpload);
+    }
+    
+    handleDeletePhotos = () => {
+        if (this.state.selectedPhotos > 0) {
+            const deletedPhotos = this.state.photos.filter(photo => {
+                return photo.selected;
             });
-
-            return photos;
+    
+            this.props.onDeletePhotos(deletedPhotos);
         }
+        else alert('No photos selected...')
+    }
+
+    componentDidMount() {
+        const { photosPortofolio } = this.props.photographer;
+        this.convertFormatToGallery(photosPortofolio);
+    }
+
+    componentWillReceiveProps(nextProps) {
+        const newPhotosPortofolio = nextProps.photographer.photosPortofolio;
+        const prevPhotosPortofolio = this.props.photographer.photosPortofolio;
+
+        const lNew = newPhotosPortofolio ? newPhotosPortofolio.length : 0;
+        const oNew = prevPhotosPortofolio ? prevPhotosPortofolio.length : 0;
+        
+        if ((lNew !== oNew) || this.props.isUploading) {
+            this.convertFormatToGallery(newPhotosPortofolio);
+        }
+        
+    }
+
+    convertFormatToGallery = (photosPortofolio) => {
+        let photos = [];
+        if (photosPortofolio) {
+            photosPortofolio.forEach(photo => {
+                if (!photo.defaultPicture) {
+                    let newFormat = {
+                        src: photo.url, 
+                        width: 3, 
+                        height: 2,
+                        publicid: photo.publicId,
+                    }
+                    photos.push(newFormat);
+                }
+            });
+        }
+        this.setState({ photos, isEmpty: photos.length <= 0 });
     }
 
     selectImagesHandler = (event) => {
         const filesUpload = event.target.files;
         this.setState({filesUpload});
-    }
-
-    handleDeletePhotos = () => {
-        if (this.state.selectedPhotos > 0) alert('Coming soon...')
-        else alert('No photos selected...')
     }
 
     openLightbox = (event, obj) => {
@@ -87,6 +97,7 @@ class PortofolioForm extends React.Component {
             lightboxIsOpen: false,
         });
     }
+
     gotoPrevious = () => {
         this.setState({
             currentImage: this.state.currentImage - 1,
@@ -101,8 +112,6 @@ class PortofolioForm extends React.Component {
     selectPhoto = (event, obj) => {
         
         let { photos, selectedPhotos }  = this.state;
-
-        photos = this.convertFormatToGallery(this.props.photographer.photosPortofolio, photos);
 
         photos[obj.index].selected = !photos[obj.index].selected;
         
@@ -125,7 +134,7 @@ class PortofolioForm extends React.Component {
 
 
     render() {
-        const photos = this.convertFormatToGallery(this.props.photographer.photosPortofolio) || [];
+        const photos = this.state.photos;
 
         return (
             <Row>
@@ -153,7 +162,8 @@ class PortofolioForm extends React.Component {
                             <CardBody>
                                 <div style={{
                                     display: 'flex',
-                                    alignItems: 'center'
+                                    flexDirection: 'column',
+                                    alignItems: 'flex-start'
                                 }}>
                                     <Label style={{marginRight: 10}}>Switch to ON for Delete Photos Mode:</Label>
                                     <Switch
@@ -164,17 +174,17 @@ class PortofolioForm extends React.Component {
                                         onColor="#ff0000"
                                         offColor="#080"
                                     />
-                                    {this.state.checked && (
-                                        <div style={{paddingLeft: 10}}>
-                                            <Button 
-                                                color="warning"
-                                                onClick={this.handleDeletePhotos} 
-                                            >
-                                                Delete Selected Photos
-                                            </Button>
-                                        </div>
-                                    )}
                                 </div>
+                                {this.state.checked && (
+                                    <Button 
+                                        color="warning"
+                                        onClick={this.handleDeletePhotos} 
+                                        disabled={this.props.isDeleting}
+                                        style={{marginTop: 20}}
+                                    >
+                                        {this.props.isDeleting ? 'Deleting photos...' : 'Delete Selected Photos'}
+                                    </Button>
+                                )}
                             </CardBody>
                         </Card>
                     )}
@@ -197,18 +207,12 @@ class PortofolioForm extends React.Component {
                     </Card>
                 </Col>
 
-                <Col md={12} xs={12}>
-                    <div style={{width: '100%', display: 'flex', justifyContent: 'center'}}>
-                    <Button 
-                        color="primary" 
-                        onClick={() => this.props.onUploadPhotos(this.state.filesUpload)}
-                        style={{marginTop: 40, width: 200}}
-                        disabled={this.props.isUploading || !this.state.filesUpload}
-                    >
-                        {this.props.isUploading ? 'Uploading...' : 'Save'}
-                    </Button>
-                    </div>  
-                </Col>
+                <ManageSaveButton
+                    onClick={this.handleOnUpload}
+                    isSubmitting={this.props.isUploading}
+                    disabled={!this.state.filesUpload}
+                    isSubmittingLabel="Uploading..."
+                />
             </Row>
             
         );

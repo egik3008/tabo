@@ -3,8 +3,6 @@ import {
   Card,
   CardHeader,
   CardBody,
-  CardFooter,
-  CardImg,
   Col,
   Row,
   Nav,
@@ -17,8 +15,6 @@ import {
   FormText,
   Label,
   Input,
-  Button,
-  Table,
 } from 'reactstrap'
 import { CountryDropdown } from 'react-country-region-selector'
 import SelectCurrency from 'react-select-currency'
@@ -27,22 +23,27 @@ import classnames from 'classnames'
 import ReactTable from 'react-table'
 import 'react-table/react-table.css'
 import CreatableSelect from 'react-select/lib/Creatable'
-import GoogleMapReact from 'google-map-react'
+
 import Swal from 'sweetalert2'
-import BigCalendar from 'react-big-calendar'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
 import moment from 'moment'
 import 'moment/locale/id'
 import uuidv4 from 'uuid/v4'
+import qs from 'query-string';
 
+import * as API from './../services/api';
 import { USER_TYPE } from '../constants/user';
 import PackageForm from './PhotographersManage/PackageForm'
 import PhotographerDetailsForm from './PhotographersManage/PhotographerDetailsForm';
 import PhotographerEquipmentForm from './PhotographersManage/EquipmentForm';
 import PortofolioForm from './PhotographersManage/PortofolioForm';
+import MeetingPointForm from './PhotographersManage/MeetingPointForm';
+import UnavailableTimeForm from './PhotographersManage/UnavailableTimeForm';
+import ReservationHistory from './PhotographersManage/ReservationHistory';
 import SendMessageForm from './commons/SendMessageForm';
 
 const MAX_TEXT_LENGTH = 5000;
+const API_SERVICE_URL = process.env.REACT_APP_API_HOSTNAME + "/api/";
 
 class UserDetail extends Component {
   constructor(props) {
@@ -97,6 +98,9 @@ class UserDetail extends Component {
           locationMerge: '',
           enable: 1,
           reason: '',
+          blockedDate: null,
+          photoProfileUrl: null,
+          displayName: null,
         },
       },
       title: '',
@@ -104,20 +108,14 @@ class UserDetail extends Component {
       reasonBlockLength: MAX_TEXT_LENGTH,
       aboutCharLeft: MAX_TEXT_LENGTH,
       countries: [],
-      isUploading: false
+      isSubmitting: false,
+      addingPortofolio: false,
+      deletingPortofolio: false
     }
-    BigCalendar.setLocalizer(BigCalendar.momentLocalizer(moment))
+    
   }
 
-  static defaultProps = {
-    center: {
-      lat: -2.548926,
-      lng: 118.0148634,
-    },
-    zoom: 1,
-  }
-
-  componentWillMount() {
+  componentDidMount() {
     if ('id' in this.props.match.params) {
       this.setState({
         title: this.props.match.params.type + ' Detail',
@@ -135,11 +133,62 @@ class UserDetail extends Component {
     }
   }
 
+  fetchUser(type, id) {
+    const url = type === USER_TYPE.TRAVELLER ? 'users' : 'photographers'
+    axios.get(`${API_SERVICE_URL + url}/${id}`).then(response => {
+      // console.log("fetch " + type, response.data);
+      if (type === USER_TYPE.TRAVELLER)
+        this.setState({
+          user: response.data,
+          loading: false,
+        })
+      else {
+        this.setState({
+          photographer: {
+            ...this.state.photographer,
+            ...response.data
+          },
+          loading: false,
+        })
+      }
+
+      const remaining =
+        MAX_TEXT_LENGTH - ('reason' in response.data ? response.data.reason.length : 0)
+
+      const aboutCharRemaining = this.state.aboutCharLeft - ('selfDescription' in response.data ? response.data.selfDescription.length : 0)
+      this.setState({
+        reasonBlockLength: remaining,
+        aboutCharLeft: aboutCharRemaining
+      })
+    })
+  }
+
+  fetchCountries() {
+    this.setState({
+      loading: true,
+    })
+
+    return axios.get(`${process.env.REACT_APP_API_HOSTNAME}/api/countries`).then(response => {
+      if (response.data) {
+        this.setState({
+          countries: response.data,
+        })
+      }
+    })
+  }
+
   toggle(tab) {
     if (this.state.activeTab !== tab) {
       this.setState({
         activeTab: tab,
       })
+    }
+  }
+
+  filterCaseInsensitive = (filter, row) => {
+    const id = filter.pivotId || filter.id
+    if (row[id] !== null) {
+      return row[id] !== undefined ? String(row[id].toLowerCase()).includes(filter.value.toLowerCase()) : true
     }
   }
 
@@ -151,17 +200,194 @@ class UserDetail extends Component {
     return (this.props.match.params.type === USER_TYPE.TRAVELLER);
   }
 
-  handleOnAddPackagePrice = (packagePrice) => {
-    this.setState((prevState) => {
-      let { packagesPrice } = this.state.photographer;
-      packagesPrice.push(packagePrice);
-      return {
-        photographer: {
-          ...prevState.photographer,
-          packagesPrice
-        }
-      };
+  handleCreateTableChange = name => (selected) => {
+    const arrSelected = selected.map(item => {
+      return item.value
+    })
+
+    const cameraEquipment = {
+      ...this.state.photographer.cameraEquipment,
+      [name]: arrSelected,
+    }
+
+    const photographer = {
+      ...this.state.photographer,
+      cameraEquipment: cameraEquipment,
+    }
+
+    this.setState({photographer})
+  }
+
+  handleLanguagesChange = (selected) => {
+    const arrSelected = selected.map(item => {
+      return item.value
+    })
+
+    const photographer = {
+      ...this.state.photographer,
+      languages: arrSelected,
+    }
+
+    this.setState({
+      photographer: photographer,
+    })
+  }
+
+  updatePhotographerPortofolio = (newPortofolio, defaultPicture = false) => {
+    const uid = this.state.photographer.userMetadata.uid;
+    let newServiceInformation = {
+      ...this.state.photographer,
+      photosPortofolio: newPortofolio
+    };
+    delete newServiceInformation.userMetadata;
+
+    API.updatePhotographerServiceInformation(uid, newServiceInformation)
+      .then(() => {
+        this.setState({
+          photographer: {
+            ...this.state.photographer,
+            photosPortofolio: newPortofolio
+          },
+          addingPortofolio: false,
+          deletingPortofolio: false
+        })
+        Swal('Success!', "Portofolio updated..", 'success');
+      })
+  }
+  
+  handleImagesUpload = (files, defaultPicture = false) => {
+    this.setState({addingPortofolio: true})
+
+    const fileOutOfSize = [];
+    let uploads = [];
+    let urlUploadRequest = process.env.REACT_APP_CLOUDINARY_API_BASE_URL;
+    urlUploadRequest += '/image/upload';
+
+    let newPortofolio = this.state.photographer.photosPortofolio;
+
+    if (defaultPicture) {
+      if (files.size <= 10000000) {
+        
+        const formData = new FormData();
+        formData.append('upload_preset', process.env.REACT_APP_CLOUDINARY_PHOTOS_PORTFOLIO_PRESET);
+        formData.append('tags', `portfolio-${this.state.user.uid}`);
+        formData.append('file', files);
+
+        uploads.push(
+          axios
+            .post(urlUploadRequest, formData)
+            .then((response) => {
+              const newItem = {
+                id: uuidv4(),
+                publicId: response.data.public_id,
+                imageFormat: response.data.format,
+                url: response.data.secure_url,
+                width: response.data.width,
+                height: response.data.height,
+                sizebytes: response.data.bytes,
+                theme: '-',
+                defaultPicture: defaultPicture
+              };
+
+              newPortofolio.push(newItem);
+            })
+            .catch((error) => {
+              console.error('Catch error: ', error);
+            })
+        );
+      } else {
+        fileOutOfSize.push(files.name);
+      }
+    } else {
+      Object.keys(files).forEach((itemKey) => {
+      const fileItemObject = files[itemKey];
+      if (fileItemObject.size <= 10000000) {
+        
+        const formData = new FormData();
+        formData.append('upload_preset', process.env.REACT_APP_CLOUDINARY_PHOTOS_PORTFOLIO_PRESET);
+        formData.append('tags', `portfolio-${this.state.user.uid}`);
+        formData.append('file', fileItemObject);
+
+        uploads.push(
+          axios
+            .post(urlUploadRequest, formData)
+            .then((response) => {
+              const newItem = {
+                id: uuidv4(),
+                publicId: response.data.public_id,
+                imageFormat: response.data.format,
+                url: response.data.secure_url,
+                width: response.data.width,
+                height: response.data.height,
+                sizebytes: response.data.bytes,
+                theme: '-',
+                defaultPicture: defaultPicture
+              };
+
+              newPortofolio.push(newItem);
+            })
+            .catch((error) => {
+              console.error('Catch error: ', error);
+            })
+        );
+
+        
+      } else {
+        fileOutOfSize.push(fileItemObject.name);
+      }
     });
+    }
+
+    Promise.all(uploads)
+      .then(() => {
+        this.updatePhotographerPortofolio(newPortofolio, defaultPicture);
+      })
+  }
+
+  handleDeletePhotos = (deletedPhotos) => {
+    this.setState({deletingPortofolio: true});
+
+    const photosRemaining = this.state.photographer.photosPortofolio.filter(photo => {
+      const isDeleted = deletedPhotos.find(deletedPhoto => {
+        return deletedPhoto.publicid === photo.publicId
+      });
+      return !isDeleted;
+    })
+
+    let paramsReq = [];
+
+    deletedPhotos.forEach(item => {
+      paramsReq.push(item.publicid);
+    });
+
+    axios
+      .delete(API_SERVICE_URL + "cloudinary-images/delete", { 
+        params: {
+          public_ids: paramsReq
+        },
+        paramsSerializer: params => {
+          return qs.stringify(params)
+        }
+      })
+      .then((response) => {
+        if (response.data.deleted) {
+          this.updatePhotographerPortofolio(photosRemaining);
+        }
+      })
+      .catch((error) => {
+        console.error('Catch error: ', error);
+      })
+  }
+
+  handleSubmitPackagesPrice = (packagesPrice) => {
+    this.setState({
+      photographer: {
+        ...this.state.photographer,
+        packagesPrice
+      }
+    }, () => {
+      this.handleSubmit();
+    })
   }
 
   handleChange = event => {
@@ -237,6 +463,8 @@ class UserDetail extends Component {
   }
 
   handleSubmit = event => {
+    this.setState({isSubmitting: true});
+
     if (this.isTraveller()) {
       const { user } = this.state
 
@@ -257,142 +485,32 @@ class UserDetail extends Component {
       const uid = photographer.userMetadata.uid
 
       if (uid !== '') {
-        axios.put(`${process.env.REACT_APP_API_HOSTNAME}/api/users/${uid}`, photographer.userMetadata).then(() => {
+        axios.put(`${API_SERVICE_URL}users/${uid}`, photographer.userMetadata)
+        .then(() => {
           delete photographer['userMetadata']
           delete photographer['reservationHistory']
 
-          axios.put(`${process.env.REACT_APP_API_HOSTNAME}/api/photographers/${uid}`, photographer).then(response => {
+          axios.put(`${API_SERVICE_URL}photographers/${uid}`, photographer)
+          .then(response => {
             photographer.userMetadata = userMetadata;
-            Swal('Success!', this.state.isUploading ? "Uploading success.." : response.data.message, 'success');
+            Swal('Success!', response.data.message, 'success');
+            
             this.setState({
               photographer: photographer,
-              isUploading: false
+              isSubmitting: false
             })
           })
         })
       } else {
-        axios.post(`${process.env.REACT_APP_API_HOSTNAME}/api/photographers`, photographer).then(response => {
+        axios.post(`${API_SERVICE_URL}photographers`, photographer)
+        .then(response => {
           Swal('Success!', response.data.message, 'success')
         })
       }
     }
   }
 
-  handleImagesUpload = (files) => {
-    this.setState({isUploading: true})
-
-    const fileOutOfSize = [];
-    let uploads = [];
-    let urlUploadRequest = process.env.REACT_APP_CLOUDINARY_API_BASE_URL;
-    urlUploadRequest += '/image/upload';
-
-    // console.log(urlUploadRequest);
-    // return;
-
-    let { photosPortofolio } = this.state.photographer;
-
-    Object.keys(files).forEach((itemKey) => {
-      // Current used images upload strategy
-      const fileItemObject = files[itemKey];
-      if (fileItemObject.size <= 10000000) {
-        
-        const formData = new FormData();
-        formData.append('upload_preset', process.env.REACT_APP_CLOUDINARY_PHOTOS_PORTFOLIO_PRESET);
-        formData.append('tags', `portfolio-${this.state.user.uid}`);
-        formData.append('file', fileItemObject);
-
-        uploads.push(
-          axios
-            .post(urlUploadRequest, formData)
-            .then((response) => {
-              const newItem = {
-                id: uuidv4(),
-                publicId: response.data.public_id,
-                imageFormat: response.data.format,
-                url: response.data.secure_url,
-                width: response.data.width,
-                height: response.data.height,
-                sizebytes: response.data.bytes,
-                theme: '-',
-                defaultPicture: false
-              };
-
-              photosPortofolio.push(newItem);
-
-            })
-            .catch((error) => {
-              console.error('Catch error: ', error);
-            })
-        );
-
-        
-      } else {
-        fileOutOfSize.push(fileItemObject.name);
-      }
-    })
-
-    Promise.all(uploads)
-      .then(() => {
-        this.setState({
-          photographer: {
-            ...this.state.photographer,
-            photosPortofolio: photosPortofolio,
-          }
-        }, () => {
-          this.handleSubmit(); 
-        })
-      })
-
-  }
-
-  fetchUser(type, id) {
-    const url = type === USER_TYPE.TRAVELLER ? 'users' : 'photographers'
-    axios.get(`${process.env.REACT_APP_API_HOSTNAME}/api/${url}/${id}`).then(response => {
-      if (type === USER_TYPE.TRAVELLER)
-        this.setState({
-          user: response.data,
-          loading: false,
-        })
-      else {
-        this.setState({
-          photographer: response.data,
-          loading: false,
-        })
-      }
-
-      const remaining =
-        MAX_TEXT_LENGTH - ('reason' in response.data ? response.data.reason.length : 0)
-
-      const aboutCharRemaining = this.state.aboutCharLeft - ('selfDescription' in response.data ? response.data.selfDescription.length : 0)
-      this.setState({
-        reasonBlockLength: remaining,
-        aboutCharLeft: aboutCharRemaining
-      })
-    })
-  }
-
-  fetchCountries() {
-    this.setState({
-      loading: true,
-    })
-
-    return axios.get(`${process.env.REACT_APP_API_HOSTNAME}/api/countries`).then(response => {
-      if (response.data) {
-        this.setState({
-          countries: response.data,
-        })
-      }
-    })
-  }
-
-  filterCaseInsensitive = (filter, row) => {
-    const id = filter.pivotId || filter.id
-    if (row[id] !== null) {
-      return row[id] !== undefined ? String(row[id].toLowerCase()).includes(filter.value.toLowerCase()) : true
-    }
-  }
-
-  renderTraveler() {
+  renderTraveller() {
     const historyColumns = [
       {
         Header: 'ID Reservation',
@@ -697,112 +815,7 @@ class UserDetail extends Component {
     )
   }
 
-
-  handleCreateTableChange = name => (selected) => {
-    const arrSelected = selected.map(item => {
-      return item.value
-    })
-
-    const cameraEquipment = {
-      ...this.state.photographer.cameraEquipment,
-      [name]: arrSelected,
-    }
-
-    const photographer = {
-      ...this.state.photographer,
-      cameraEquipment: cameraEquipment,
-    }
-
-    this.setState({photographer})
-  }
-
-  handleLanguagesChange = (selected) => {
-    const arrSelected = selected.map(item => {
-      return item.value
-    })
-
-    const photographer = {
-      ...this.state.photographer,
-      languages: arrSelected,
-    }
-
-    this.setState({
-      photographer: photographer,
-    })
-  }
-
   renderPhotographer() {
-    const historyColumns = [
-      {
-        Header: 'Traveler ID',
-        accessor: 'travellerId',
-      },
-      {
-        Header: 'Traveler Name',
-        accessor: 'uidMapping',
-        Cell: row => {
-          const keys = Object.keys(row.value)
-          const photographerIndex = keys.indexOf(this.props.match.params.id)
-          const travelerIndex = photographerIndex === 0 ? 1 : 0
-          const travelerId = keys[travelerIndex]
-          return <span>{row.value[travelerId].displayName}</span>
-        },
-      },
-      {
-        Header: 'Destination',
-        accessor: 'destination',
-        maxWidth: 180,
-      },
-      {
-        Header: 'Email',
-        accessor: 'uidMapping',
-        Cell: row => {
-          const keys = Object.keys(row.value)
-          const photographerIndex = keys.indexOf(this.props.match.params.id)
-          const travelerIndex = photographerIndex === 0 ? 1 : 0
-          const travelerId = keys[travelerIndex]
-          return <span>{row.value[travelerId].email}</span>
-        },
-      },
-      {
-        Header: 'Currency',
-        maxWidth: 80,
-      },
-      {
-        Header: 'Updated',
-        accessor: 'created',
-        Cell: row =>
-          moment(row.value)
-            .locale('id')
-            .format('lll'),
-      },
-      {
-        Header: 'Status',
-        accessor: 'status',
-        maxWidth: 80,
-      },
-    ]
-
-    const greatPlaceStyle = {
-      // initially any map object has left top corner at lat lng coordinates
-      // it's on you to set object origin to 0,0 coordinates
-      position: 'absolute',
-      width: 70,
-      height: 70,
-      left: -70 / 2,
-      top: -70 / 2,
-
-      border: '5px solid #f44336',
-      borderRadius: 30,
-      backgroundColor: 'white',
-      textAlign: 'center',
-      color: '#3f51b5',
-      fontSize: 11,
-      fontWeight: 'bold',
-      padding: 4,
-      cursor: 'pointer',
-    }
-
     return (
       <div>
         <Nav tabs>
@@ -888,6 +901,7 @@ class UserDetail extends Component {
                 onLanguagesChange={this.handleLanguagesChange}
                 countries={this.state.countries}
                 onSubmit={this.handleSubmit}
+                isSubmitting={this.state.isSubmitting}
               />
           </TabPane>
 
@@ -896,110 +910,43 @@ class UserDetail extends Component {
               photographer={this.state.photographer}
               handleChange={this.handleCreateTableChange}
               onSubmit={this.handleSubmit}
+              isSubmitting={this.state.isSubmitting}
             />
           </TabPane>
 
           <TabPane tabId="package">
             <PackageForm
-              packagesPrice={this.state.photographer.packagesPrice}
-              onAddPackagePrice={this.handleOnAddPackagePrice}
+              photographer={this.state.photographer}
+              onSubmit={this.handleSubmitPackagesPrice}
+              isSubmitting={this.state.isSubmitting}
             />
           </TabPane>
 
           <TabPane tabId="meeting-point">
-            <div style={{ height: '100vh', width: '100%' }}>
-              <GoogleMapReact defaultCenter={this.props.center} defaultZoom={this.props.zoom}>
-                {'meetingPoints' in this.state.photographer
-                  ? this.state.photographer.meetingPoints.map((p, i) => (
-                      <div key={i} lat={p.lat} lng={p.long} style={greatPlaceStyle}>
-                        {p.meetingPointName}
-                      </div>
-                    ))
-                  : ''}
-              </GoogleMapReact>
-            </div>
-
-            <Table responsive bordered className="mt-3">
-              <thead>
-                <tr>
-                  <th>No</th>
-                  <th>Address</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {'meetingPoints' in this.state.photographer
-                  ? this.state.photographer.meetingPoints.map((p, i) => (
-                      <tr key={i}>
-                        <td>{i + 1}</td>
-                        <td>{p.meetingPointName}</td>
-                        <td>
-                          <Button>Edit</Button>
-                          <Button
-                            color="danger"
-                            onClick={() => {
-                              const meetingPoints = this.state.photographer.meetingPoints
-                              meetingPoints.splice(i, 1)
-
-                              this.setState({
-                                ...this.state.photographer,
-                                meetingPoints: meetingPoints,
-                              })
-                            }}>
-                            Delete
-                          </Button>
-                        </td>
-                      </tr>
-                    ))
-                  : ''}
-              </tbody>
-            </Table>
+            <MeetingPointForm
+              photographer={this.state.photographer}
+            />
           </TabPane>
 
           <TabPane tabId="unavailable-time">
-            <div style={{ height: '100vh', width: '100%' }}>
-              <BigCalendar
-                events={
-                  'notAvailableDates' in this.state.photographer
-                    ? this.state.photographer.notAvailableDates.map((item, i) => {
-                        return {
-                          id: i,
-                          title: 'Unavailable',
-                          allDay: true,
-                          start: new Date(item),
-                          end: new Date(item),
-                        }
-                      })
-                    : []
-                }
-                defaultDate={new Date()}
-                views={{ month: true }}
+              <UnavailableTimeForm
+                photographer={this.state.photographer}
               />
-            </div>
           </TabPane>
 
           <TabPane tabId="portfolio">
                 <PortofolioForm
                   photographer={this.state.photographer}
                   onUploadPhotos={this.handleImagesUpload}
-                  isUploading={this.state.isUploading}
+                  isUploading={this.state.addingPortofolio}
+                  isDeleting={this.state.deletingPortofolio}
+                  onDeletePhotos={this.handleDeletePhotos}
                 />
           </TabPane>
 
           <TabPane tabId="history">
-            <ReactTable
-              className="-striped -hightlight"
-              columns={historyColumns}
-              sortable={true}
-              defaultSorted={[
-                {
-                  id: 'created',
-                  desc: true,
-                },
-              ]}
-              defaultPageSize={10}
-              data={this.state.photographer.reservationHistory}
-              loading={this.state.loading}
+            <ReservationHistory
+              photographer={this.state.photographer}
             />
           </TabPane>
 
@@ -1025,7 +972,7 @@ class UserDetail extends Component {
               <CardBody>
                 {!this.state.loading ? (
                   this.isTraveller() ? (
-                    this.renderTraveler()
+                    this.renderTraveller()
                   ) : (
                     this.renderPhotographer()
                   )
@@ -1036,13 +983,6 @@ class UserDetail extends Component {
                   </div>
                 )}
               </CardBody>
-              {/* {this.state.activeTab !== 'history' && (
-                <CardFooter>
-                  <Button color="primary" onClick={this.handleSubmit}>
-                    Save
-                  </Button>
-                </CardFooter>
-              )} */}
             </Card>
           </Col>
         </Row>

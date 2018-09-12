@@ -90,14 +90,13 @@ class Users extends Component {
   filterCaseInsensitive = (filter, row) => {
     const id = filter.pivotId || filter.id
     if (row[id] !== null) {
-      return row[id] !== undefined ? String(row[id].toLowerCase()).includes(filter.value.toLowerCase()) : true
+      return row[id] !== undefined ? String(row[id]).toLowerCase().includes(filter.value.toLowerCase()) : true
     }
   }
 
-  setCompletion = (data) => {
+  setUpData = (data) => {
     return data.map(d => {
       let completion = 100
-
       if ('photographerInfo' in d) {
         if (!('cameraEquipment' in d.photographerInfo)) completion -= 10
         if (!('languages' in d.photographerInfo)) completion -= 10
@@ -110,6 +109,9 @@ class Users extends Component {
         completion = 0
       }
       d.completion = completion;
+      d.countryName = d.countryName ? d.countryName : '-';
+      if (this.isPhotographers()) d.currency = d.currency ? d.currency : '-';
+
       return d;
     })
   }
@@ -128,7 +130,6 @@ class Users extends Component {
         Header: 'Country',
         accessor: 'countryName',
         maxWidth: 80,
-        Cell: row => (row.value ? row.value : '-'),
       },
       {
         Header: 'Email',
@@ -263,7 +264,7 @@ class Users extends Component {
                   onFilteredChange={filtered => {
                     this.setState({ filtered })
                   }}
-                  data={this.setCompletion(this.state.users.data)}
+                  data={this.setUpData(this.state.users.data)}
                   loading={this.state.users.loading}
                   type={this.state.type}
                 />

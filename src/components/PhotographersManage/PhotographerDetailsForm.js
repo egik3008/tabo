@@ -17,6 +17,7 @@ import Select from 'react-select';
 import CreatableSelect from 'react-select/lib/Creatable'
 import moment from 'moment'
 import defaultUserPhoto from '../../assets/img/avatar/user_default.png';
+import ManageSaveButton from '../commons/ManageSaveButton';
 
 const MAX_TEXT_LENGTH = 5000;
 class PhotographerDetailsForm extends React.Component {
@@ -48,6 +49,10 @@ class PhotographerDetailsForm extends React.Component {
     } else {
       alert("Field Name & Email are mandatory");
     }
+  }
+
+  handleUploadPhotoProfile = () => {
+    
   }
 
   handleChangeCounterText = (event) => {
@@ -257,8 +262,8 @@ class PhotographerDetailsForm extends React.Component {
                       <span>
                         <strong>
                           {moment(
-                            'updated' in photographer.userMetadata
-                              ? photographer.userMetadata.updated
+                            'blockedDate' in photographer.userMetadata
+                              ? photographer.userMetadata.blockedDate
                               : {}
                           )
                             .locale('id')
@@ -295,15 +300,12 @@ class PhotographerDetailsForm extends React.Component {
             <Card>
               <CardImg top width="100%" 
                 src={photographer.userMetadata.photoProfileUrl || defaultUserPhoto} 
-                alt={photographer.userMetadata.displayName || "User Default"} 
+                alt={photographer.userMetadata.displayName || "User Default"}
               />
               <CardBody>
               <FormGroup>
                 <Label for="exampleFile">Change Photo:</Label>
                 <Input type="file" name="file" id="exampleFile" />
-                {/* <FormText color="muted">
-                  Max size: 500 KB
-                </FormText> */}
               </FormGroup>
               <Button color="primary">
                 Upload
@@ -312,17 +314,10 @@ class PhotographerDetailsForm extends React.Component {
             </Card>
             </Col>
 
-            <Col md={12} xs={12}>
-                <div style={{width: '100%', display: 'flex', justifyContent: 'center'}}>
-                  <Button 
-                    color="primary" 
-                    onClick={this.handleSubmit}
-                    style={{marginTop: 20, width: 200}}
-                  >
-                    Save
-                  </Button>
-                </div>  
-            </Col>
+            <ManageSaveButton
+              onClick={this.handleSubmit}
+              isSubmitting={this.props.isSubmitting}
+            />
           </Row>
       );
   }
