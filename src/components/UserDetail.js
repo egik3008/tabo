@@ -390,6 +390,17 @@ class UserDetail extends Component {
     })
   }
 
+  handleSubmitMeetingPoints = (meetingPoints) => {
+    this.setState({
+      photographer: {
+        ...this.state.photographer,
+        meetingPoints
+      }
+    }, () => {
+      this.handleSubmit();
+    })
+  }
+
   handleChange = event => {
     let inputValue, inputName;
     if (event.label) {
@@ -925,6 +936,8 @@ class UserDetail extends Component {
           <TabPane tabId="meeting-point">
             <MeetingPointForm
               photographer={this.state.photographer}
+              onSubmit={this.handleSubmitMeetingPoints}
+              isSubmitting={this.state.isSubmitting}
             />
           </TabPane>
 

@@ -1,97 +1,155 @@
 import React from 'react';
-import GoogleMapReact from 'google-map-react'
-
+import uuidv4 from 'uuid/v4';
+import get from 'lodash/get';
 import {
     Button,
     Table,
-} from 'reactstrap'
+} from 'reactstrap';
+import MapWithASearchBox from '../commons/MapWithSearchBox';
 import ManageSaveButton from '../commons/ManageSaveButton';
 
-const greatPlaceStyle = {
-    // initially any map object has left top corner at lat lng coordinates
-    // it's on you to set object origin to 0,0 coordinates
-    position: 'absolute',
-    width: 70,
-    height: 70,
-    left: -70 / 2,
-    top: -70 / 2,
-
-    border: '5px solid #f44336',
-    borderRadius: 30,
-    backgroundColor: 'white',
-    textAlign: 'center',
-    color: '#3f51b5',
-    fontSize: 11,
-    fontWeight: 'bold',
-    padding: 4,
-    cursor: 'pointer',
-}
-
 class MeetingPointForm extends React.Component {
-    state = {
-        center: {
-            lat: -2.548926,
-            lng: 118.0148634,
-          },
-          zoom: 1,
+
+    constructor(props) {
+        super(props);
+        this.state = {
+            meetingPoints: props.photographer.meetingPoints,
+            editMeetingPoint: null,
+            isEdit: null, 
+        }
     }
 
+    handleSubmit = () => {
+        this.props.onSubmit(this.state.meetingPoints);
+        this.handleCancelEdit();
+    }
+
+    handleOnEdit = (editMeetingPoint) => () => {
+        this.setState({
+            editMeetingPoint,
+            isEdit: editMeetingPoint.id
+        });
+    }
+
+    handleCancelEdit = () => {
+        this.setState({
+            editMeetingPoint: null,
+            isEdit: null
+        })
+    }
+
+    handlePlaceChange = () => {
+        this.setState({editMeetingPoint: null});
+    }
+
+    handleDelete = (meetingPointID) => () => {
+        const meetingPoints = this.state.meetingPoints.filter(mp => {
+            return !(mp.id === meetingPointID);
+        });
+
+        this.setState({meetingPoints});
+
+    }
+
+    handleAddition = params => {
+        let generalLocation = get(params, 'generalLocation');
+        const specificLocation = get(params, 'specificLocation', '-');
+
+        if ((generalLocation && this.state.meetingPoints.length < 3) || this.state.isEdit){
+            let uuid = uuidv4();
+            let meetingPointsLocal = Object.assign(
+                generalLocation, { 
+                    placeLocationNotes: specificLocation, 
+                    id: uuid 
+                }
+            );
+
+            let currentMeetingPoints = this.state.meetingPoints;
+
+            if (this.state.isEdit) {
+                currentMeetingPoints = this.state.meetingPoints.filter(mp => {
+                    return !(mp.id === this.state.isEdit);
+                });
+            }
+
+            const meetingPoints = [ 
+                ...currentMeetingPoints,
+                meetingPointsLocal
+            ];
+
+            this.setState({meetingPoints});
+            this.handleCancelEdit();
+        } else {
+            alert("Sorry, meeting points is limited to three.")
+        }
+    };
+
     render() {
-        const { photographer } = this.props;
+        const { meetingPoints } = this.state;
         return (
             <div>
-                <div style={{ height: '100vh', width: '100%' }}>
-                <GoogleMapReact 
-                    defaultCenter={this.state.center} 
-                    defaultZoom={this.state.zoom}
-                >
-                    {'meetingPoints' in photographer
-                    ? photographer.meetingPoints.map((p, i) => (
-                        <div key={i} lat={p.lat} lng={p.long} style={greatPlaceStyle}>
-                            {p.meetingPointName}
-                        </div>
-                        ))
-                    : ''}
-                </GoogleMapReact>
-                </div>
-
+                <MapWithASearchBox 
+                    meetingPoint={this.state.editMeetingPoint}
+                    isEditMode={this.state.isEdit}
+                    handleAddition={this.handleAddition} 
+                    onPlaceChange={this.handlePlaceChange}    
+                />
                 <Table responsive bordered className="mt-3">
                 <thead>
                     <tr>
-                    <th>No</th>
-                    <th>Address</th>
-                    <th>Action</th>
+                        <th className="td-center">No</th>
+                        <th>Address</th>
+                        <th className="td-center">Action</th>
                     </tr>
                 </thead>
                     <tbody>
-                        {'meetingPoints' in photographer
-                        ? photographer.meetingPoints.map((p, i) => (
-                            <tr key={i}>
-                                <td>{i + 1}</td>
-                                <td>{p.meetingPointName}</td>
-                                <td>
-                                <Button>Edit</Button>
-                                <Button
-                                    color="danger"
-                                    onClick={() => {
-                                    const meetingPoints = photographer.meetingPoints
-                                    meetingPoints.splice(i, 1)
-
-                                    this.setState({
-                                        ...photographer,
-                                        meetingPoints: meetingPoints,
-                                    })
-                                    }}>
-                                    Delete
-                                </Button>
+                        {meetingPoints.length > 0 ? meetingPoints.map((p, i) => {
+                            const isEdit = p.id === this.state.isEdit;
+                            return (
+                                <tr key={p.id}>
+                                    <td className="td-center">{i + 1}</td>
+                                    <td>
+                                        <p>{p.meetingPointName}</p>
+                                        <p>
+                                            <strong>Note: </strong>
+                                            {p.placeLocationNotes}
+                                        </p>
+                                    </td>
+                                    <td className="td-center" >
+                                    <Button 
+                                        color={isEdit ? "warning" : "secondary"}
+                                        style={{marginRight: 5}}
+                                        onClick={isEdit ? this.handleCancelEdit:this.handleOnEdit(p)}
+                                    >
+                                        {isEdit ? "Cancel Edit" : "Edit" }
+                                    </Button>
+                                    {!isEdit && (
+                                        <Button
+                                            style={{marginLeft: 5}}
+                                            color="danger"
+                                            onClick={this.handleDelete(p.id)}
+                                        >
+                                            Delete
+                                        </Button>
+                                    )}
+                                    </td>
+                                </tr>
+                            )
+                        }) : (
+                            <tr>
+                                <td colSpan="3" className="td-center">
+                                    There is no meeting point 
                                 </td>
                             </tr>
-                            ))
-                        : null}
+                        )
+                        }
                     </tbody>
                 </Table>
 
-                <ManageSaveButton />
+                <ManageSaveButton 
+                    onClick={this.handleSubmit}
+                    isSubmitting={this.props.isSubmitting}
+                />
             </div>
         );
     }

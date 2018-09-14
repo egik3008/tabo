@@ -1,0 +1,21 @@
+.td-center {
+    text-align: center;
+}
+@media (max-width: 480px) {
+    
+}
+@media (max-width: 1024px) {
+    .input-place-location-name{
+        width: 94% !important;
+        top: 53px !important;
+        left: 10px !important;
+    }
+}
+
+@media (min-width: 1024px) {
+    .input-place-location-name{
+        width: 65% !important;
+        top: 10px !important;
+        left: 185px !important;
+    }
+}

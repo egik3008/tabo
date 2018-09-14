@@ -165,7 +165,7 @@ class PortofolioForm extends React.Component {
                                     flexDirection: 'column',
                                     alignItems: 'flex-start'
                                 }}>
-                                    <Label style={{marginRight: 10}}>Switch to ON for Delete Photos Mode:</Label>
+                                    <Label style={{marginRight: 10}}>Switch for View or Delete Photos Mode:</Label>
                                     <Switch
                                         onChange={this.handleSwitch}
                                         checked={this.state.checked}

@@ -112,7 +112,7 @@ class PhotographerDetailsForm extends React.Component {
                       type="text"
                       id="displayName"
                       name="displayName"
-                      value={photographer.userMetadata.displayName}
+                      value={photographer.userMetadata.displayName || ""}
                       placeholder=""
                       onChange={this.props.onFieldChange}
                     />
@@ -128,7 +128,7 @@ class PhotographerDetailsForm extends React.Component {
                       type="email"
                       id="email"
                       name="email"
-                      value={photographer.userMetadata.email}
+                      value={photographer.userMetadata.email || ""}
                       placeholder=""
                       onChange={this.props.onFieldChange}
                     />
@@ -160,7 +160,7 @@ class PhotographerDetailsForm extends React.Component {
                       type="number"
                       id="phoneNumber"
                       name="phoneNumber"
-                      value={photographer.userMetadata.phoneNumber}
+                      value={photographer.userMetadata.phoneNumber || ""}
                       placeholder="Insert phone"
                       onChange={this.props.onFieldChange}
                     />
@@ -176,7 +176,7 @@ class PhotographerDetailsForm extends React.Component {
                       type="text"
                       id="countryName"
                       name="countryName"
-                      value={photographer.userMetadata.countryName}
+                      value={photographer.userMetadata.countryName || ""}
                       placeholder="Insert country"
                       onChange={this.props.onFieldChange}
                     />
@@ -192,7 +192,7 @@ class PhotographerDetailsForm extends React.Component {
                       type="text"
                       id="locationMerge"
                       name="locationMerge"
-                      value={photographer.userMetadata.locationMerge}
+                      value={photographer.userMetadata.locationMerge || ""}
                       placeholder="Insert address"
                       onChange={this.props.onFieldChange}
                     />
@@ -210,7 +210,7 @@ class PhotographerDetailsForm extends React.Component {
                       name="selfDescription"
                       rows="5"
                       maxLength={MAX_TEXT_LENGTH}
-                      value={photographer.selfDescription}
+                      value={photographer.selfDescription || ""}
                       placeholder="Max 5000 characters"
                       onChange={this.handleChangeCounterText}
                     />
@@ -249,7 +249,7 @@ class PhotographerDetailsForm extends React.Component {
                           type="select"
                           id="enable"
                           name="enable"
-                          value={photographer.userMetadata.enable}
+                          value={photographer.userMetadata.enable || ""}
                           onChange={this.props.onFieldChange}>
                           <option value="1">Active</option>
                           <option value="0">Blocked</option>
@@ -285,7 +285,7 @@ class PhotographerDetailsForm extends React.Component {
                         id="reason"
                         name="reason"
                         maxLength={MAX_TEXT_LENGTH}
-                        value={photographer.userMetadata.reason}
+                        value={photographer.userMetadata.reason || ""}
                         onChange={this.handleChangeCounterText}
                         placeholder="Max 5000 characters"
                       />
