@@ -10,6 +10,7 @@ import {
   FormText,
   Label,
   Input,
+  CustomInput,
   Button
 } from 'reactstrap';
 
@@ -20,39 +21,138 @@ import defaultUserPhoto from '../../assets/img/avatar/user_default.png';
 import ManageSaveButton from '../commons/ManageSaveButton';
 
 const MAX_TEXT_LENGTH = 5000;
-class PhotographerDetailsForm extends React.Component {
+class DetailsForm extends React.Component {
 
   state = {
+    userAuth: {
+      password: '',
+      passwordConfirm: ''
+    },
+    userMetadata: {
+      uid: '',
+      displayName: '',
+      email: '',
+      phoneDialCode: '',
+      phoneNumber: '',
+      countryName: '',
+      locationMerge: '',
+      photoProfileUrl: '',
+      enable: 1,
+      reason: '',
+      blockedDate: null,
+    },
+    photographer: {
+      selfDescription: '',
+      languages: []
+    },
     reasonBlockLength: MAX_TEXT_LENGTH,
     aboutCharLeft: MAX_TEXT_LENGTH,
-  }
+    changePassword: false,
+  } 
 
   componentDidMount() {
     const { photographer } = this.props;
+
     const remaining =
       MAX_TEXT_LENGTH - ('reason' in photographer ? photographer.reason.length : 0)
 
-    const aboutCharRemaining = this.state.aboutCharLeft - ('selfDescription' in photographer ? photographer.selfDescription.length : 0)
+    const aboutCharRemaining = this.state.aboutCharLeft - photographer.selfDescription.length
     this.setState({
+      userMetadata: {
+        ...this.state.userMetadata,
+        ...photographer.userMetadata
+      },
+      photographer: {
+        selfDescription: photographer.selfDescription,
+        languages: photographer.languages
+      },
       reasonBlockLength: remaining,
       aboutCharLeft: aboutCharRemaining
     })
   }
 
-  handleSubmit = () => {
-    const { userMetadata } = this.props.photographer;
-    if (
-      (userMetadata.displayName && userMetadata.displayName !== "") && 
-      (userMetadata.email && userMetadata.email !== "") 
-    ) {
-      this.props.onSubmit();
+  isEditMode = () => {
+    return this.state.userMetadata.uid !== '';
+  }
+
+  isUserBlocked = () => {
+    return Number(this.state.userMetadata.enable) === 0;
+  }
+
+  handleChange = (event) => {
+    let fieldName, fieldValue;
+
+    // handle select event => doesnt have target.name
+    if (event.label) {
+      fieldName = "phoneDialCode";
+      fieldValue = event.value;
     } else {
-      alert("Field Name & Email are mandatory");
+      fieldName = event.target.name;
+      fieldValue = event.target.value
     }
+
+    if (fieldName in this.state.userMetadata) {
+      this.setState({
+        userMetadata: {
+          ...this.state.userMetadata,
+          [fieldName]: fieldValue
+        }
+      });
+    }
+
+    if (fieldName in this.state.photographer) {
+      this.setState({
+        photographer: {
+          ...this.state.photographer,
+          [fieldName]: fieldValue
+        }
+      });
+    }
+
+    if (fieldName in this.state.userAuth) {
+      this.setState({
+        userAuth: {
+          ...this.state.userAuth,
+          [fieldName]: fieldValue
+        }
+      });
+    }
+  }
+
+  handleSubmit = () => {
+    const { userMetadata, photographer } = this.state;
+    let userAuth = null;
+
+    // validate field mandatory
+    if ((userMetadata.displayName === "") || (userMetadata.email === "")) {
+      alert("Field Name & Email are mandatory");
+      return;
+    }
+
+    // validate password
+    if (!this.isEditMode() || this.state.changePassword) {
+      const { password, passwordConfirm } = this.state.userAuth;
+      if (password.length < 6) {
+        alert("Password must be at least six characters long");
+        return;
+      } else if (password !== passwordConfirm) {
+        alert("Password does not match the confirm password");
+        return;
+      }
+
+      userAuth = { password };
+
+    }
+
+    this.props.onSubmit(userMetadata, photographer, userAuth);
   }
 
   handleUploadPhotoProfile = () => {
     
+  }
+
+  togglePassword = () => {
+    this.setState({changePassword: !this.state.changePassword});
   }
 
   handleChangeCounterText = (event) => {
@@ -73,20 +173,22 @@ class PhotographerDetailsForm extends React.Component {
         reasonBlockLength: remaining,
       })
     }
-    this.props.onFieldChange(event);
+    this.handleChange(event);
   }
 
   render() {
-      let { photographer, countries } = this.props;
-      let defaultDialCode = countries.find(item => {
-        return item.value === photographer.userMetadata.phoneDialCode
+      let { countries } = this.props;
+      const {photographer, userMetadata, userAuth } = this.state;
+
+      let phoneDialCode = countries.find(item => {
+        return item.value === userMetadata.phoneDialCode
       }) || [];
 
       return (
           <Row>
             <Col md="7">
               <Form action="" className="form-horizontal px-3">
-                {photographer.userMetadata.uid !== '' && (
+                {this.isEditMode() && (
                   <FormGroup row>
                     <Col md="3">
                       <Label htmlFor="id">ID</Label>
@@ -96,7 +198,7 @@ class PhotographerDetailsForm extends React.Component {
                         type="text"
                         id="id"
                         name="id"
-                        placeholder={photographer.userMetadata.uid}
+                        placeholder={userMetadata.uid}
                         disabled
                       />
                     </Col>
@@ -112,25 +214,25 @@ class PhotographerDetailsForm extends React.Component {
                       type="text"
                       id="displayName"
                       name="displayName"
-                      value={photographer.userMetadata.displayName || ""}
+                      value={userMetadata.displayName || ""}
                       placeholder=""
-                      onChange={this.props.onFieldChange}
+                      onChange={this.handleChange}
                     />
                   </Col>
                 </FormGroup>
 
                 <FormGroup row>
                   <Col md="3">
-                    <Label htmlFor="email">Email</Label>
+                    <Label htmlFor="email">e-Mail</Label>
                   </Col>
                   <Col xs="12" md="9">
                     <Input
                       type="email"
                       id="email"
                       name="email"
-                      value={photographer.userMetadata.email || ""}
+                      value={userMetadata.email || ""}
                       placeholder=""
-                      onChange={this.props.onFieldChange}
+                      onChange={this.handleChange}
                     />
                   </Col>
                 </FormGroup>
@@ -142,11 +244,11 @@ class PhotographerDetailsForm extends React.Component {
                   <Col xs="12" md="9">
                     <Select
                       name="phoneDialCode"
-                      defaultValue={defaultDialCode}
                       options={countries}
                       clearable={false}
                       isSearchable={true}
-                      onChange={this.props.onFieldChange}
+                      value={phoneDialCode}
+                      onChange={this.handleChange}
                     />
                   </Col>
                 </FormGroup>
@@ -160,9 +262,9 @@ class PhotographerDetailsForm extends React.Component {
                       type="number"
                       id="phoneNumber"
                       name="phoneNumber"
-                      value={photographer.userMetadata.phoneNumber || ""}
+                      value={userMetadata.phoneNumber || ""}
                       placeholder="Insert phone"
-                      onChange={this.props.onFieldChange}
+                      onChange={this.handleChange}
                     />
                   </Col>
                 </FormGroup>
@@ -176,9 +278,9 @@ class PhotographerDetailsForm extends React.Component {
                       type="text"
                       id="countryName"
                       name="countryName"
-                      value={photographer.userMetadata.countryName || ""}
+                      value={userMetadata.countryName || ""}
                       placeholder="Insert country"
-                      onChange={this.props.onFieldChange}
+                      onChange={this.handleChange}
                     />
                   </Col>
                 </FormGroup>
@@ -192,9 +294,9 @@ class PhotographerDetailsForm extends React.Component {
                       type="text"
                       id="locationMerge"
                       name="locationMerge"
-                      value={photographer.userMetadata.locationMerge || ""}
+                      value={userMetadata.locationMerge || ""}
                       placeholder="Insert address"
-                      onChange={this.props.onFieldChange}
+                      onChange={this.handleChange}
                     />
                   </Col>
                 </FormGroup>
@@ -238,6 +340,54 @@ class PhotographerDetailsForm extends React.Component {
                   </Col>
                 </FormGroup>
 
+                {this.isEditMode() && (
+                  <React.Fragment>
+                    <FormGroup row>
+                      <Col md="3">
+                        <Label htmlFor="passwordCheckbox">Password</Label>
+                      </Col>
+                      <Col xs="12" md="9">
+                        <CustomInput type="checkbox" 
+                          id="passwordCheckbox" 
+                          label="Change password"
+                          onClick={this.togglePassword}
+                        />
+                      </Col>
+                    </FormGroup>
+                  </React.Fragment>
+                )}
+
+                { (this.state.changePassword || !this.isEditMode()) && (
+                  <React.Fragment>
+                    <FormGroup row>
+                      <Col md="3">{!this.isEditMode() && "Password"}</Col>
+                      <Col xs="12" md="9">
+                        <Input
+                          type="password"
+                          id="password"
+                          name="password"
+                          value={userAuth.password}
+                          onChange={this.handleChange}
+                          placeholder={(this.isEditMode() ? "New" : "") +" Password"}
+                        />
+                      </Col>
+                    </FormGroup>
+                    <FormGroup row>
+                    <Col md="3">{!this.isEditMode() && "Confirm Password"}</Col>
+                      <Col xs="12" md="9">
+                        <Input
+                          type="password"
+                          id="passwordConfirm"
+                          name="passwordConfirm"
+                          value={userAuth.passwordConfirm}
+                          onChange={this.handleChange}
+                          placeholder={(this.isEditMode() ? "New" : "") +" Password Confirmation"}
+                        />
+                      </Col>
+                    </FormGroup>
+                  </React.Fragment>
+                )}
+
                 <FormGroup row>
                   <Col>
                     <Row>
@@ -249,8 +399,8 @@ class PhotographerDetailsForm extends React.Component {
                           type="select"
                           id="enable"
                           name="enable"
-                          value={photographer.userMetadata.enable || ""}
-                          onChange={this.props.onFieldChange}>
+                          value={userMetadata.enable}
+                          onChange={this.handleChange}>
                           <option value="1">Active</option>
                           <option value="0">Blocked</option>
                         </Input>
@@ -258,12 +408,12 @@ class PhotographerDetailsForm extends React.Component {
                     </Row>
                   </Col>
                   <Col>
-                    {Number(photographer.userMetadata.enable) === 0 && (
+                    {this.isUserBlocked() && (
                       <span>
                         <strong>
                           {moment(
-                            'blockedDate' in photographer.userMetadata
-                              ? photographer.userMetadata.blockedDate
+                            'blockedDate' in userMetadata
+                              ? userMetadata.blockedDate
                               : {}
                           )
                             .locale('id')
@@ -274,7 +424,7 @@ class PhotographerDetailsForm extends React.Component {
                   </Col>
                 </FormGroup>
 
-                {Number(photographer.userMetadata.enable) === 0 && (
+                {this.isUserBlocked() && (
                   <FormGroup row>
                     <Col md="3">
                       <Label htmlFor="reason">Reason</Label>
@@ -285,7 +435,7 @@ class PhotographerDetailsForm extends React.Component {
                         id="reason"
                         name="reason"
                         maxLength={MAX_TEXT_LENGTH}
-                        value={photographer.userMetadata.reason || ""}
+                        value={userMetadata.reason || ""}
                         onChange={this.handleChangeCounterText}
                         placeholder="Max 5000 characters"
                       />
@@ -299,8 +449,8 @@ class PhotographerDetailsForm extends React.Component {
             <Col md="5">
             <Card>
               <CardImg top width="100%" 
-                src={photographer.userMetadata.photoProfileUrl || defaultUserPhoto} 
-                alt={photographer.userMetadata.displayName || "User Default"}
+                src={userMetadata.photoProfileUrl || defaultUserPhoto} 
+                alt={userMetadata.displayName || "User Default"}
               />
               <CardBody>
               <FormGroup>
@@ -323,4 +473,4 @@ class PhotographerDetailsForm extends React.Component {
   }
 }
 
-export default PhotographerDetailsForm;
+export default DetailsForm;

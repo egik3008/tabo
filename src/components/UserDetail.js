@@ -34,7 +34,7 @@ import qs from 'query-string';
 import * as API from './../services/api';
 import { USER_TYPE } from '../constants/user';
 import PackageForm from './PhotographersManage/PackageForm'
-import PhotographerDetailsForm from './PhotographersManage/PhotographerDetailsForm';
+import PhotographerDetailsForm from './PhotographersManage/DetailsForm';
 import PhotographerEquipmentForm from './PhotographersManage/EquipmentForm';
 import PortofolioForm from './PhotographersManage/PortofolioForm';
 import MeetingPointForm from './PhotographersManage/MeetingPointForm';
@@ -62,6 +62,10 @@ class UserDetail extends Component {
         currency: '',
         language: '',
         enable: 0,
+
+        // for photographer user
+
+
       },
       photographer: {
         cameraEquipment: {
@@ -81,13 +85,13 @@ class UserDetail extends Component {
         packagesPrice: [],
         photosPortofolio: [],
         selfDescription: '',
-        serviceReviews: {
-          impressions: [],
-          rating: {
-            label: '',
-            value: 0,
-          },
-        },
+        // serviceReviews: {
+        //   impressions: [],
+        //   rating: {
+        //     label: '',
+        //     value: 0,
+        //   },
+        // },
         userMetadata: {
           uid: '',
           displayName: '',
@@ -96,11 +100,10 @@ class UserDetail extends Component {
           phoneNumber: '',
           countryName: '',
           locationMerge: '',
+          photoProfileUrl: '',
           enable: 1,
           reason: '',
           blockedDate: null,
-          photoProfileUrl: null,
-          displayName: null,
         },
       },
       title: '',
@@ -191,6 +194,8 @@ class UserDetail extends Component {
       return row[id] !== undefined ? String(row[id].toLowerCase()).includes(filter.value.toLowerCase()) : true
     }
   }
+
+  isEditMode = () => {}
 
   isPhotographers = () => {
     return (this.props.match.params.type === USER_TYPE.PHOTOGRAPHER);
@@ -401,15 +406,30 @@ class UserDetail extends Component {
     })
   }
 
+  handleSubmitDetail = (userMetadata, photographer, userAuth) => {
+    if (userAuth) {
+      axios.put(`${API_SERVICE_URL}auth/update/${userMetadata.uid}`, userAuth);
+    }
+
+    if (this.isPhotographers()) {
+      this.setState({
+        photographer: {
+          ...this.state.photographer,
+          ...photographer,
+          userMetadata: {
+            ...this.state.photographer.userMetadata,
+            ...userMetadata
+          }
+        }
+      }, () => {
+        this.handleSubmit();
+      })
+    }
+
+  } 
+
   handleChange = event => {
     let inputValue, inputName;
-    if (event.label) {
-      inputName = "phoneDialCode";
-      inputValue = event.value;
-    } else {
-      inputName = event.target.name;
-      inputValue = event.target.value
-    }
 
     if (this.isPhotographers()) {
       const nameArr = ['selfDescription']
@@ -908,10 +928,9 @@ class UserDetail extends Component {
           <TabPane tabId="detail">
               <PhotographerDetailsForm 
                 photographer={this.state.photographer}
-                onFieldChange={this.handleChange} 
                 onLanguagesChange={this.handleLanguagesChange}
                 countries={this.state.countries}
-                onSubmit={this.handleSubmit}
+                onSubmit={this.handleSubmitDetail}
                 isSubmitting={this.state.isSubmitting}
               />
           </TabPane>
