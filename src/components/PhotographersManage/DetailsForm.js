@@ -45,6 +45,8 @@ class DetailsForm extends React.Component {
       selfDescription: '',
       languages: []
     },
+    initialStatus: 1, // status user (active/blocked)
+    displayBlockedReason: '',
     reasonBlockLength: MAX_TEXT_LENGTH,
     aboutCharLeft: MAX_TEXT_LENGTH,
     changePassword: false,
@@ -53,10 +55,10 @@ class DetailsForm extends React.Component {
   componentDidMount() {
     const { photographer } = this.props;
 
-    const remaining =
-      MAX_TEXT_LENGTH - ('reason' in photographer ? photographer.reason.length : 0)
+    const remaining = this.state.reasonBlockLength - photographer.userMetadata.reason.length;
 
     const aboutCharRemaining = this.state.aboutCharLeft - photographer.selfDescription.length
+    
     this.setState({
       userMetadata: {
         ...this.state.userMetadata,
@@ -66,6 +68,8 @@ class DetailsForm extends React.Component {
         selfDescription: photographer.selfDescription,
         languages: photographer.languages
       },
+      initialStatus: photographer.userMetadata.enable,
+      displayBlockedReason: photographer.userMetadata.reason,
       reasonBlockLength: remaining,
       aboutCharLeft: aboutCharRemaining
     })
@@ -77,6 +81,10 @@ class DetailsForm extends React.Component {
 
   isUserBlocked = () => {
     return Number(this.state.userMetadata.enable) === 0;
+  }
+
+  isShowBlockedDateAndReason = () => {
+    return (this.isUserBlocked() && (Number(this.state.initialStatus) === 0));
   }
 
   handleChange = (event) => {
@@ -120,7 +128,7 @@ class DetailsForm extends React.Component {
   }
 
   handleSubmit = () => {
-    const { userMetadata, photographer } = this.state;
+    let { userMetadata, photographer } = this.state;
     let userAuth = null;
 
     // validate field mandatory
@@ -139,12 +147,39 @@ class DetailsForm extends React.Component {
         alert("Password does not match the confirm password");
         return;
       }
-
       userAuth = { password };
-
     }
 
+    userMetadata = this.checkIfUserStatusChange();
+
     this.props.onSubmit(userMetadata, photographer, userAuth);
+
+  }
+
+  checkIfUserStatusChange = () => {
+    const { userMetadata, initialStatus } = this.state;
+    if (Number(userMetadata.enable) !== initialStatus) {
+      if (Number(userMetadata.enable) === 0) {
+        userMetadata.blockedDate = moment().format("DD/MM/YYYY");
+        this.setState({
+          initialStatus: 0,
+          displayBlockedReason: userMetadata.reason
+        });
+      } else {
+        this.setState({
+          initialStatus: 1,
+          userMetadata: {
+            ...userMetadata,
+            reason: ''
+          },
+          displayBlockedReason: ''
+        });
+      }
+    } else {
+      this.setState({displayBlockedReason: userMetadata.reason});
+    }
+
+    return userMetadata;
   }
 
   handleUploadPhotoProfile = () => {
@@ -176,9 +211,24 @@ class DetailsForm extends React.Component {
     this.handleChange(event);
   }
 
+  handleLanguagesChange = (selected) => {
+    const arrSelected = selected.map(item => {
+      return item.value
+    })
+
+    const photographer = {
+      ...this.state.photographer,
+      languages: arrSelected,
+    }
+
+    this.setState({
+      photographer: photographer,
+    })
+  }
+
   render() {
       let { countries } = this.props;
-      const {photographer, userMetadata, userAuth } = this.state;
+      const { photographer, userMetadata, userAuth } = this.state;
 
       let phoneDialCode = countries.find(item => {
         return item.value === userMetadata.phoneDialCode
@@ -239,6 +289,37 @@ class DetailsForm extends React.Component {
 
                 <FormGroup row>
                   <Col md="3">
+                    <Label htmlFor="countryName">Country</Label>
+                  </Col>
+                  <Col xs="12" md="9">
+                    <Select
+                      name="countryName"
+                      value={userMetadata.countryName || ""}
+                      options={[]}
+                      clearable={false}
+                      onChange={this.handleChange}
+                    />
+                  </Col>
+                </FormGroup>
+
+                <FormGroup row>
+                  <Col md="3">
+                    <Label htmlFor="locationMerge">City</Label>
+                  </Col>
+                  <Col xs="12" md="9">
+                    <Input
+                      type="text"
+                      id="locationMerge"
+                      name="locationMerge"
+                      value={userMetadata.locationMerge || ""}
+                      placeholder="Insert address"
+                      onChange={this.handleChange}
+                    />
+                  </Col>
+                </FormGroup>
+
+                <FormGroup row>
+                  <Col md="3">
                     <Label htmlFor="phoneNumber">Dial Code</Label>
                   </Col>
                   <Col xs="12" md="9">
@@ -264,38 +345,6 @@ class DetailsForm extends React.Component {
                       name="phoneNumber"
                       value={userMetadata.phoneNumber || ""}
                       placeholder="Insert phone"
-                      onChange={this.handleChange}
-                    />
-                  </Col>
-                </FormGroup>
-
-                <FormGroup row>
-                  <Col md="3">
-                    <Label htmlFor="countryName">Country</Label>
-                  </Col>
-                  <Col xs="12" md="9">
-                    <Input
-                      type="text"
-                      id="countryName"
-                      name="countryName"
-                      value={userMetadata.countryName || ""}
-                      placeholder="Insert country"
-                      onChange={this.handleChange}
-                    />
-                  </Col>
-                </FormGroup>
-
-                <FormGroup row>
-                  <Col md="3">
-                    <Label htmlFor="locationMerge">City</Label>
-                  </Col>
-                  <Col xs="12" md="9">
-                    <Input
-                      type="text"
-                      id="locationMerge"
-                      name="locationMerge"
-                      value={userMetadata.locationMerge || ""}
-                      placeholder="Insert address"
                       onChange={this.handleChange}
                     />
                   </Col>
@@ -333,7 +382,14 @@ class DetailsForm extends React.Component {
                             })
                           : ''
                       }
-                      onChange={this.props.onLanguagesChange}
+                      options={LANGUAGES.map(item => ({
+                        label: item,
+                        value: item,
+                        style: {
+                          margin: "5px 0px 5px 5px"
+                        }
+                      }))}
+                      onChange={this.handleLanguagesChange}
                       allowCreate={true}
                       isMulti
                     />
@@ -408,17 +464,12 @@ class DetailsForm extends React.Component {
                     </Row>
                   </Col>
                   <Col>
-                    {this.isUserBlocked() && (
+                    {this.isShowBlockedDateAndReason() && (
                       <span>
                         <strong>
-                          {moment(
-                            'blockedDate' in userMetadata
-                              ? userMetadata.blockedDate
-                              : {}
-                          )
-                            .locale('id')
-                            .format('lll')}
+                          {this.state.userMetadata.blockedDate}
                         </strong>
+                        <p className="user-blocked-reason">{this.state.displayBlockedReason}</p>
                       </span>
                     )}
                   </Col>
@@ -449,6 +500,7 @@ class DetailsForm extends React.Component {
             <Col md="5">
             <Card>
               <CardImg top width="100%" 
+                style={{maxHeight: 425}}
                 src={userMetadata.photoProfileUrl || defaultUserPhoto} 
                 alt={userMetadata.displayName || "User Default"}
               />
@@ -474,3 +526,40 @@ class DetailsForm extends React.Component {
 }
 
 export default DetailsForm;
+
+const LANGUAGES =  [
+  "English",
+  "Thai",
+  "Vietnamese",
+  "Tagalog",
+  "Korean",
+  "Japanese",
+  "Mandarin",
+  "Burmese",
+  "Malay",
+  "Bahasa Indonesia",
+  "Spanish",
+  "Portuguese",
+  "Russian",
+  "German",
+  "French",
+  "Italian",
+  "Turkish",
+  "Polish",
+  "Ukrainian",
+  "Romanian",
+  "Dutch",
+  "Croatian",
+  "Hungarian",
+  "Greek",
+  "Czech",
+  "Swedish",
+  "Hindi",
+  "Arabic",
+  "Bengali",
+  "Punjabi",
+  "Tamil",
+  "Urdu",
+  "Gujarati",
+  "Persian"
+];

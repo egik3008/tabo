@@ -10,60 +10,84 @@ import {
   import SaveButton from '../commons/ManageSaveButton';
 
 class EquipmentForm extends React.Component {
-    render() {
-        let { photographer } = this.props;
-        return (
-            <div>
-            <FormGroup row>
-              <Col md="3">
-                <Label htmlFor="body">Body</Label>
-              </Col>
-              <Col xs="12" md="9">
-                <CreatableSelect
-                  value={
-                    'cameraEquipment' in photographer
-                      ? 'body' in photographer.cameraEquipment
-                        ? photographer.cameraEquipment.body.map(item => {
-                            return { value: item, label: item }
-                          })
-                        : ''
-                      : ''
-                  }
-                  onChange={this.props.handleChange('body')}
-                  allowCreate={true}
-                  isMulti
-                />
-              </Col>
-            </FormGroup>
 
-            <FormGroup row>
-              <Col md="3">
-                <Label htmlFor="lens">Lens</Label>
-              </Col>
-              <Col xs="12" md="9">
-                <CreatableSelect
-                  value={
-                    'cameraEquipment' in photographer
-                      ? 'lens' in photographer.cameraEquipment
-                        ? photographer.cameraEquipment.lens.map(item => {
-                            return { value: item, label: item }
-                          })
-                        : ''
-                      : ''
-                  }
-                  onChange={this.props.handleChange('lens')}
-                  allowCreate={true}
-                  isMulti
-                />
-              </Col>
-            </FormGroup>
-            <SaveButton
-              onClick={this.props.onSubmit}
-              isSubmitting={this.props.isSubmitting}
-            />
-            </div>
-        );
+  constructor(props) {
+    super(props);
+
+    const { cameraEquipment: {body, lens} } = props.photographer;
+
+    this.state = {
+      cameraEquipment: {
+        body: body || [],
+        lens: lens || []
+      }
     }
+  }
+
+  handleChange = name => (selected) => {
+    const arrSelected = selected.map(item => {
+      return item.value
+    });
+
+    this.setState({
+      cameraEquipment: {
+        ...this.state.cameraEquipment,
+        [name]: arrSelected,
+      }
+    })
+  }
+
+  handleSubmit = () => {
+    this.props.onSubmit(this.state.cameraEquipment);
+  }
+
+  render() {
+    const { cameraEquipment } = this.state;
+      return (
+          <div>
+          <FormGroup row>
+            <Col md="3">
+              <Label htmlFor="body">Body</Label>
+            </Col>
+            <Col xs="12" md="9">
+              <CreatableSelect
+                value={
+                  cameraEquipment.body.map(item => {
+                    return { value: item, label: item }
+                  })
+                }
+                onChange={this.handleChange('body')}
+                allowCreate={true}
+                isMulti
+              />
+            </Col>
+          </FormGroup>
+
+          <FormGroup row>
+            <Col md="3">
+              <Label htmlFor="lens">Lens</Label>
+            </Col>
+            <Col xs="12" md="9">
+              <CreatableSelect
+                value={
+                  cameraEquipment.lens.map(item => {
+                    return { value: item, label: item }
+                  })
+                }
+                onChange={this.handleChange('lens')}
+                allowCreate={true}
+                isMulti
+              />
+            </Col>
+          </FormGroup>
+
+          <SaveButton
+            onClick={this.handleSubmit}
+            isSubmitting={this.props.isSubmitting}
+          />
+          </div>
+      );
+  }
 }
 
 export default EquipmentForm;

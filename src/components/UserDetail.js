@@ -25,7 +25,6 @@ import 'react-table/react-table.css'
 import CreatableSelect from 'react-select/lib/Creatable'
 
 import Swal from 'sweetalert2'
-import 'react-big-calendar/lib/css/react-big-calendar.css'
 import moment from 'moment'
 import 'moment/locale/id'
 import uuidv4 from 'uuid/v4'
@@ -205,39 +204,6 @@ class UserDetail extends Component {
     return (this.props.match.params.type === USER_TYPE.TRAVELLER);
   }
 
-  handleCreateTableChange = name => (selected) => {
-    const arrSelected = selected.map(item => {
-      return item.value
-    })
-
-    const cameraEquipment = {
-      ...this.state.photographer.cameraEquipment,
-      [name]: arrSelected,
-    }
-
-    const photographer = {
-      ...this.state.photographer,
-      cameraEquipment: cameraEquipment,
-    }
-
-    this.setState({photographer})
-  }
-
-  handleLanguagesChange = (selected) => {
-    const arrSelected = selected.map(item => {
-      return item.value
-    })
-
-    const photographer = {
-      ...this.state.photographer,
-      languages: arrSelected,
-    }
-
-    this.setState({
-      photographer: photographer,
-    })
-  }
-
   updatePhotographerPortofolio = (newPortofolio, defaultPicture = false) => {
     const uid = this.state.photographer.userMetadata.uid;
     let newServiceInformation = {
@@ -384,6 +350,17 @@ class UserDetail extends Component {
       })
   }
 
+  handleSubmitCameraEquipment = (cameraEquipment) => {
+    this.setState({
+      photographer: {
+        ...this.state.photographer,
+        cameraEquipment
+      }
+    }, () => {
+      this.handleSubmit();
+    })
+  }
+
   handleSubmitPackagesPrice = (packagesPrice) => {
     this.setState({
       photographer: {
@@ -400,6 +377,17 @@ class UserDetail extends Component {
       photographer: {
         ...this.state.photographer,
         meetingPoints
+      }
+    }, () => {
+      this.handleSubmit();
+    })
+  }
+
+  handleSubmitUnavailableTime = (notAvailableDates) => {
+    this.setState({
+      photographer: {
+        ...this.state.photographer,
+        notAvailableDates
       }
     }, () => {
       this.handleSubmit();
@@ -928,7 +916,6 @@ class UserDetail extends Component {
           <TabPane tabId="detail">
               <PhotographerDetailsForm 
                 photographer={this.state.photographer}
-                onLanguagesChange={this.handleLanguagesChange}
                 countries={this.state.countries}
                 onSubmit={this.handleSubmitDetail}
                 isSubmitting={this.state.isSubmitting}
@@ -938,8 +925,7 @@ class UserDetail extends Component {
           <TabPane tabId="equipment">
             <PhotographerEquipmentForm
               photographer={this.state.photographer}
-              handleChange={this.handleCreateTableChange}
-              onSubmit={this.handleSubmit}
+              onSubmit={this.handleSubmitCameraEquipment}
               isSubmitting={this.state.isSubmitting}
             />
           </TabPane>
@@ -963,6 +949,8 @@ class UserDetail extends Component {
           <TabPane tabId="unavailable-time">
               <UnavailableTimeForm
                 photographer={this.state.photographer}
+                onSubmit={this.handleSubmitUnavailableTime}
+                isSubmitting={this.state.isSubmitting}
               />
           </TabPane>
 

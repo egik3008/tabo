@@ -175,16 +175,6 @@ class PortofolioForm extends React.Component {
                                         offColor="#080"
                                     />
                                 </div>
-                                {this.state.checked && (
-                                    <Button 
-                                        color="warning"
-                                        onClick={this.handleDeletePhotos} 
-                                        disabled={this.props.isDeleting}
-                                        style={{marginTop: 20}}
-                                    >
-                                        {this.props.isDeleting ? 'Deleting photos...' : 'Delete Selected Photos'}
-                                    </Button>
-                                )}
                             </CardBody>
                         </Card>
                     )}
@@ -207,12 +197,33 @@ class PortofolioForm extends React.Component {
                     </Card>
                 </Col>
 
-                <ManageSaveButton
-                    onClick={this.handleOnUpload}
-                    isSubmitting={this.props.isUploading}
-                    disabled={!this.state.filesUpload}
-                    isSubmittingLabel="Uploading..."
-                />
+                {this.state.checked ? (
+                    <Col md={12} xs={12}>
+                        <div 
+                            style={{
+                                width: '100%', 
+                                display: 'flex', 
+                                justifyContent: 'center'
+                            }}
+                        >
+                            <Button 
+                                color="warning"
+                                onClick={this.handleDeletePhotos} 
+                                disabled={this.props.isDeleting}
+                                style={{marginTop: 20}}
+                            >
+                                {this.props.isDeleting ? 'Deleting photos...' : 'Delete Selected Photos'}
+                            </Button>
+                        </div>
+                    </Col>
+                ) : (
+                    <ManageSaveButton
+                        onClick={this.handleOnUpload}
+                        isSubmitting={this.props.isUploading}
+                        disabled={!this.state.filesUpload}
+                        isSubmittingLabel="Uploading..."
+                    />
+                )}
             </Row>
             
         );

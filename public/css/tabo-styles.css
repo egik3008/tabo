@@ -1,9 +1,70 @@
 .td-center {
     text-align: center;
 }
+
+#schedule {
+    position: relative;
+    height: 450px;
+    margin-bottom: 40px;
+}
+
+#schedule > .DayPicker {
+    display: block;
+    font-size: 1.2rem;
+}
+
+.DayPicker-Month {
+    display: table;
+    border-collapse: collapse;
+    border-spacing: 0;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    margin: 0 1rem;
+    width: 100%;
+}
+
+.DayPicker-Day {
+    border: 1px solid #eaecec !important;
+    border-radius: unset !important;
+}
+
+.schedule-card {
+    padding: 20px 30px;
+    border-radius: 16px;
+    -webkit-box-shadow: 0 5px 12px 0 rgba(0, 0, 0, 0.2);
+    -moz-box-shadow: 0 5px 12px 0 rgba(0, 0, 0, 0.2);
+    box-shadow: 0 5px 12px 0 rgba(0, 0, 0, 0.2);
+}
+
+.user-blocked-reason {
+    font-size: 10px;
+    color: red;
+}
+
 @media (max-width: 480px) {
     
 }
+
+@media (max-width: 767px) {
+    .container-fluid {
+        padding-right: 5px !important;
+        padding-left: 5px !important;
+    }
+
+    .card {
+        padding: 0px !important;
+    }
+    .card-body {
+        padding-right: 5px !important;
+        padding-left: 5px !important;
+    }
+    .tab-content .tab-pane {
+        padding: 10px 5px !important;
+    }
+}
+
 @media (max-width: 1024px) {
     .input-place-location-name{
         width: 94% !important;

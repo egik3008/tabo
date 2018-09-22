@@ -1,41 +1,66 @@
 import React from 'react';
-import BigCalendar from 'react-big-calendar';
+import DayPicker, { DateUtils } from 'react-day-picker';
+import 'react-day-picker/lib/style.css';
+
 import moment from 'moment';
 import 'moment/locale/id';
+
 import ManageSaveButton from '../commons/ManageSaveButton';
 
 class UnavailableTimeForm extends React.Component {
 
     constructor(props) {
-        super(props)
-        BigCalendar.setLocalizer(BigCalendar.momentLocalizer(moment))
+        super(props);
+
+        const { notAvailableDates } = props.photographer;
+        this.state = {
+          selectedDays: this.setSelectedDays(notAvailableDates)
+        };
+    }
+
+    setSelectedDays = (notAvailableDates) => {
+      let notAvailableDatesAsDateObjectList = []
+      if (typeof notAvailableDates !== 'undefined') {
+        if (notAvailableDates.length > 0) {
+          notAvailableDatesAsDateObjectList = notAvailableDates.map(item => new Date(item));
+        }
+      }
+      return notAvailableDatesAsDateObjectList;
+    }
+
+    dayClickHandle = (day, { selected }) => {
+      const { selectedDays } = this.state;
+      if (selected) {
+        const selectedIndex = selectedDays.findIndex(selectedDay => DateUtils.isSameDay(selectedDay, day));
+        selectedDays.splice(selectedIndex, 1);
+      } else {
+        selectedDays.push(day);
+      }
+      this.setState({ selectedDays });
+    };
+
+    handleSubmit = () => {
+      const { selectedDays } = this.state;
+      const notAvailableDates = selectedDays.map(item => (
+        moment(item).format('YYYY-MM-DD')
+      ));
+
+      this.props.onSubmit(notAvailableDates);
     }
     
     render () {
-        const { photographer } = this.props;
-
         return (
-          <div>
-            <div style={{ height: '100vh', width: '100%' }}>
-              <BigCalendar
-                events={
-                  'notAvailableDates' in photographer
-                    ? photographer.notAvailableDates.map((item, i) => {
-                        return {
-                          id: i,
-                          title: 'Unavailable',
-                          allDay: true,
-                          start: new Date(item),
-                          end: new Date(item),
-                        }
-                      })
-                    : []
-                }
-                defaultDate={new Date()}
-                views={{ month: true }}
+          <div className="col-sm-12">
+            <div id="schedule" className="schedule-card">
+              <DayPicker
+                selectedDays={this.state.selectedDays}
+                onDayClick={this.dayClickHandle}
               />
             </div>
-            <ManageSaveButton />
+            <ManageSaveButton 
+              onClick={this.handleSubmit}
+              isSubmitting={this.props.isSubmitting}
+            />
           </div>
         );
     }
