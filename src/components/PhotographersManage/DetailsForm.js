@@ -1,4 +1,5 @@
 import React from 'react';
+import { connect } from 'react-redux';
 import {
   Card,
   CardBody,
@@ -11,16 +12,27 @@ import {
   Label,
   Input,
   CustomInput,
-  Button
+  Button,
+  InputGroup,
+  InputGroupAddon
 } from 'reactstrap';
+import axios from 'axios';
+import sha1 from 'js-sha1';
+import Swal from 'sweetalert2';
 
 import Select from 'react-select';
+import AsyncSelect from 'react-select/lib/Async';
 import CreatableSelect from 'react-select/lib/Creatable'
-import moment from 'moment'
+import moment from 'moment';
+
 import defaultUserPhoto from '../../assets/img/avatar/user_default.png';
 import ManageSaveButton from '../commons/ManageSaveButton';
 
+import { selectCountries } from '../../store/selector/countries';
+
 const MAX_TEXT_LENGTH = 5000;
+const API_SERVICE_URL = process.env.REACT_APP_API_HOSTNAME + "/api/";
+
 class DetailsForm extends React.Component {
 
   state = {
@@ -34,8 +46,12 @@ class DetailsForm extends React.Component {
       email: '',
       phoneDialCode: '',
       phoneNumber: '',
+      country: '',
       countryName: '',
+      locationAdmLevel1: '',
+      locationAdmLevel2: '',
       locationMerge: '',
+      currency: '',
       photoProfileUrl: '',
       enable: 1,
       reason: '',
@@ -45,24 +61,34 @@ class DetailsForm extends React.Component {
       selfDescription: '',
       languages: []
     },
+    countryExt: {
+      continent: '',
+    },
+    newPhotoProfile: {
+      fileObject: null,
+      fileName: '',
+      preview: null
+    },
     initialStatus: 1, // status user (active/blocked)
     displayBlockedReason: '',
     reasonBlockLength: MAX_TEXT_LENGTH,
     aboutCharLeft: MAX_TEXT_LENGTH,
     changePassword: false,
-  } 
+    uploadingPhotoProfile: false,
+  }
 
-  componentDidMount() {
-    const { photographer } = this.props;
+  setDefaultState = (photographer) => {
+    const { userMetadata } = photographer;
+    const currentReasonLength = userMetadata.reason ? userMetadata.reason.length : 0;
+    const currentSelfDescLength = userMetadata.selfDescription ? userMetadata.selfDescription.length : 0;
 
-    const remaining = this.state.reasonBlockLength - photographer.userMetadata.reason.length;
-
-    const aboutCharRemaining = this.state.aboutCharLeft - photographer.selfDescription.length
+    const remaining = this.state.reasonBlockLength - currentReasonLength;
+    const aboutCharRemaining = this.state.aboutCharLeft - currentSelfDescLength;
     
     this.setState({
       userMetadata: {
         ...this.state.userMetadata,
-        ...photographer.userMetadata
+        ...userMetadata
       },
       photographer: {
         selfDescription: photographer.selfDescription,
@@ -72,7 +98,12 @@ class DetailsForm extends React.Component {
       displayBlockedReason: photographer.userMetadata.reason,
       reasonBlockLength: remaining,
       aboutCharLeft: aboutCharRemaining
-    })
+    });
+  }
+
+  componentDidMount() {
+    const { photographer } = this.props;
+    this.setDefaultState(photographer);
   }
 
   isEditMode = () => {
@@ -152,6 +183,12 @@ class DetailsForm extends React.Component {
 
     userMetadata = this.checkIfUserStatusChange();
 
+    const locationMerge = [userMetadata.locationAdmLevel2, userMetadata.locationAdmLevel1]
+      .filter((item) => item)
+      .join(', ')
+      .concat(', ' + userMetadata.countryName);
+
+    userMetadata.locationMerge = locationMerge;
     this.props.onSubmit(userMetadata, photographer, userAuth);
 
   }
@@ -182,8 +219,75 @@ class DetailsForm extends React.Component {
     return userMetadata;
   }
 
+  handleBrowserPhotoProfile = (event) => {
+    const fileObject = event.target.files[0];
+    let fileReader = new FileReader();
+    fileReader.readAsDataURL(fileObject);
+    fileReader.onload = (evt) => {
+      this.setState({
+        newPhotoProfile: {
+          ...this.state.newPhotoProfile,
+          fileObject: fileObject,
+          fileName: fileObject.name,
+          preview: evt.target.result
+        }
+      });
+    }
+  }
   handleUploadPhotoProfile = () => {
-    
+    this.setState({uploadingPhotoProfile: true});
+
+    const { userMetadata, newPhotoProfile } = this.state;
+
+    let urlUploadRequest = process.env.REACT_APP_CLOUDINARY_API_BASE_URL;
+    urlUploadRequest += '/image/upload';
+
+    const nowDateTime = Date.now();
+    let signature = `public_id=${userMetadata.uid}`;
+    signature += `&timestamp=${nowDateTime}`;
+    signature += `&upload_preset=${process.env.REACT_APP_CLOUDINARY_PHOTO_PROFILE_PRESET}`;
+    signature += process.env.REACT_APP_CLOUDINARY_API_SECRET;
+
+    const formData = new FormData();
+      formData.append('upload_preset', process.env.REACT_APP_CLOUDINARY_PHOTO_PROFILE_PRESET);
+      formData.append('public_id', userMetadata.uid);
+      formData.append('timestamp', nowDateTime);
+      formData.append('api_key', process.env.REACT_APP_CLOUDINARY_API_KEY);
+      formData.append('signature', sha1(signature));
+      formData.append('file', newPhotoProfile.fileObject);
+
+      axios
+        .post(urlUploadRequest, formData, {})
+        .then((response) => {
+          const userData = {
+            photoURL: response.data.secure_url,
+            publicID: response.data.public_id
+          };
+
+          axios
+            .put(`${API_SERVICE_URL}auth/update/${userMetadata.uid}`, userData)
+            .then(() => {
+              this.inputPhotoProfile.value = "";
+
+              this.setState({
+                userMetadata: {
+                  ...this.state.userMetadata,
+                  photoProfileUrl: response.data.secure_url,
+                },
+                newPhotoProfile: {
+                  fileObject: null,
+                  fileName: '',
+                  preview: null
+                },
+                uploadingPhotoProfile: false,
+              }, () => {
+                Swal('Success!', 'Photo profile uploaded successfully', 'success');
+              });
+            })
+        })
+        .catch((error) => {
+          console.error(error);
+        });
   }
 
   togglePassword = () => {
@@ -226,13 +330,67 @@ class DetailsForm extends React.Component {
     })
   }
 
-  render() {
-      let { countries } = this.props;
-      const { photographer, userMetadata, userAuth } = this.state;
+  handleCountryChange = (selectedChoice) => {
+    if (selectedChoice) {
+      let { countriesData: {currencies} } = this.props;
+      this.setState({
+        userMetadata: {
+          ...this.state.userMetadata,
+          country: selectedChoice.value,
+          countryName: selectedChoice.label,
+          currency: currencies[selectedChoice.value],
+          phoneDialCode: selectedChoice.phoneDialCode
+        },
+        countryExt: {
+          ...this.state.countryExt,
+          continent: selectedChoice.continent
+        },
+      });
+    }
+  }
 
-      let phoneDialCode = countries.find(item => {
-        return item.value === userMetadata.phoneDialCode
-      }) || [];
+  getCities = (input) => {
+    if (!input) {
+      return Promise.resolve({ options: [] });
+    }
+
+    let urlApi = `${process.env.REACT_APP_API_HOSTNAME}/api/cities/`;
+    urlApi += `?countryCode=${this.state.userMetadata.country}`;
+    urlApi += `&continent=${this.state.countryExt.continent}`;
+    urlApi += `&kwd=${input}`;
+
+    return fetch(urlApi)
+      .then(response => response.json())
+      .then(results => {
+        return results.data;
+      });
+  };
+
+  handleCityChange = (selectedChoice) => {
+    if (selectedChoice) {
+      this.setState({
+        userMetadata: {
+          ...this.state.userMetadata,
+          locationAdmLevel1: selectedChoice.adm1,
+          locationAdmLevel2: selectedChoice.value
+        }
+      });
+    }
+  }
+
+  getSelectValue = (value, options) => {
+    return options.find(item => {
+      return item.value === value;
+    })
+  }
+
+  render() {
+      let { countriesData: { countries } } = this.props;
+      const { photographer, userMetadata, userAuth, newPhotoProfilePreview } = this.state;
+
+      const city = userMetadata.locationAdmLevel2 && userMetadata.locationAdmLevel2
+        ? { value: userMetadata.locationAdmLevel2, label: userMetadata.locationAdmLevel2 }
+        : null;
 
       return (
           <Row>
@@ -264,7 +422,7 @@ class DetailsForm extends React.Component {
                       type="text"
                       id="displayName"
                       name="displayName"
-                      value={userMetadata.displayName || ""}
+                      value={userMetadata.displayName}
                       placeholder=""
                       onChange={this.handleChange}
                     />
@@ -280,7 +438,7 @@ class DetailsForm extends React.Component {
                       type="email"
                       id="email"
                       name="email"
-                      value={userMetadata.email || ""}
+                      value={userMetadata.email}
                       placeholder=""
                       onChange={this.handleChange}
                     />
@@ -289,15 +447,16 @@ class DetailsForm extends React.Component {
 
                 <FormGroup row>
                   <Col md="3">
-                    <Label htmlFor="countryName">Country</Label>
+                    <Label htmlFor="country">Country</Label>
                   </Col>
                   <Col xs="12" md="9">
                     <Select
-                      name="countryName"
-                      value={userMetadata.countryName || ""}
-                      options={[]}
+                      id="country"
+                      name="country"
+                      value={this.getSelectValue(userMetadata.country, countries)}
+                      options={countries}
                       clearable={false}
-                      onChange={this.handleChange}
+                      onChange={this.handleCountryChange}
                     />
                   </Col>
                 </FormGroup>
@@ -307,29 +466,17 @@ class DetailsForm extends React.Component {
                     <Label htmlFor="locationMerge">City</Label>
                   </Col>
                   <Col xs="12" md="9">
-                    <Input
-                      type="text"
-                      id="locationMerge"
-                      name="locationMerge"
-                      value={userMetadata.locationMerge || ""}
-                      placeholder="Insert address"
-                      onChange={this.handleChange}
-                    />
-                  </Col>
-                </FormGroup>
-
-                <FormGroup row>
-                  <Col md="3">
-                    <Label htmlFor="phoneNumber">Dial Code</Label>
-                  </Col>
-                  <Col xs="12" md="9">
-                    <Select
-                      name="phoneDialCode"
-                      options={countries}
-                      clearable={false}
-                      isSearchable={true}
-                      value={phoneDialCode}
-                      onChange={this.handleChange}
+                    <AsyncSelect
+                      multi={false}
+                      cacheOptions
+                      value={city}
+                      onChange={this.handleCityChange}
+                      valueKey="value"
+                      labelKey="label"
+                      loadOptions={this.getCities}
+                      placeholder={userMetadata.country ? "Search and choose your city" : "Please select a country first"}
+                      isDisabled={!userMetadata.country}
+                      filterOption={() => (true)}
                     />
                   </Col>
                 </FormGroup>
@@ -339,14 +486,19 @@ class DetailsForm extends React.Component {
                     <Label htmlFor="phoneNumber">Phone Number</Label>
                   </Col>
                   <Col xs="12" md="9">
-                    <Input
-                      type="number"
-                      id="phoneNumber"
-                      name="phoneNumber"
-                      value={userMetadata.phoneNumber || ""}
-                      placeholder="Insert phone"
-                      onChange={this.handleChange}
-                    />
+                    <InputGroup>
+                      <InputGroupAddon addonType="prepend">
+                        {userMetadata.phoneDialCode || "-"}
+                      </InputGroupAddon>
+                      <Input
+                        type="number"
+                        id="phoneNumber"
+                        name="phoneNumber"
+                        value={userMetadata.phoneNumber}
+                        placeholder="Insert phone"
+                        onChange={this.handleChange}
+                      />
+                    </InputGroup>
                   </Col>
                 </FormGroup>
 
@@ -375,6 +527,7 @@ class DetailsForm extends React.Component {
                   </Col>
                   <Col xs="12" md="9">
                     <CreatableSelect
+                      id="languages"
                       value={
                         'languages' in photographer
                           ? photographer.languages.map(item => {
@@ -501,16 +654,25 @@ class DetailsForm extends React.Component {
             <Card>
               <CardImg top width="100%" 
                 style={{maxHeight: 425}}
-                src={userMetadata.photoProfileUrl || defaultUserPhoto} 
+                src={this.state.newPhotoProfile.preview || (userMetadata.photoProfileUrl || defaultUserPhoto)} 
                 alt={userMetadata.displayName || "User Default"}
               />
               <CardBody>
               <FormGroup>
                 <Label for="exampleFile">Change Photo:</Label>
-                <Input type="file" name="file" id="exampleFile" />
+                <Input 
+                  ref={ref => this.inputPhotoProfile = ref}
+                  onChange={this.handleBrowserPhotoProfile} 
+                  type="file"
+                  name=""
+                />
               </FormGroup>
-              <Button color="primary">
-                Upload
+              <Button 
+                color="primary"
+                disabled={this.state.uploadingPhotoProfile} 
+                onClick={this.handleUploadPhotoProfile}
+              >
+                {this.state.uploadingPhotoProfile ? "Uploading photo profile..." : "Upload"}
               </Button>
               </CardBody>
             </Card>
@@ -525,7 +687,11 @@ class DetailsForm extends React.Component {
   }
 }
 
-export default DetailsForm;
+const mapsStateToProps = (store) => ({
+  countriesData: selectCountries(store.commons.countries)
+});
+
+export default connect(mapsStateToProps)(DetailsForm);
 
 const LANGUAGES =  [
   "English",

@@ -5,9 +5,7 @@ import { Link } from 'react-router-dom'
 import axios from 'axios'
 import moment from 'moment'
 import 'moment/locale/id'
-// import map from 'lodash/map'
 import 'react-table/react-table.css'
-// import { database } from "../services/database"
 
 class Users extends Component {
   constructor() {

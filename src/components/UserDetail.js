@@ -1,4 +1,5 @@
-import React, { Component } from 'react'
+import React, { Component } from 'react';
+import { connect } from 'react-redux';
 import {
   Card,
   CardHeader,
@@ -40,6 +41,8 @@ import MeetingPointForm from './PhotographersManage/MeetingPointForm';
 import UnavailableTimeForm from './PhotographersManage/UnavailableTimeForm';
 import ReservationHistory from './PhotographersManage/ReservationHistory';
 import SendMessageForm from './commons/SendMessageForm';
+
+import { fetchCountries } from '../store/actions/CommonAction';
 
 const MAX_TEXT_LENGTH = 5000;
 const API_SERVICE_URL = process.env.REACT_APP_API_HOSTNAME + "/api/";
@@ -105,7 +108,6 @@ class UserDetail extends Component {
           blockedDate: null,
         },
       },
-      title: '',
       loading: false,
       reasonBlockLength: MAX_TEXT_LENGTH,
       aboutCharLeft: MAX_TEXT_LENGTH,
@@ -118,27 +120,34 @@ class UserDetail extends Component {
   }
 
   componentDidMount() {
-    if ('id' in this.props.match.params) {
-      this.setState({
-        title: this.props.match.params.type + ' Detail',
-      })
-      this.fetchCountries().then(() => {
+    this.setState({
+      loading: true,
+    });
+
+    this.props.fetchCountries().then(() => {
+      if (this.isEditMode()) {
         this.fetchUser(this.props.match.params.type, this.props.match.params.id);
-      })
-    } else {
-      this.fetchCountries().then(() => {
+      } else {
         this.setState({
-          title: 'Manage ' + this.props.match.params.type + " - Add New Data",
           loading: false
         })
-      });
+      }
+    })
+  }
+
+  getTitle = () => {
+    if (this.isEditMode()) {
+      return this.props.match.params.type + ' Detail';
+    } else {
+      return 'Manage ' + this.props.match.params.type + " - Add New Data";
     }
   }
 
   fetchUser(type, id) {
-    const url = type === USER_TYPE.TRAVELLER ? 'users' : 'photographers'
+
+    const url = (type === USER_TYPE.TRAVELLER) ? 'users' : 'photographers';
+
     axios.get(`${API_SERVICE_URL + url}/${id}`).then(response => {
-      // console.log("fetch " + type, response.data);
       if (type === USER_TYPE.TRAVELLER)
         this.setState({
           user: response.data,
@@ -165,20 +174,6 @@ class UserDetail extends Component {
     })
   }
 
-  fetchCountries() {
-    this.setState({
-      loading: true,
-    })
-
-    return axios.get(`${process.env.REACT_APP_API_HOSTNAME}/api/countries`).then(response => {
-      if (response.data) {
-        this.setState({
-          countries: response.data,
-        })
-      }
-    })
-  }
-
   toggle(tab) {
     if (this.state.activeTab !== tab) {
       this.setState({
@@ -194,7 +189,9 @@ class UserDetail extends Component {
     }
   }
 
-  isEditMode = () => {}
+  isEditMode = () => {
+    return ('id' in this.props.match.params);
+  }
 
   isPhotographers = () => {
     return (this.props.match.params.type === USER_TYPE.PHOTOGRAPHER);
@@ -394,9 +391,9 @@ class UserDetail extends Component {
     })
   }
 
-  handleSubmitDetail = (userMetadata, photographer, userAuth) => {
-    if (userAuth) {
-      axios.put(`${API_SERVICE_URL}auth/update/${userMetadata.uid}`, userAuth);
+  handleSubmitDetail = (userMetadata, photographer, userData) => {
+    if (userData) {
+      axios.put(`${API_SERVICE_URL}auth/update/${userMetadata.uid}`, userData);
     }
 
     if (this.isPhotographers()) {
@@ -986,7 +983,7 @@ class UserDetail extends Component {
             <Card>
               <CardHeader>
                 <h3>
-                  <strong>{this.state.title}</strong>
+                  <strong>{this.getTitle()}</strong>
                 </h3>
               </CardHeader>
               <CardBody>
@@ -1011,4 +1008,6 @@ class UserDetail extends Component {
   }
 }
 
-export default UserDetail
+export default connect(null, {
+  fetchCountries
+})(UserDetail);
