@@ -1,6 +1,13 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router'
+import axios from 'axios';
+import sha1 from 'js-sha1';
+import Swal from 'sweetalert2';
+import Select from 'react-select';
+import AsyncSelect from 'react-select/lib/Async';
+import CreatableSelect from 'react-select/lib/Creatable';
+import moment from 'moment';
 
 import {
   Card,
@@ -18,14 +25,6 @@ import {
   InputGroup,
   InputGroupAddon
 } from 'reactstrap';
-import axios from 'axios';
-import sha1 from 'js-sha1';
-import Swal from 'sweetalert2';
-
-import Select from 'react-select';
-import AsyncSelect from 'react-select/lib/Async';
-import CreatableSelect from 'react-select/lib/Creatable'
-import moment from 'moment';
 
 import defaultUserPhoto from '../../assets/img/avatar/user_default.png';
 import ManageSaveButton from '../commons/ManageSaveButton';
@@ -33,6 +32,7 @@ import ManageSaveButton from '../commons/ManageSaveButton';
 import { selectCountries } from '../../store/selector/countries';
 
 import { USER_TYPE } from '../../constants/user';
+import { LANGUAGES } from '../../constants/commons';
 
 const MAX_TEXT_LENGTH = 5000;
 const API_SERVICE_URL = process.env.REACT_APP_API_HOSTNAME + "/api/";
@@ -246,7 +246,6 @@ class DetailsForm extends React.Component {
     } else {
       this.setState({displayBlockedReason: userMetadata.reason});
     }
-
     return userMetadata;
   }
 
@@ -727,40 +726,3 @@ const mapsStateToProps = (store) => ({
 });
 
 export default connect(mapsStateToProps)(withRouter(DetailsForm));
-
-const LANGUAGES =  [
-  "English",
-  "Thai",
-  "Vietnamese",
-  "Tagalog",
-  "Korean",
-  "Japanese",
-  "Mandarin",
-  "Burmese",
-  "Malay",
-  "Bahasa Indonesia",
-  "Spanish",
-  "Portuguese",
-  "Russian",
-  "German",
-  "French",
-  "Italian",
-  "Turkish",
-  "Polish",
-  "Ukrainian",
-  "Romanian",
-  "Dutch",
-  "Croatian",
-  "Hungarian",
-  "Greek",
-  "Czech",
-  "Swedish",
-  "Hindi",
-  "Arabic",
-  "Bengali",
-  "Punjabi",
-  "Tamil",
-  "Urdu",
-  "Gujarati",
-  "Persian"
-];

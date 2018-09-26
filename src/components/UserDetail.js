@@ -10,24 +10,13 @@ import {
   NavItem,
   NavLink,
   TabContent,
-  TabPane,
-  Form,
-  FormGroup,
-  FormText,
-  Label,
-  Input,
-} from 'reactstrap'
-import { CountryDropdown } from 'react-country-region-selector'
-import SelectCurrency from 'react-select-currency'
-import axios from 'axios'
-import classnames from 'classnames'
-import ReactTable from 'react-table'
-import 'react-table/react-table.css'
-import CreatableSelect from 'react-select/lib/Creatable'
+  TabPane
+} from 'reactstrap';
+import axios from 'axios';
+import classnames from 'classnames';
+import 'react-table/react-table.css';
 
-import Swal from 'sweetalert2'
-import moment from 'moment'
-import 'moment/locale/id'
+import Swal from 'sweetalert2';
 import uuidv4 from 'uuid/v4'
 import qs from 'query-string';
 
@@ -41,6 +30,9 @@ import MeetingPointForm from './PhotographersManage/MeetingPointForm';
 import UnavailableTimeForm from './PhotographersManage/UnavailableTimeForm';
 import ReservationHistory from './PhotographersManage/ReservationHistory';
 import SendMessageForm from './commons/SendMessageForm';
+
+import TravellerDetailsForm from './TravellerManage/DetailsForm';
+import TravellerReservcationHistory from './TravellerManage/ReservationHistory';
 
 import { fetchCountries } from '../store/actions/CommonAction';
 
@@ -64,10 +56,6 @@ class UserDetail extends Component {
         currency: '',
         language: '',
         enable: 0,
-
-        // for photographer user
-
-
       },
       photographer: {
         cameraEquipment: {
@@ -87,13 +75,6 @@ class UserDetail extends Component {
         packagesPrice: [],
         photosPortofolio: [],
         selfDescription: '',
-        // serviceReviews: {
-        //   impressions: [],
-        //   rating: {
-        //     label: '',
-        //     value: 0,
-        //   },
-        // },
         userMetadata: {
           uid: '',
           displayName: '',
@@ -111,7 +92,6 @@ class UserDetail extends Component {
       loading: false,
       reasonBlockLength: MAX_TEXT_LENGTH,
       aboutCharLeft: MAX_TEXT_LENGTH,
-      countries: [],
       isSubmitting: false,
       addingPortofolio: false,
       deletingPortofolio: false
@@ -409,6 +389,15 @@ class UserDetail extends Component {
       }, () => {
         this.handleSubmit();
       })
+    } else {
+      this.setState({
+        user: {
+          ...this.state.user,
+          ...userMetadata
+        }
+      }, () => {
+        this.handleSubmit();
+      })
     }
 
   } 
@@ -490,7 +479,10 @@ class UserDetail extends Component {
       }
 
       axios.put(`${process.env.REACT_APP_API_HOSTNAME}/api/users/${user.uid}`, user).then(response => {
-        Swal('Success!', response.data.message, 'success')
+        Swal('Success!', response.data.message, 'success');
+        this.setState({
+          isSubmitting: false
+        })
       })
     } 
     
@@ -527,49 +519,6 @@ class UserDetail extends Component {
   }
 
   renderTraveller() {
-    const historyColumns = [
-      {
-        Header: 'ID Reservation',
-        accessor: 'reservationId',
-      },
-      {
-        Header: 'ID Photographer',
-        accessor: 'photographerId',
-      },
-      {
-        Header: 'Date',
-        accessor: 'created',
-        Cell: row =>
-          moment(row.value)
-            .locale('id')
-            .format('lll'),
-      },
-      {
-        Header: 'Booking Date',
-        accessor: 'startDateTime',
-        Cell: row =>
-          moment(row.value)
-            .locale('id')
-            .format('lll'),
-      },
-      {
-        Header: 'Package',
-        accessor: 'packageId',
-        maxWidth: 80,
-      },
-      {
-        Header: 'Service Fee',
-        accessor: 'photographerFee',
-        maxWidth: 100,
-        Cell: row => 'Rp. ' + Number(row.value).toLocaleString('id'),
-      },
-      {
-        Header: 'Status',
-        accessor: 'status',
-        maxWidth: 120,
-      },
-    ]
-
     return (
       <div>
         <Nav tabs>
@@ -604,222 +553,16 @@ class UserDetail extends Component {
 
         <TabContent activeTab={this.state.activeTab}>
           <TabPane tabId="detail">
-            <Form action="" className="form-horizontal px-3">
-              <FormGroup row>
-                <Col md="3">
-                  <Label htmlFor="id">ID</Label>
-                </Col>
-                <Col xs="12" md="9">
-                  <Input type="text" id="id" name="id" placeholder={this.state.user.uid} disabled />
-                </Col>
-              </FormGroup>
-
-              <FormGroup row>
-                <Col md="3">
-                  <Label htmlFor="displayName">Name</Label>
-                </Col>
-                <Col xs="12" md="9">
-                  <Input
-                    type="text"
-                    id="displayName"
-                    name="displayName"
-                    value={this.state.user.displayName}
-                    placeholder=""
-                    onChange={this.handleChange}
-                  />
-                </Col>
-              </FormGroup>
-
-              <FormGroup row>
-                <Col md="3">
-                  <Label htmlFor="email">Email</Label>
-                </Col>
-                <Col xs="12" md="9">
-                  <Input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value={this.state.user.email}
-                    placeholder=""
-                    onChange={this.handleChange}
-                  />
-                </Col>
-              </FormGroup>
-
-              <FormGroup row>
-                <Col md="3">
-                  <Label htmlFor="country">Country</Label>
-                </Col>
-                <Col xs="12" md="9">
-                  <CountryDropdown
-                    id="country"
-                    name="country"
-                    classes="form-control"
-                    value={'country' in this.state.user ? this.state.user.country : ''}
-                    onChange={val => {
-                      const updatedUser = {
-                        ...this.state.user,
-                        country: val,
-                        countryName: val,
-                      }
-
-                      this.setState({
-                        user: updatedUser,
-                      })
-                    }}
-                  />
-                </Col>
-              </FormGroup>
-
-              <FormGroup row>
-                <Col md="3">
-                  <Label htmlFor="phoneNumber">Phone</Label>
-                </Col>
-                <Col xs="12" md="9">
-                  <Input
-                    type="number"
-                    id="phoneNumber"
-                    name="phoneNumber"
-                    value={this.state.user.phoneNumber}
-                    placeholder="Insert phone"
-                    onChange={this.handleChange}
-                  />
-                </Col>
-              </FormGroup>
-
-              <FormGroup row>
-                <Col md="3">
-                  <Label htmlFor="address">Address</Label>
-                </Col>
-                <Col xs="12" md="9">
-                  <Input
-                    type="text"
-                    id="address"
-                    name="address"
-                    value={this.state.user.address ? this.state.user.address : ''}
-                    placeholder="Insert address"
-                    onChange={this.handleChange}
-                  />
-                </Col>
-              </FormGroup>
-
-              <FormGroup row>
-                <Col md="3">
-                  <Label htmlFor="currency">Currency</Label>
-                </Col>
-                <Col xs="12" md="9">
-                  <SelectCurrency
-                    id="currency"
-                    name="currency"
-                    className="form-control"
-                    value={'currency' in this.state.user ? this.state.user.currency : ''}
-                    onChange={this.handleChange}
-                  />
-                </Col>
-              </FormGroup>
-
-              <FormGroup row>
-                <Col md="3">
-                  <Label htmlFor="language">Language</Label>
-                </Col>
-                <Col xs="12" md="9">
-                  <CreatableSelect
-                    value={
-                      'languages' in this.state.user
-                        ? this.state.user.languages.map(item => {
-                            return { value: item, label: item }
-                          })
-                        : ''
-                    }
-                    onChange={selected => {
-                      const arrSelected = selected.map(item => {
-                        return item.value
-                      })
-
-                      const user = {
-                        ...this.state.user,
-                        languages: arrSelected,
-                      }
-
-                      this.setState({
-                        user: user,
-                      })
-                    }}
-                    allowCreate={true}
-                    isMulti
-                  />
-                </Col>
-              </FormGroup>
-
-              <FormGroup row>
-                <Col md="9">
-                  <Row>
-                    <Col md="4">
-                      <Label htmlFor="enable">Status</Label>
-                    </Col>
-                    <Col xs="12" md="8">
-                      <Input
-                        type="select"
-                        id="enable"
-                        name="enable"
-                        value={this.state.user.enable}
-                        onChange={this.handleChange}>
-                        <option value="1">Active</option>
-                        <option value="0">Blocked</option>
-                      </Input>
-                    </Col>
-                  </Row>
-                </Col>
-                <Col md="3">
-                  {Number(this.state.user.enable) === 0 && (
-                    <span>
-                      <p>
-                        <strong>
-                          {moment('blocked' in this.state.user ? this.state.user.blocked : {})
-                            .locale('id')
-                            .format('lll')}
-                        </strong>
-                      </p>
-                      <p>{'reason' in this.state.user ? this.state.user.reason : '-'}</p>
-                    </span>
-                  )}
-                </Col>
-              </FormGroup>
-
-              {Number(this.state.user.enable) === 0 && (
-                <FormGroup row>
-                  <Col md="3">
-                    <Label htmlFor="reason">Reason</Label>
-                  </Col>
-                  <Col xs="12" md="9">
-                    <Input
-                      type="textarea"
-                      id="reason"
-                      name="reason"
-                      maxLength={MAX_TEXT_LENGTH}
-                      onChange={this.handleChange}
-                    />
-                    <FormText className="help-block">Max. {this.state.reasonBlockLength} character</FormText>
-                  </Col>
-                </FormGroup>
-              )}
-            </Form>
+            <TravellerDetailsForm
+              traveller={this.state.user}
+              onSubmit={this.handleSubmitDetail}
+              isSubmitting={this.state.isSubmitting}
+            />
           </TabPane>
 
           <TabPane tabId="history">
-            <ReactTable
-              className="-striped -hightlight"
-              columns={historyColumns}
-              sortable={true}
-              defaultSorted={[
-                {
-                  id: 'startDateTime',
-                  desc: true,
-                },
-              ]}
-              defaultPageSize={10}
-              data={this.state.user.reservationHistory}
-              loading={this.state.loading}
+            <TravellerReservcationHistory
+              reservationHistory={this.state.user.reservationHistory}
             />
           </TabPane>
 
@@ -925,7 +668,6 @@ class UserDetail extends Component {
           <TabPane tabId="detail">
               <PhotographerDetailsForm 
                 photographer={this.state.photographer}
-                countries={this.state.countries}
                 onSubmit={this.handleSubmitDetail}
                 isSubmitting={this.state.isSubmitting}
               />
