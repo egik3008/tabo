@@ -846,6 +846,7 @@ class UserDetail extends Component {
           </NavItem>
           <NavItem>
             <NavLink
+              disabled={!this.isEditMode()}
               className={classnames({ active: this.state.activeTab === 'equipment' })}
               onClick={() => {
                 this.toggle('equipment')
@@ -855,6 +856,7 @@ class UserDetail extends Component {
           </NavItem>
           <NavItem>
             <NavLink
+              disabled={!this.isEditMode()}
               className={classnames({ active: this.state.activeTab === 'package' })}
               onClick={() => {
                 this.toggle('package')
@@ -864,6 +866,7 @@ class UserDetail extends Component {
           </NavItem>
           <NavItem>
             <NavLink
+              disabled={!this.isEditMode()}
               className={classnames({ active: this.state.activeTab === 'meeting-point' })}
               onClick={() => {
                 this.toggle('meeting-point')
@@ -873,6 +876,7 @@ class UserDetail extends Component {
           </NavItem>
           <NavItem>
             <NavLink
+              disabled={!this.isEditMode()}
               className={classnames({ active: this.state.activeTab === 'unavailable-time' })}
               onClick={() => {
                 this.toggle('unavailable-time')
@@ -882,6 +886,7 @@ class UserDetail extends Component {
           </NavItem>
           <NavItem>
             <NavLink
+              disabled={!this.isEditMode()}
               className={classnames({ active: this.state.activeTab === 'portfolio' })}
               onClick={() => {
                 this.toggle('portfolio')
@@ -889,24 +894,31 @@ class UserDetail extends Component {
               Portfolio
             </NavLink>
           </NavItem>
-          <NavItem>
-            <NavLink
-              className={classnames({ active: this.state.activeTab === 'history' })}
-              onClick={() => {
-                this.toggle('history')
-              }}>
-              History
-            </NavLink>
-          </NavItem>
-          <NavItem>
-            <NavLink
-              className={classnames({ active: this.state.activeTab === 'messages' })}
-              onClick={() => {
-                this.toggle('messages')
-              }}>
-              Messages
-            </NavLink>
-          </NavItem>
+
+          {
+            this.isEditMode() && (
+              <React.Fragment>
+                <NavItem>
+                  <NavLink
+                    className={classnames({ active: this.state.activeTab === 'history' })}
+                    onClick={() => {
+                      this.toggle('history')
+                    }}>
+                    History
+                  </NavLink>
+                </NavItem>
+                <NavItem>
+                  <NavLink
+                    className={classnames({ active: this.state.activeTab === 'messages' })}
+                    onClick={() => {
+                      this.toggle('messages')
+                    }}>
+                    Messages
+                  </NavLink>
+                </NavItem>   
+              </React.Fragment>
+            )
+          }
         </Nav>
 
         <TabContent activeTab={this.state.activeTab}>
@@ -961,15 +973,21 @@ class UserDetail extends Component {
                 />
           </TabPane>
 
-          <TabPane tabId="history">
-            <ReservationHistory
-              photographer={this.state.photographer}
-            />
-          </TabPane>
+          {
+            this.isEditMode() && (
+              <React.Fragment>
+                <TabPane tabId="history">
+                <ReservationHistory
+                  photographer={this.state.photographer}
+                />
+              </TabPane>
 
-          <TabPane tabId="messages">
-            <SendMessageForm />
-          </TabPane>
+              <TabPane tabId="messages">
+                <SendMessageForm />
+              </TabPane>  
+              </React.Fragment>
+            )
+          }
         </TabContent>
       </div>
     )

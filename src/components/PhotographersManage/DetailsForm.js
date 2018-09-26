@@ -1,5 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
+import { withRouter } from 'react-router'
+
 import {
   Card,
   CardBody,
@@ -30,6 +32,8 @@ import ManageSaveButton from '../commons/ManageSaveButton';
 
 import { selectCountries } from '../../store/selector/countries';
 
+import { USER_TYPE } from '../../constants/user';
+
 const MAX_TEXT_LENGTH = 5000;
 const API_SERVICE_URL = process.env.REACT_APP_API_HOSTNAME + "/api/";
 
@@ -59,7 +63,7 @@ class DetailsForm extends React.Component {
     },
     photographer: {
       selfDescription: '',
-      languages: []
+      languages: [],
     },
     countryExt: {
       continent: '',
@@ -75,6 +79,7 @@ class DetailsForm extends React.Component {
     aboutCharLeft: MAX_TEXT_LENGTH,
     changePassword: false,
     uploadingPhotoProfile: false,
+    submittingNewUser: false,
   }
 
   setDefaultState = (photographer) => {
@@ -181,15 +186,41 @@ class DetailsForm extends React.Component {
       userAuth = { password };
     }
 
-    userMetadata = this.checkIfUserStatusChange();
-
     const locationMerge = [userMetadata.locationAdmLevel2, userMetadata.locationAdmLevel1]
       .filter((item) => item)
       .join(', ')
       .concat(', ' + userMetadata.countryName);
 
     userMetadata.locationMerge = locationMerge;
-    this.props.onSubmit(userMetadata, photographer, userAuth);
+    photographer.location = {
+      country: userMetadata.country,
+      countryName: userMetadata.countryName,
+      locationAdmLevel1: userMetadata.locationAdmLevel1,
+      locationAdmLevel2: userMetadata.locationAdmLevel2,
+      locationMerge: userMetadata.locationMerge
+    };
+
+    if (this.isEditMode()) {
+      userMetadata = this.checkIfUserStatusChange();
+      this.props.onSubmit(userMetadata, photographer, userAuth);
+    } else {
+      // create new data
+
+      this.setState({submittingNewUser: true});
+      axios
+      .post(API_SERVICE_URL + "users", {
+        ...userMetadata,
+        ...photographer,
+        password: userAuth.password,
+        userType: USER_TYPE.PHOTOGRAPHER
+      })
+      .then((response) => {
+        Swal('Success!', response.data.message, 'success');
+        this.setState({submittingNewUser: false}, () => {
+          this.props.history.push('/users/' + USER_TYPE.PHOTOGRAPHER + "/" + response.data.uid);
+        });
+      })
+    }
 
   }
 
@@ -234,6 +265,7 @@ class DetailsForm extends React.Component {
       });
     }
   }
+
   handleUploadPhotoProfile = () => {
     this.setState({uploadingPhotoProfile: true});
 
@@ -386,7 +418,7 @@ class DetailsForm extends React.Component {
 
   render() {
       let { countriesData: { countries } } = this.props;
-      const { photographer, userMetadata, userAuth, newPhotoProfilePreview } = this.state;
+      const { photographer, userMetadata, userAuth } = this.state;
 
       const city = userMetadata.locationAdmLevel2 && userMetadata.locationAdmLevel2
         ? { value: userMetadata.locationAdmLevel2, label: userMetadata.locationAdmLevel2 }
@@ -394,7 +426,7 @@ class DetailsForm extends React.Component {
 
       return (
           <Row>
-            <Col md="7">
+            <Col md={this.isEditMode() ? 7 : "9"}>
               <Form action="" className="form-horizontal px-3">
                 {this.isEditMode() && (
                   <FormGroup row>
@@ -650,37 +682,40 @@ class DetailsForm extends React.Component {
               </Form>
             </Col>
 
-            <Col md="5">
-            <Card>
-              <CardImg top width="100%" 
-                style={{maxHeight: 425}}
-                src={this.state.newPhotoProfile.preview || (userMetadata.photoProfileUrl || defaultUserPhoto)} 
-                alt={userMetadata.displayName || "User Default"}
-              />
-              <CardBody>
-              <FormGroup>
-                <Label for="exampleFile">Change Photo:</Label>
-                <Input 
-                  ref={ref => this.inputPhotoProfile = ref}
-                  onChange={this.handleBrowserPhotoProfile} 
-                  type="file"
-                  name=""
-                />
-              </FormGroup>
-              <Button 
-                color="primary"
-                disabled={this.state.uploadingPhotoProfile} 
-                onClick={this.handleUploadPhotoProfile}
-              >
-                {this.state.uploadingPhotoProfile ? "Uploading photo profile..." : "Upload"}
-              </Button>
-              </CardBody>
-            </Card>
-            </Col>
-
+            {
+              this.isEditMode() && (
+                <Col md="5">
+                  <Card>
+                    <CardImg top width="100%" 
+                      style={{maxHeight: 425}}
+                      src={this.state.newPhotoProfile.preview || (userMetadata.photoProfileUrl || defaultUserPhoto)} 
+                      alt={userMetadata.displayName || "User Default"}
+                    />
+                    <CardBody>
+                    <FormGroup>
+                      <Label for="exampleFile">Change Photo:</Label>
+                      <Input 
+                        ref={ref => this.inputPhotoProfile = ref}
+                        onChange={this.handleBrowserPhotoProfile} 
+                        type="file"
+                        name=""
+                      />
+                    </FormGroup>
+                    <Button 
+                      color="primary"
+                      disabled={this.state.uploadingPhotoProfile} 
+                      onClick={this.handleUploadPhotoProfile}
+                    >
+                      {this.state.uploadingPhotoProfile ? "Uploading photo profile..." : "Upload"}
+                    </Button>
+                    </CardBody>
+                  </Card>
+                </Col>
+              )
+            }
             <ManageSaveButton
               onClick={this.handleSubmit}
-              isSubmitting={this.props.isSubmitting}
+              isSubmitting={this.props.isSubmitting || this.state.submittingNewUser}
             />
           </Row>
       );
@@ -691,7 +726,7 @@ const mapsStateToProps = (store) => ({
   countriesData: selectCountries(store.commons.countries)
 });
 
-export default connect(mapsStateToProps)(DetailsForm);
+export default connect(mapsStateToProps)(withRouter(DetailsForm));
 
 const LANGUAGES =  [
   "English",
