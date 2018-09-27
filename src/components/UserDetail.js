@@ -22,6 +22,7 @@ import qs from 'query-string';
 
 import * as API from './../services/api';
 import { USER_TYPE } from '../constants/user';
+import LoadingAnimation from './commons/LoadingAnimation';
 import PackageForm from './PhotographersManage/PackageForm'
 import PhotographerDetailsForm from './PhotographersManage/DetailsForm';
 import PhotographerEquipmentForm from './PhotographersManage/EquipmentForm';
@@ -754,10 +755,7 @@ class UserDetail extends Component {
                     this.renderPhotographer()
                   )
                 ) : (
-                  <div className="row justify-content-center align-items-center" style={{ height: '100vh' }}>
-                    <i className="fa fa-spinner fa-spin fa-5x fa-fw" />
-                    <span className="sr-only">Loading...</span>
-                  </div>
+                  <LoadingAnimation />
                 )}
               </CardBody>
             </Card>

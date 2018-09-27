@@ -142,9 +142,9 @@ class Users extends Component {
             .locale('id')
             .format('lll'),
         filterMethod: (filter, row) => {
-          const dateString = moment(row.created)
+          const dateString = row.created ? moment(row.created)
             .locale('id')
-            .format('lll')
+            .format('lll') : "-";
           return String(dateString.toLowerCase()).includes(filter.value.toLowerCase())
         },
       },
@@ -160,9 +160,9 @@ class Users extends Component {
             : '-'
         },
         filterMethod: (filter, row) => {
-          const dateString = moment(row.updated)
+          const dateString = row.updated ? moment(row.updated)
             .locale('id')
-            .format('lll')
+            .format('lll'): '-';
           return String(dateString.toLowerCase()).includes(filter.value.toLowerCase())
         },
       },
@@ -186,7 +186,7 @@ class Users extends Component {
         Filter: ({ filter, onChange }) => (
           <select
             onChange={event => onChange(event.target.value)}
-            style={{ width: '100%' }}
+            style={{ width: '100%', height: '100%' }}
             value={filter ? filter.value : 'all'}>
             <option value="all">Show All</option>
             <option value="1">Active</option>

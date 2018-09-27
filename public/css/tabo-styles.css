@@ -43,6 +43,25 @@
     color: red;
 }
 
+.reservation-detail-header {
+    border: 0.5px solid;
+    padding: 10px 20px;
+    margin-bottom: 15px;
+    background-color: lightgray;
+}
+
+.reservation-detail-body {
+    padding: 10px 20px;
+}
+
+.reservation-detail-content {
+    padding-left: 20px;
+}
+
+.reservation-detail-subtitle {
+    margin-left: 20px;
+}
+
 @media (max-width: 480px) {
     
 }

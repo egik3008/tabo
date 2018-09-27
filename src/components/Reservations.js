@@ -5,7 +5,9 @@ import { Link } from 'react-router-dom'
 import axios from 'axios'
 import moment from 'moment'
 import 'moment/locale/id'
-import 'react-table/react-table.css'
+import 'react-table/react-table.css';
+
+import STATUS from '../constants/reservations';
 
 class Reservations extends Component {
   constructor() {
@@ -58,8 +60,18 @@ class Reservations extends Component {
       },
       {
         Header: 'Album Delivered',
-        accessor: 'albumDelivered',
-        Cell: row => (row.value === 'Y' ? 'Yes' : 'No'),
+        id: 'albumDelivered',
+        // accessor: 'albumDelivered',
+        accessor: d => {
+          if (d.albumDelivered === 'Y') {
+            if (d.updated) {
+              return moment(d.updated).locale('id').format("DD/MM/YYYY")
+            }
+            return "-"
+          }
+          return "-";
+        },
+        // Cell: row => (row.value === 'Y' ? 'Yes' : 'No'),
       },
       {
         Header: 'Traveler',
@@ -96,9 +108,9 @@ class Reservations extends Component {
             : '-'
         },
         filterMethod: (filter, row) => {
-          const dateString = moment(row.updated)
+          const dateString = row.updated ? moment(row.updated)
             .locale('id')
-            .format('lll')
+            .format('lll') : '-';
           return String(dateString.toLowerCase()).includes(filter.value.toLowerCase())
         },
       },
@@ -124,19 +136,21 @@ class Reservations extends Component {
             return true
           }
 
-          if (filter.value === 'PAID') return row[filter.id] === 'PAID'
-          else if (filter.value === 'UNPAID') return row[filter.id] === 'UNPAID'
-          else if (filter.value === 'COMPLETED') return row[filter.id] === 'COMPLETED'
+          if (filter.value === STATUS.RESERVATION_PAID) return row[filter.id] === STATUS.RESERVATION_PAID
+          else if (filter.value === STATUS.RESERVATION_UNPAID) return row[filter.id] === STATUS.RESERVATION_UNPAID
+          else if (filter.value === STATUS.RESERVATION_COMPLETED) return row[filter.id] === STATUS.RESERVATION_COMPLETED
+          else if (filter.value === STATUS.RESERVATION_PENDING) return row[filter.id] === STATUS.RESERVATION_PENDING
         },
         Filter: ({ filter, onChange }) => (
           <select
             onChange={event => onChange(event.target.value)}
-            style={{ width: '100%' }}
+            style={{ width: '100%', height: "100%" }}
             value={filter ? filter.value : 'all'}>
             <option value="all">Show All</option>
-            <option value="COMPLETED">Completed</option>
-            <option value="PAID">Paid</option>
-            <option value="UNPAID">Unpaid</option>
+            <option value={STATUS.RESERVATION_COMPLETED}>Completed</option>
+            <option value={STATUS.RESERVATION_PAID}>Paid</option>
+            <option value={STATUS.RESERVATION_PENDING}>Pending</option>
+            <option value={STATUS.RESERVATION_UNPAID}>Unpaid</option>
           </select>
         ),
       },
