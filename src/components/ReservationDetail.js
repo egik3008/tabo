@@ -15,6 +15,7 @@ class ReservationDetail extends Component {
       activeTab: 'detail',
       reservation: {
         albums: [],
+        albumDelivered: 'N',
         credit: 0,
         meetingPoints: {
           detail: {
@@ -55,7 +56,12 @@ class ReservationDetail extends Component {
   }
 
   isAlbumDelivered = () => {
-    this.state.reservation.albumDelivered === 'Y';
+    return this.state.reservation.albumDelivered === 'Y';
+  }
+
+  directToAlbum = (event) => {
+    event.preventDefault();
+    alert("will be available soon along with photo album..");
   }
 
   fetchReservation(id) {
@@ -65,7 +71,10 @@ class ReservationDetail extends Component {
 
     axios.get(`${process.env.REACT_APP_API_HOSTNAME}/api/reservations/${id}`).then(response => {
       this.setState({
-        reservation: response.data,
+        reservation: {
+          ...this.state.reservation,
+          ...response.data
+        },
         loading: false
       })
     })
@@ -117,7 +126,9 @@ class ReservationDetail extends Component {
                 </dd>
 
                 <dt className="col-sm-3">Photo Album ID</dt>
-                <dd className="col-sm-9">{this.props.match.params.id}</dd>
+                <dd className="col-sm-9">
+                  <a href="#" onClick={this.directToAlbum}>{this.props.match.params.id}</a>
+                </dd>
                 
                 <dt className="col-sm-3">Album Delivered</dt>
                 <dd className="col-sm-9">
@@ -179,11 +190,11 @@ class ReservationDetail extends Component {
             <hr className="mt-0 mb-1" />
             <dl className="row mb-2 reservation-detail-content">
               <dt className="col-sm-3">Subtotal</dt>
-              <dd className="col-sm-9">Rp. {this.state.reservation.photographerFeeIDR.toLocaleString('id')}</dd>
+              <dd className="col-sm-9">{this.state.reservation.travellerCurrency} {this.state.reservation.photographerFeeIDR.toLocaleString('id')}</dd>
 
               <dt className="col-sm-3">Service Fee</dt>
               <dd className="col-sm-9">
-                Rp.{' '}
+                {this.state.reservation.travellerCurrency + " "}
                 {(
                   this.state.reservation.totalPriceIDR - this.state.reservation.photographerFeeIDR
                 ).toLocaleString('id')}
@@ -193,11 +204,11 @@ class ReservationDetail extends Component {
               <dd className="col-sm-9">
                 {this.state.reservation.credit === 0
                   ? '-'
-                  : 'Rp. ' + this.state.reservation.credit.toLocaleString('id')}
+                  : this.state.reservation.travellerCurrency + this.state.reservation.credit.toLocaleString('id')}
               </dd>
 
               <dt className="col-sm-3">Total</dt>
-              <dd className="col-sm-9">Rp. {this.state.reservation.totalPriceIDR.toLocaleString('id')}</dd>
+              <dd className="col-sm-9">{this.state.reservation.travellerCurrency} {this.state.reservation.totalPriceIDR.toLocaleString('id')}</dd>
             </dl>
           </div>
           </TabPane>

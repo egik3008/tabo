@@ -226,7 +226,7 @@ class DetailsForm extends React.Component {
 
   checkIfUserStatusChange = () => {
     const { userMetadata, initialStatus } = this.state;
-    if (Number(userMetadata.enable) !== initialStatus) {
+    if (Number(userMetadata.enable) !== Number(initialStatus)) {
       if (Number(userMetadata.enable) === 0) {
         userMetadata.blockedDate = moment().format("DD/MM/YYYY");
         this.setState({
@@ -370,7 +370,10 @@ class DetailsForm extends React.Component {
           country: selectedChoice.value,
           countryName: selectedChoice.label,
           currency: currencies[selectedChoice.value],
-          phoneDialCode: selectedChoice.phoneDialCode
+          phoneDialCode: selectedChoice.phoneDialCode,
+          locationAdmLevel1: '',
+          locationAdmLevel2: '',
+          locationMerge: '',
         },
         countryExt: {
           ...this.state.countryExt,
@@ -419,8 +422,8 @@ class DetailsForm extends React.Component {
       let { countriesData: { countries } } = this.props;
       const { photographer, userMetadata, userAuth } = this.state;
 
-      const city = userMetadata.locationAdmLevel2 && userMetadata.locationAdmLevel2
-        ? { value: userMetadata.locationAdmLevel2, label: userMetadata.locationAdmLevel2 }
+      const city = userMetadata.locationAdmLevel2 ? 
+        { value: userMetadata.locationAdmLevel2, label: userMetadata.locationAdmLevel2 }
         : null;
 
       return (

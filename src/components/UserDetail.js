@@ -472,12 +472,8 @@ class UserDetail extends Component {
     this.setState({isSubmitting: true});
 
     if (this.isTraveller()) {
-      const { user } = this.state
-
-      if (Number(user.enable) === 1) {
-        user.reason = ''
-        user.blocked = {}
-      }
+      const user = this.state.user;
+      delete user['reservationHistory'];
 
       axios.put(`${process.env.REACT_APP_API_HOSTNAME}/api/users/${user.uid}`, user).then(response => {
         Swal('Success!', response.data.message, 'success');

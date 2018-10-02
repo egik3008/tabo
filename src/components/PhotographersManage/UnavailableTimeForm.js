@@ -49,11 +49,13 @@ class UnavailableTimeForm extends React.Component {
     }
     
     render () {
+      const today = new Date();
         return (
           <div className="col-sm-12">
             <div id="schedule" className="schedule-card">
               <DayPicker
                 selectedDays={this.state.selectedDays}
+                disabledDays={{ before: today }}
                 onDayClick={this.dayClickHandle}
               />
             </div>

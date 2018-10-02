@@ -168,6 +168,7 @@ class Reservations extends Component {
       },
     ]
 
+    console.log(this.state.reservations.data);
     return (
       <div className="animated fadeIn">
         <Row>
