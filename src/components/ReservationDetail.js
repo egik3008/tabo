@@ -87,7 +87,12 @@ class ReservationDetail extends Component {
         <br/>
         {moment(date).format('HH:mm:ss')}
       </React.Fragment>
-    ): '';
+    ): '-';
+  }
+
+  displayPriceFormat = (price) => {
+    const {currency} = this.state.reservation;
+    return `${currency} ${price}`;
   }
 
   render() {
@@ -133,6 +138,13 @@ class ReservationDetail extends Component {
                 <dt className="col-sm-3">Album Delivered</dt>
                 <dd className="col-sm-9">
                   {this.isAlbumDelivered() ? this.displayDateFormat(this.state.reservation.updated) : "-"}
+                </dd>
+
+                <dt className="col-sm-3">Photo of album</dt>
+                <dd className="col-sm-9">
+                  {this.isAlbumDelivered() ? 
+                    (Array.isArray(this.state.reservation.albums) ? this.state.reservation.albums.length : 0) 
+                    : "-"}
                 </dd>
               </dl>
             </div>
@@ -190,25 +202,23 @@ class ReservationDetail extends Component {
             <hr className="mt-0 mb-1" />
             <dl className="row mb-2 reservation-detail-content">
               <dt className="col-sm-3">Subtotal</dt>
-              <dd className="col-sm-9">{this.state.reservation.travellerCurrency} {this.state.reservation.photographerFeeIDR.toLocaleString('id')}</dd>
+              <dd className="col-sm-9">{this.displayPriceFormat(this.state.reservation.photographerFeeIDR)}</dd>
 
               <dt className="col-sm-3">Service Fee</dt>
               <dd className="col-sm-9">
-                {this.state.reservation.travellerCurrency + " "}
-                {(
-                  this.state.reservation.totalPriceIDR - this.state.reservation.photographerFeeIDR
-                ).toLocaleString('id')}
+                {this.displayPriceFormat(this.state.reservation.totalPriceIDR - this.state.reservation.photographerFeeIDR)}
               </dd>
 
               <dt className="col-sm-3">Credit</dt>
               <dd className="col-sm-9">
                 {this.state.reservation.credit === 0
                   ? '-'
-                  : this.state.reservation.travellerCurrency + this.state.reservation.credit.toLocaleString('id')}
+                  : this.displayPriceFormat(this.state.reservation.credit)
+                }
               </dd>
 
               <dt className="col-sm-3">Total</dt>
-              <dd className="col-sm-9">{this.state.reservation.travellerCurrency} {this.state.reservation.totalPriceIDR.toLocaleString('id')}</dd>
+              <dd className="col-sm-9">{this.displayPriceFormat(this.state.reservation.totalPriceIDR)}</dd>
             </dl>
           </div>
           </TabPane>
