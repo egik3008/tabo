@@ -23,7 +23,8 @@ import {
   CustomInput,
   Button,
   InputGroup,
-  InputGroupAddon
+  InputGroupAddon,
+  Progress
 } from 'reactstrap';
 
 import defaultUserPhoto from '../../assets/img/avatar/user_default.png';
@@ -71,7 +72,8 @@ class DetailsForm extends React.Component {
     newPhotoProfile: {
       fileObject: null,
       fileName: '',
-      preview: null
+      preview: null,
+      uploadProgress: 0
     },
     initialStatus: 1, // status user (active/blocked)
     displayBlockedReason: '',
@@ -226,8 +228,12 @@ class DetailsForm extends React.Component {
 
   checkIfUserStatusChange = () => {
     const { userMetadata, initialStatus } = this.state;
-    if (Number(userMetadata.enable) !== Number(initialStatus)) {
-      if (Number(userMetadata.enable) === 0) {
+    const currentUserStatus = Number(userMetadata.enable);
+    
+    // if the user status change
+    if (currentUserStatus !== Number(initialStatus)) {
+      // if user blocked
+      if (currentUserStatus === 0) {
         userMetadata.blockedDate = moment().format("DD/MM/YYYY");
         this.setState({
           initialStatus: 0,
@@ -235,12 +241,7 @@ class DetailsForm extends React.Component {
         });
       } else {
         this.setState({
-          initialStatus: 1,
-          userMetadata: {
-            ...userMetadata,
-            reason: ''
-          },
-          displayBlockedReason: ''
+          initialStatus: 1
         });
       }
     } else {
@@ -287,8 +288,18 @@ class DetailsForm extends React.Component {
       formData.append('signature', sha1(signature));
       formData.append('file', newPhotoProfile.fileObject);
 
+      const uploadConfig = {
+        onUploadProgress: (progressEvent) => {
+          const progress = Math.round( (progressEvent.loaded * 100) / progressEvent.total );
+          this.setState({ newPhotoProfile: {
+            ...this.state.newPhotoProfile,
+            uploadProgress: progress
+          }});
+        }
+      };
+
       axios
-        .post(urlUploadRequest, formData, {})
+        .post(urlUploadRequest, formData, uploadConfig)
         .then((response) => {
           const userData = {
             photoURL: response.data.secure_url,
@@ -308,7 +319,8 @@ class DetailsForm extends React.Component {
                 newPhotoProfile: {
                   fileObject: null,
                   fileName: '',
-                  preview: null
+                  preview: null,
+                  uploadProgress: 0
                 },
                 uploadingPhotoProfile: false,
               }, () => {
@@ -651,7 +663,7 @@ class DetailsForm extends React.Component {
                     </Row>
                   </Col>
                   <Col>
-                    {this.isShowBlockedDateAndReason() && (
+                    {this.isUserBlocked() && (
                       <span>
                         <strong>
                           {this.state.userMetadata.blockedDate}
@@ -693,6 +705,21 @@ class DetailsForm extends React.Component {
                       src={this.state.newPhotoProfile.preview || (userMetadata.photoProfileUrl || defaultUserPhoto)} 
                       alt={userMetadata.displayName || "User Default"}
                     />
+                    {
+                      this.state.uploadingPhotoProfile
+                        ? (
+                          <Progress 
+                            value={this.state.newPhotoProfile.uploadProgress}
+                            color="info"
+                            style={{
+                              width: '100%',
+                            }}
+                          >
+                            {`${this.state.newPhotoProfile.uploadProgress}%`}
+                          </Progress>
+                        )
+                        : null
+                    }
                     <CardBody>
                     <FormGroup>
                       <Label for="exampleFile">Change Photo:</Label>
