@@ -199,6 +199,7 @@ class Users extends Component {
         accessor: 'uid',
         maxWidth: 70,
         sortable: false,
+        filterable: false,
         Cell: row => (
           <div style={{ textAlign: 'center' }}>
             <Link to={'/users/' + this.props.match.params.type + '/' + row.value}>

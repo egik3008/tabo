@@ -32,6 +32,11 @@ export default {
       icon: 'fa fa-money fa-fw',
     },
     {
+      name: 'Cashout',
+      url: '/finance/cashout',
+      icon: 'fa fa-money fa-fw'
+    },
+    {
       name: 'Management',
       url: '/management',
       icon: 'fa fa-tasks fa-fw',

@@ -1,20 +1,20 @@
-import React, { Component } from 'react'
+import React, { Component } from 'react';
+import { database } from '../../services/database';
 import ReactTable from 'react-table'
 import { Card, CardBody, CardHeader, Col, Row } from 'reactstrap'
 import { Link } from 'react-router-dom'
-import axios from 'axios'
 import moment from 'moment'
 import 'moment/locale/id'
 import 'react-table/react-table.css';
 
-import STATUS from '../constants/reservations';
+import STATUS from '../../constants/cashout';
 
-class Reservations extends Component {
+class Cashout extends Component {
   constructor() {
     super()
     this.state = {
       filtered: [],
-      reservations: {
+      cashout: {
         data: [],
         loaded: false,
         loading: false,
@@ -23,23 +23,29 @@ class Reservations extends Component {
   }
 
   componentWillMount() {
-    this.fetchData(this.state)
+    this.fetchData(this.state);
   }
 
   fetchData = state => {
     this.setState(prevState => ({
-      reservations: { ...prevState.reservations, loading: true },
-    }))
+      cashout: { ...prevState.cashout, loading: true },
+    }));
 
-    axios.get(`${process.env.REACT_APP_API_HOSTNAME}/api/reservations`).then(response => {
-      this.setState(prevState => {
-        return {
-          reservations: {
-            ...prevState.reservations,
-            loading: false,
-            loaded: true,
-            data: response.data,
-          },
+    const db = database.database();
+    db.ref('cashout').once('value', snapshot => {
+      const data = snapshot.val();
+      let cashoutList = [];
+      Object.keys(data).forEach(key => {
+        let cashout = data[key];
+        cashout.id = key;
+        cashoutList.push(cashout);
+      })
+
+      this.setState({
+        cashout: {
+          loading: false,
+          loaded: true,
+          data: cashoutList
         }
       })
     })
@@ -55,44 +61,43 @@ class Reservations extends Component {
   render() {
     const columns = [
       {
-        Header: 'ID Reservation',
+        Header: 'CashOut ID',
         accessor: 'id',
       },
       {
-        Header: 'Album Delivered',
-        id: 'albumDelivered',
-        // accessor: 'albumDelivered',
-        accessor: d => {
-          if (d.albumDelivered === 'Y') {
-            if (d.updated) {
-              return moment(d.updated).locale('id').format("DD/MM/YYYY")
-            }
-            return "-"
-          }
-          return "-";
-        },
-        // Cell: row => (row.value === 'Y' ? 'Yes' : 'No'),
-      },
-      {
-        Header: 'Traveler',
-        accessor: 'traveler',
-      },
-      {
         Header: 'Photographer',
-        accessor: 'photographer',
+        accessor: 'photographerDisplayName',
+      },
+      // {
+      //   Header: 'Reservation',
+      //   accessor: 'reservation',
+      // },
+      {
+        Header: 'Amount',
+        id: 'amount',
+        accessor: d => {
+          return `${d.currency || 'IDR'} ${d.amount}`;
+        },
+      },
+      {
+        Header: 'Method',
+        accessor: 'paymentType',
       },
       {
         Header: 'Created',
         accessor: 'created',
         maxWidth: 220,
-        Cell: row =>
-          moment(row.value)
-            .locale('id')
-            .format('lll'),
+        Cell: row => {
+          return row.value
+            ? moment(row.value)
+                .locale('id')
+                .format('lll')
+            : '-'
+        },
         filterMethod: (filter, row) => {
-          const dateString = moment(row.created)
+          const dateString = row.updated ? moment(row.updated)
             .locale('id')
-            .format('lll')
+            .format('lll') : '-';
           return String(dateString.toLowerCase()).includes(filter.value.toLowerCase())
         },
       },
@@ -115,18 +120,6 @@ class Reservations extends Component {
         },
       },
       {
-        Header: 'Destination',
-        accessor: 'destination',
-      },
-      {
-        Header: 'Price',
-        Cell: cellInfo => {
-          if ('totalPriceIDR' in cellInfo.original)
-            return 'Rp. ' + Number(cellInfo.original.totalPriceIDR).toLocaleString('id')
-          else return '$ ' + Number(cellInfo.original.total).toLocaleString('us')
-        },
-      },
-      {
         Header: 'Status',
         accessor: 'status',
         id: 'status',
@@ -136,10 +129,9 @@ class Reservations extends Component {
             return true
           }
 
-          if (filter.value === STATUS.RESERVATION_PAID) return row[filter.id] === STATUS.RESERVATION_PAID
-          else if (filter.value === STATUS.RESERVATION_UNPAID) return row[filter.id] === STATUS.RESERVATION_UNPAID
-          else if (filter.value === STATUS.RESERVATION_COMPLETED) return row[filter.id] === STATUS.RESERVATION_COMPLETED
-          else if (filter.value === STATUS.RESERVATION_PENDING) return row[filter.id] === STATUS.RESERVATION_PENDING
+          if (filter.value === STATUS.STATUS_REQUESTED) return row[filter.id] === STATUS.STATUS_REQUESTED
+          else if (filter.value === STATUS.STATUS_PROCESSING) return row[filter.id] === STATUS.STATUS_PROCESSING
+          else if (filter.value === STATUS.STATUS_DONE) return row[filter.id] === STATUS.STATUS_DONE
         },
         Filter: ({ filter, onChange }) => (
           <select
@@ -147,28 +139,28 @@ class Reservations extends Component {
             style={{ width: '100%', height: "100%" }}
             value={filter ? filter.value : 'all'}>
             <option value="all">Show All</option>
-            <option value={STATUS.RESERVATION_COMPLETED}>Completed</option>
-            <option value={STATUS.RESERVATION_PAID}>Paid</option>
-            <option value={STATUS.RESERVATION_PENDING}>Pending</option>
-            <option value={STATUS.RESERVATION_UNPAID}>Unpaid</option>
+            <option value={STATUS.STATUS_REQUESTED}>Requested</option>
+            <option value={STATUS.STATUS_PROCESSING}>Processing</option>
+            <option value={STATUS.STATUS_DONE}>Done</option>
           </select>
         ),
       },
       {
-        Header: 'Actions',
+        Header: 'Detail',
         accessor: 'id',
         maxWidth: 70,
         sortable: false,
         filterable: false,
         Cell: row => (
           <div style={{ textAlign: 'center' }}>
-            <Link to={'/reservations/' + row.value}>
+            <Link to={'/finance/cashout/' + row.value}>
               <i className="fa fa-pencil" />
             </Link>
           </div>
         ),
       },
     ]
+
 
     return (
       <div className="animated fadeIn">
@@ -177,7 +169,7 @@ class Reservations extends Component {
             <Card>
               <CardHeader>
                 <h3>
-                  <strong>Reservations List</strong>
+                  <strong>Cash Out</strong>
                 </h3>
               </CardHeader>
               <CardBody>
@@ -194,8 +186,8 @@ class Reservations extends Component {
                     },
                   ]}
                   defaultPageSize={10}
-                  data={this.state.reservations.data}
-                  loading={this.state.reservations.loading}
+                  data={this.state.cashout.data}
+                  loading={this.state.cashout.loading}
                 />
               </CardBody>
             </Card>
@@ -206,4 +198,4 @@ class Reservations extends Component {
   }
 }
 
-export default Reservations
+export default Cashout;
