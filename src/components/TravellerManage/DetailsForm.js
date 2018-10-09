@@ -172,8 +172,9 @@ class DetailsForm extends React.Component {
 
     checkIfUserStatusChange = () => {
         const { user, initialStatus } = this.state;
-        if (Number(user.enable) !== initialStatus) {
-          if (Number(user.enable) === 0) {
+        const currentUserStatus = Number(user.enable);
+        if (currentUserStatus !== initialStatus) {
+          if (currentUserStatus === 0) {
             user.blockedDate = moment().format("DD/MM/YYYY");
             this.setState({
               initialStatus: 0,
@@ -181,12 +182,7 @@ class DetailsForm extends React.Component {
             });
           } else {
             this.setState({
-              initialStatus: 1,
-              user: {
-                ...user,
-                reason: ''
-              },
-              displayBlockedReason: ''
+              initialStatus: 1
             });
           }
         } else {
@@ -358,7 +354,7 @@ class DetailsForm extends React.Component {
                         </Row>
                     </Col>
                     <Col>
-                        {this.isShowBlockedDateAndReason() && (
+                        {this.isUserBlocked() && (
                         <span>
                             <strong>
                             {this.state.user.blockedDate}
