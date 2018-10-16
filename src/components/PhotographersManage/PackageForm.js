@@ -1,4 +1,6 @@
 import React from 'react';
+import firebase from 'firebase';
+import Swal from 'sweetalert2';
 import {
     Table,
     FormGroup,
@@ -8,6 +10,7 @@ import {
     Input,
 } from 'reactstrap';
 import ManageSaveButton from '../commons/ManageSaveButton';
+import database from '../../services/database';
 
 
 class PackageForm extends React.Component {
@@ -44,7 +47,31 @@ class PackageForm extends React.Component {
     }
 
     handleSubmit = () => {
-        this.props.onSubmit(this.state.packagesPrice);
+        const {packagesPrice} = this.state;
+        const db = database.database();
+        const {uid} = this.props.photographer.userMetadata;
+        db
+            .ref('photographer_service_information')
+            .child(uid)
+            .update({
+                packagesPrice: packagesPrice,
+                updated: firebase.database.ServerValue.TIMESTAMP
+            })
+            .then(() => {
+                db
+                .ref('user_metadata')
+                .child(uid)
+                .update({
+                    priceStartFrom: packagesPrice[0].price,
+                    updated: firebase.database.ServerValue.TIMESTAMP
+                })
+                .then(() => {
+                    Swal('Success!', "Photographer package updated!", 'success');
+                });
+            })
+            .catch(error => {
+                console.error(error);
+            });
     }
 
     render() {

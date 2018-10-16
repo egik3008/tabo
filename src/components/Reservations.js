@@ -61,7 +61,6 @@ class Reservations extends Component {
       {
         Header: 'Album Delivered',
         id: 'albumDelivered',
-        // accessor: 'albumDelivered',
         accessor: d => {
           if (d.albumDelivered === 'Y') {
             if (d.updated) {
@@ -120,17 +119,59 @@ class Reservations extends Component {
       },
       {
         Header: 'Price',
-        Cell: cellInfo => {
-          if ('totalPriceIDR' in cellInfo.original)
-            return 'Rp. ' + Number(cellInfo.original.totalPriceIDR).toLocaleString('id')
-          else return '$ ' + Number(cellInfo.original.total).toLocaleString('us')
+        id: 'price',
+        accessor: d => {
+          let currency = "IDR"
+          if (d.paymentCurrency) {
+            currency = d.paymentCurrency;
+          }
+          return Number(d["totalPrice" + currency]);
         },
+        Cell: cellInfo => {
+          let currency = "IDR"
+          if (cellInfo.original.paymentCurrency) {
+            currency = cellInfo.original.paymentCurrency;
+          }
+          const price = Number(cellInfo.original["totalPrice" + currency]);
+          return currency + " " + (currency === "IDR" ? price.toLocaleString('id') : price.toLocaleString('us'));
+        },
+        filterMethod: (filter, row) => {
+          if (filter.value === 'all') {
+            return true
+          }
+          if (filter.value === "IDR") 
+            return row._original.paymentCurrency ? 
+              (row._original.paymentCurrency === "IDR") : true
+          else if (filter.value === "USD") 
+            return row._original.paymentCurrency ? 
+              (row._original.paymentCurrency === "USD") : false
+        },
+        Filter: ({ filter, onChange }) => (
+          <select
+            onChange={event => onChange(event.target.value)}
+            style={{ width: '100%', height: "100%" }}
+            value={filter ? filter.value : 'all'}>
+            <option value="all">Show All</option>
+            <option value="IDR">IDR</option>
+            <option value="USD">USD</option>
+          </select>
+        ),
       },
       {
         Header: 'Status',
         accessor: 'status',
         id: 'status',
         maxWidth: 100,
+        // Cell: row => {
+        //   return <span
+        //     style={{color: row.value === STATUS.RESERVATION_UNPAID ? 'red' 
+        //       : (row.value === STATUS.RESERVATION_PENDING ? 'inherit' 
+        //       : 'green')}
+        //     }
+        //   >
+        //     {row.value}
+        //   </span>
+        // },
         filterMethod: (filter, row) => {
           if (filter.value === 'all') {
             return true
@@ -140,6 +181,7 @@ class Reservations extends Component {
           else if (filter.value === STATUS.RESERVATION_UNPAID) return row[filter.id] === STATUS.RESERVATION_UNPAID
           else if (filter.value === STATUS.RESERVATION_COMPLETED) return row[filter.id] === STATUS.RESERVATION_COMPLETED
           else if (filter.value === STATUS.RESERVATION_PENDING) return row[filter.id] === STATUS.RESERVATION_PENDING
+          else if (filter.value === STATUS.RESERVATION_ACCEPTED) return row[filter.id] === STATUS.RESERVATION_ACCEPTED
         },
         Filter: ({ filter, onChange }) => (
           <select
@@ -148,6 +190,7 @@ class Reservations extends Component {
             value={filter ? filter.value : 'all'}>
             <option value="all">Show All</option>
             <option value={STATUS.RESERVATION_COMPLETED}>Completed</option>
+            <option value={STATUS.RESERVATION_ACCEPTED}>Accepted</option>
             <option value={STATUS.RESERVATION_PAID}>Paid</option>
             <option value={STATUS.RESERVATION_PENDING}>Pending</option>
             <option value={STATUS.RESERVATION_UNPAID}>Unpaid</option>

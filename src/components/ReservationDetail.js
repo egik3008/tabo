@@ -38,6 +38,9 @@ class ReservationDetail extends Component {
         totalPrice: 0,
         totalPriceIDR: 0,
         totalPriceUSD: 0,
+        photographerCurrency: "",
+        paymentCurrency: "IDR"
+
       },
       loading: false,
     }
@@ -91,11 +94,23 @@ class ReservationDetail extends Component {
   }
 
   displayPriceFormat = (price) => {
-    const {currency} = this.state.reservation;
-    return `${currency} ${price}`;
+    const {paymentCurrency} = this.state.reservation;
+    const local = paymentCurrency === "IDR" ? "id" : 'us';
+    return `${paymentCurrency} ${Number(price).toLocaleString(local)}`;
   }
 
   render() {
+    const {
+      photographerFeeIDR,
+      photographerFeeUSD,
+      paymentCurrency,
+      totalPriceIDR,
+      totalPriceUSD,
+      credit
+    } = this.state.reservation;
+    const photographerFee = paymentCurrency === "IDR" ? photographerFeeIDR : photographerFeeUSD;
+    const totalPrice = paymentCurrency === "IDR" ? totalPriceIDR : totalPriceUSD;
+    
     const renderReservationDetail = (
       <React.Fragment>
         <Nav tabs>
@@ -202,23 +217,23 @@ class ReservationDetail extends Component {
             <hr className="mt-0 mb-1" />
             <dl className="row mb-2 reservation-detail-content">
               <dt className="col-sm-3">Subtotal</dt>
-              <dd className="col-sm-9">{this.displayPriceFormat(this.state.reservation.photographerFeeIDR)}</dd>
+              <dd className="col-sm-9">{this.displayPriceFormat(photographerFee)}</dd>
 
               <dt className="col-sm-3">Service Fee</dt>
               <dd className="col-sm-9">
-                {this.displayPriceFormat(this.state.reservation.totalPriceIDR - this.state.reservation.photographerFeeIDR)}
+                {this.displayPriceFormat(totalPrice - photographerFee)}
               </dd>
 
               <dt className="col-sm-3">Credit</dt>
               <dd className="col-sm-9">
                 {this.state.reservation.credit === 0
                   ? '-'
-                  : this.displayPriceFormat(this.state.reservation.credit)
+                  : this.displayPriceFormat(credit)
                 }
               </dd>
 
               <dt className="col-sm-3">Total</dt>
-              <dd className="col-sm-9">{this.displayPriceFormat(this.state.reservation.totalPriceIDR)}</dd>
+              <dd className="col-sm-9">{this.displayPriceFormat(totalPrice)}</dd>
             </dl>
           </div>
           </TabPane>
