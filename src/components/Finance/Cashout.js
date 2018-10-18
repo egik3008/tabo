@@ -7,7 +7,7 @@ import moment from 'moment'
 import 'moment/locale/id'
 import 'react-table/react-table.css';
 
-import STATUS from '../../constants/cashout';
+import CASHOUT from '../../constants/cashout';
 
 class Cashout extends Component {
   constructor() {
@@ -68,10 +68,6 @@ class Cashout extends Component {
         Header: 'Photographer',
         accessor: 'photographerDisplayName',
       },
-      // {
-      //   Header: 'Reservation',
-      //   accessor: 'reservation',
-      // },
       {
         Header: 'Amount',
         id: 'amount',
@@ -81,7 +77,10 @@ class Cashout extends Component {
       },
       {
         Header: 'Method',
-        accessor: 'paymentType',
+        id: 'paymentType',
+        accessor: d => {
+          return d.paymentType === CASHOUT.BANK_METHOD ? 'Bank Transfer' : 'PayPal';
+        }
       },
       {
         Header: 'Created',
@@ -129,9 +128,9 @@ class Cashout extends Component {
             return true
           }
 
-          if (filter.value === STATUS.STATUS_REQUESTED) return row[filter.id] === STATUS.STATUS_REQUESTED
-          else if (filter.value === STATUS.STATUS_PROCESSING) return row[filter.id] === STATUS.STATUS_PROCESSING
-          else if (filter.value === STATUS.STATUS_DONE) return row[filter.id] === STATUS.STATUS_DONE
+          if (filter.value === CASHOUT.STATUS_REQUESTED) return row[filter.id] === CASHOUT.STATUS_REQUESTED
+          else if (filter.value === CASHOUT.STATUS_PROCESSING) return row[filter.id] === CASHOUT.STATUS_PROCESSING
+          else if (filter.value === CASHOUT.STATUS_DONE) return row[filter.id] === CASHOUT.STATUS_DONE
         },
         Filter: ({ filter, onChange }) => (
           <select
@@ -139,9 +138,9 @@ class Cashout extends Component {
             style={{ width: '100%', height: "100%" }}
             value={filter ? filter.value : 'all'}>
             <option value="all">Show All</option>
-            <option value={STATUS.STATUS_REQUESTED}>Requested</option>
-            <option value={STATUS.STATUS_PROCESSING}>Processing</option>
-            <option value={STATUS.STATUS_DONE}>Done</option>
+            <option value={CASHOUT.STATUS_REQUESTED}>Requested</option>
+            <option value={CASHOUT.STATUS_PROCESSING}>Processing</option>
+            <option value={CASHOUT.STATUS_DONE}>Done</option>
           </select>
         ),
       },

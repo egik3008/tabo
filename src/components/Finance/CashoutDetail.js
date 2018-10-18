@@ -160,6 +160,9 @@ class CashoutDetail extends Component {
                 <dt className="col-sm-3">Number</dt>
                 <dd className="col-sm-9">{this.props.match.params.id}</dd>
 
+                <dt className="col-sm-3">Requested Amount</dt>
+                <dd className="col-sm-9">{(this.state.cashout.currency || "IDR") + " "+ this.state.cashout.amount}</dd>
+
                 <dt className="col-sm-3">Photographer</dt>
                 <dd className="col-sm-9">{this.state.cashout.photographerDisplayName}</dd>
 
