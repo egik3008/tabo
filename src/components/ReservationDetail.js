@@ -93,23 +93,27 @@ class ReservationDetail extends Component {
     ): '-';
   }
 
-  displayPriceFormat = (price) => {
-    const {paymentCurrency} = this.state.reservation;
-    const local = paymentCurrency === "IDR" ? "id" : 'us';
-    return `${paymentCurrency} ${Number(price).toLocaleString(local)}`;
+  displayPriceFormat = (price, currency) => {
+    currency = currency || "IDR";
+    const local = currency === "IDR" ? "id" : 'us';
+    return `${currency} ${Number(price).toLocaleString(local)}`;
   }
 
   render() {
     const {
+      photographerCurrency,
       photographerFeeIDR,
       photographerFeeUSD,
+      photographerFee,
       paymentCurrency,
       totalPriceIDR,
       totalPriceUSD,
+      totalPrice,
       credit
     } = this.state.reservation;
-    const photographerFee = paymentCurrency === "IDR" ? photographerFeeIDR : photographerFeeUSD;
-    const totalPrice = paymentCurrency === "IDR" ? totalPriceIDR : totalPriceUSD;
+    const tPhotographerFee = paymentCurrency === "IDR" ? photographerFeeIDR : photographerFeeUSD;
+    const tTotalPrice = paymentCurrency === "IDR" ? totalPriceIDR : totalPriceUSD;
+    
     
     const renderReservationDetail = (
       <React.Fragment>
@@ -215,26 +219,61 @@ class ReservationDetail extends Component {
           <div className="reservation-detail-body">
             <h5 className="mt-3">Total Summary</h5>
             <hr className="mt-0 mb-1" />
-            <dl className="row mb-2 reservation-detail-content">
-              <dt className="col-sm-3">Subtotal</dt>
-              <dd className="col-sm-9">{this.displayPriceFormat(photographerFee)}</dd>
 
-              <dt className="col-sm-3">Service Fee</dt>
-              <dd className="col-sm-9">
-                {this.displayPriceFormat(totalPrice - photographerFee)}
-              </dd>
+            <div className="row">
+              <div className="col-md-6 col-xs-12">
+                <h5 style={{
+                  paddingLeft: 20, 
+                  textDecoration: 'underline'
+                }}>Traveller Price</h5>
+                <dl className="row mb-2 reservation-detail-content">
+                  <dt className="col-sm-5">Subtotal</dt>
+                  <dd className="col-sm-7">{this.displayPriceFormat(tPhotographerFee, paymentCurrency)}</dd>
 
-              <dt className="col-sm-3">Credit</dt>
-              <dd className="col-sm-9">
-                {this.state.reservation.credit === 0
-                  ? '-'
-                  : this.displayPriceFormat(credit)
-                }
-              </dd>
+                  <dt className="col-sm-5">Service Fee</dt>
+                  <dd className="col-sm-7">
+                    {this.displayPriceFormat(tTotalPrice - tPhotographerFee, paymentCurrency)}
+                  </dd>
 
-              <dt className="col-sm-3">Total</dt>
-              <dd className="col-sm-9">{this.displayPriceFormat(totalPrice)}</dd>
-            </dl>
+                  <dt className="col-sm-5">Credit</dt>
+                  <dd className="col-sm-7">
+                    {this.state.reservation.credit === 0
+                      ? '-'
+                      : this.displayPriceFormat(credit, paymentCurrency)
+                    }
+                  </dd>
+
+                  <dt className="col-sm-5">Total</dt>
+                  <dd className="col-sm-7">{this.displayPriceFormat(tTotalPrice, paymentCurrency)}</dd>
+                </dl>
+              </div>
+              <div className="col-md-6 col-xs-12">
+                <h5 style={{
+                  paddingLeft: 20, 
+                  textDecoration: 'underline'
+                }}>Photographer Price</h5>
+                <dl className="row mb-2 reservation-detail-content" style={{borderLeft: "solid"}}>
+                  <dt className="col-sm-5">Subtotal</dt>
+                  <dd className="col-sm-7">{this.displayPriceFormat(photographerFee, photographerCurrency)}</dd>
+
+                  <dt className="col-sm-5">Service Fee</dt>
+                  <dd className="col-sm-7">
+                    {this.displayPriceFormat(totalPrice - photographerFee, photographerCurrency)}
+                  </dd>
+
+                  <dt className="col-sm-5">Credit</dt>
+                  <dd className="col-sm-7">
+                    {this.state.reservation.credit === 0
+                      ? '-'
+                      : this.displayPriceFormat(credit, photographerCurrency)
+                    }
+                  </dd>
+
+                  <dt className="col-sm-5">Total</dt>
+                  <dd className="col-sm-7">{this.displayPriceFormat(totalPrice, photographerCurrency)}</dd>
+                </dl>
+              </div>
+            </div>
           </div>
           </TabPane>
         </TabContent>

@@ -70,7 +70,6 @@ class Reservations extends Component {
           }
           return "-";
         },
-        // Cell: row => (row.value === 'Y' ? 'Yes' : 'No'),
       },
       {
         Header: 'Traveler',
@@ -232,7 +231,7 @@ class Reservations extends Component {
                   sortable={true}
                   defaultSorted={[
                     {
-                      id: 'created',
+                      id: 'updated',
                       desc: true,
                     },
                   ]}
