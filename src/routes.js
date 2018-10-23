@@ -1,5 +1,6 @@
 import React from 'react'
-import Loadable from 'react-loadable'
+import Loadable from 'react-loadable';
+
 
 function Loading() {
   return <div>Loading...</div>
@@ -40,6 +41,16 @@ const CashoutDetail = Loadable({
   loading: Loading,
 })
 
+const PhotoAlbum = Loadable({
+  loader: () => import('./components/PhotoAlbums/index'),
+  loading: Loading,
+})
+
+const CurrencyRates = Loadable({
+  loader: () => import('./components/Finance/CurrencyRates'),
+  loading: Loading,
+})
+
 // https://github.com/ReactTraining/react-router/tree/master/packages/react-router-config
 const routes = [
   { path: '/dashboard', name: 'Dashboard', component: Dashboard },
@@ -48,8 +59,10 @@ const routes = [
   { path: '/users/:type', name: 'User', component: User },
   { path: '/reservations/:id', name: 'Reservation Detail', component: ReservationDetail },
   { path: '/reservations', name: 'Reservation', component: Reservation },
-  { path: '/finance/cashout', exact: true, name: 'Cashout', component: Cashout },
-  { path: '/finance/cashout/:id', exact: true, name: 'Cashout', component: CashoutDetail },
+  { path: '/photo-album', name: 'Photo Album', component: PhotoAlbum },
+  { path: '/finance/cashout', name: 'Cashout', component: Cashout },
+  { path: '/finance/cashout/:id', name: 'Cashout', component: CashoutDetail },
+  { path: '/finance/currency-rates', name: 'Currency Rates', component: CurrencyRates },
 ]
 
 export default routes

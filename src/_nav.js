@@ -30,11 +30,16 @@ export default {
       name: 'Finance',
       url: '/finance',
       icon: 'fa fa-money fa-fw',
-    },
-    {
-      name: 'Cashout',
-      url: '/finance/cashout',
-      icon: 'fa fa-money fa-fw'
+      children: [
+        {
+          name: 'Currency Rates',
+          url: '/finance/currency-rates'
+        },
+        {
+          name: 'Cashout',
+          url: '/finance/cashout'
+        },
+      ] 
     },
     {
       name: 'Management',

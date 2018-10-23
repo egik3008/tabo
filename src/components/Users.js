@@ -1,5 +1,6 @@
-import React, { Component } from 'react'
-import ReactTable from 'react-table'
+import React, { Component } from 'react';
+import ReactTable from 'react-table';
+import { withRouter } from 'react-router-dom';
 import { Card, CardBody, CardHeader, Col, Row, Button } from 'reactstrap'
 import { Link } from 'react-router-dom'
 import axios from 'axios'
@@ -276,4 +277,4 @@ class Users extends Component {
   }
 }
 
-export default Users
+export default withRouter(Users);

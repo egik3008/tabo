@@ -1,6 +1,6 @@
-import React, { Component } from 'react'
-import { Redirect, Route, Switch } from 'react-router-dom'
-import { Container } from 'reactstrap'
+import React, { Component } from 'react';
+import { Router, Redirect, Route, Switch } from 'react-router-dom';
+import { Container } from 'reactstrap';
 
 import {
   AppFooter,
@@ -11,9 +11,10 @@ import {
   AppSidebarHeader,
   AppSidebarMinimizer,
   AppSidebarNav,
-} from '@coreui/react'
+} from '@coreui/react';
+
 // sidebar nav config
-import navigation from '../../_nav'
+import navigation from '../../_nav';
 // routes config
 import routes from '../../routes'
 import DefaultFooter from './DefaultFooter'

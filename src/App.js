@@ -1,9 +1,7 @@
 import React from 'react';
-import { Router } from 'react-router-dom';
 import { Provider } from 'react-redux';
-import { History } from './services'
+import { BrowserRouter, Route } from 'react-router-dom';
 import store from './store';
-
 // Styles
 // CoreUI Icons Set
 import '@coreui/icons/css/coreui-icons.min.css'
@@ -17,9 +15,9 @@ import { DefaultLayout } from './containers'
 
 const App = props => (
   <Provider store={store}>
-    <Router history={History}>
-      <DefaultLayout />
-    </Router>
+    <BrowserRouter>
+      <Route path="/" component={DefaultLayout} />
+    </BrowserRouter>
   </Provider>
 )
 

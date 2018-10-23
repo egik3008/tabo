@@ -106,30 +106,30 @@
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/@coreui/coreui-plugin-npm-postinstall/-/coreui-plugin-npm-postinstall-1.0.2.tgz#6daeb2ec786580d9c0849b05bc3e8d0222d5c463"
 
-"@coreui/coreui@^2.0.4":
-  version "2.0.4"
-  resolved "https://registry.yarnpkg.com/@coreui/coreui/-/coreui-2.0.4.tgz#30afdbc86ec2c4672e21625ab192fc34439c16ed"
+"@coreui/coreui@^2.0.15":
+  version "2.0.20"
+  resolved "https://registry.yarnpkg.com/@coreui/coreui/-/coreui-2.0.20.tgz#3be6ca9226e80d942b17cfd08da482b556191413"
   dependencies:
     "@coreui/coreui-plugin-npm-postinstall" "^1.0.2"
-    bootstrap "^4.1.2"
+    bootstrap "^4.1.3"
 
-"@coreui/icons@0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@coreui/icons/-/icons-0.2.0.tgz#76a1fc3cbbd35597e921a616fe553fde8ec54b78"
+"@coreui/icons@0.3.0":
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/@coreui/icons/-/icons-0.3.0.tgz#d5bece91b1442a9543593d1146bc8042b18489e3"
 
-"@coreui/react@^2.0.5":
-  version "2.0.5"
-  resolved "https://registry.yarnpkg.com/@coreui/react/-/react-2.0.5.tgz#38ff3d129b71a6064b45b37723700c8bf01b658c"
+"@coreui/react@^2.0.9":
+  version "2.0.9"
+  resolved "https://registry.yarnpkg.com/@coreui/react/-/react-2.0.9.tgz#c491d63599ef070d98903186bf32a503d4c566a9"
   dependencies:
-    "@coreui/icons" "0.2.0"
+    "@coreui/icons" "0.3.0"
     classnames "^2.2.6"
     core-js "^2.5.7"
     element-closest "^2.0.2"
     prop-types "^15.6.2"
     react-onclickout "^2.0.8"
-    react-perfect-scrollbar "^1.1.1"
+    react-perfect-scrollbar "^1.2.2"
     react-router-dom "^4.3.1"
-    reactstrap "^6.3.0"
+    reactstrap "^6.5.0"
 
 "@emotion/babel-utils@^0.6.4":
   version "0.6.10"
@@ -1423,7 +1423,7 @@ boom@5.x.x:
   dependencies:
     hoek "4.x.x"
 
-bootstrap@^4.1.2, bootstrap@^4.1.3:
+bootstrap@^4.1.3:
   version "4.1.3"
   resolved "https://registry.yarnpkg.com/bootstrap/-/bootstrap-4.1.3.tgz#0eb371af2c8448e8c210411d0cb824a6409a12be"
 
@@ -5900,7 +5900,7 @@ pbkdf2@^3.0.3:
     safe-buffer "^5.0.1"
     sha.js "^2.4.8"
 
-perfect-scrollbar@^1.3.0:
+perfect-scrollbar@^1.4.0:
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/perfect-scrollbar/-/perfect-scrollbar-1.4.0.tgz#5d014ef9775e1f43058a1dbae9ed1daf0e7091f1"
 
@@ -6307,7 +6307,7 @@ promise@^7.1.1:
   dependencies:
     asap "~2.0.3"
 
-prop-types@*, prop-types@^15.5.0, prop-types@^15.5.10, prop-types@^15.5.8, prop-types@^15.6.0, prop-types@^15.6.1, prop-types@^15.6.2:
+prop-types@^15.5.0, prop-types@^15.5.10, prop-types@^15.5.8, prop-types@^15.6.0, prop-types@^15.6.1, prop-types@^15.6.2:
   version "15.6.2"
   resolved "https://registry.yarnpkg.com/prop-types/-/prop-types-15.6.2.tgz#05d5ca77b4453e985d60fc7ff8c859094a497102"
   dependencies:
@@ -6487,7 +6487,7 @@ react-dev-utils@^5.0.1:
     strip-ansi "3.0.1"
     text-table "0.2.0"
 
-react-dom@^16.3.1, react-dom@^16.4.1:
+react-dom@^16.4.1:
   version "16.4.2"
   resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-16.4.2.tgz#4afed569689f2c561d2b8da0b819669c38a0bda4"
   dependencies:
@@ -6540,14 +6540,12 @@ react-onclickout@^2.0.8:
   version "2.0.8"
   resolved "https://registry.yarnpkg.com/react-onclickout/-/react-onclickout-2.0.8.tgz#d178b13fb87a481356761b454aa60df7069b2da4"
 
-react-perfect-scrollbar@^1.1.1:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/react-perfect-scrollbar/-/react-perfect-scrollbar-1.2.0.tgz#1e241e7382e237211c090767b79c61850c48c325"
+react-perfect-scrollbar@^1.2.2:
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/react-perfect-scrollbar/-/react-perfect-scrollbar-1.4.0.tgz#36ffb679c127536afae5eaaaaf4aa7164268466c"
   dependencies:
-    perfect-scrollbar "^1.3.0"
-    prop-types "*"
-    react "^16.3.1"
-    react-dom "^16.3.1"
+    perfect-scrollbar "^1.4.0"
+    prop-types "^15.6.1"
 
 react-popper@^0.10.4:
   version "0.10.4"
@@ -6666,7 +6664,7 @@ react-transition-group@^2.2.1, react-transition-group@^2.3.1:
     prop-types "^15.6.2"
     react-lifecycles-compat "^3.0.4"
 
-react@^16.3.1, react@^16.4.1:
+react@^16.4.1:
   version "16.4.2"
   resolved "https://registry.yarnpkg.com/react/-/react-16.4.2.tgz#2cd90154e3a9d9dd8da2991149fdca3c260e129f"
   dependencies:
@@ -6675,9 +6673,22 @@ react@^16.3.1, react@^16.4.1:
     object-assign "^4.1.1"
     prop-types "^15.6.0"
 
-reactstrap@^6.3.0, reactstrap@^6.3.1:
+reactstrap@^6.3.1:
   version "6.4.0"
   resolved "https://registry.yarnpkg.com/reactstrap/-/reactstrap-6.4.0.tgz#891252a284710180cd3d746dd236ee61d28a1c66"
+  dependencies:
+    classnames "^2.2.3"
+    lodash.isfunction "^3.0.9"
+    lodash.isobject "^3.0.2"
+    lodash.tonumber "^4.0.3"
+    prop-types "^15.5.8"
+    react-lifecycles-compat "^3.0.4"
+    react-popper "^0.10.4"
+    react-transition-group "^2.3.1"
+
+reactstrap@^6.5.0:
+  version "6.5.0"
+  resolved "https://registry.yarnpkg.com/reactstrap/-/reactstrap-6.5.0.tgz#ba655e32646e2621829f61faa033e607ec6624e5"
   dependencies:
     classnames "^2.2.3"
     lodash.isfunction "^3.0.9"
