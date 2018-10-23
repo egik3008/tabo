@@ -23,6 +23,7 @@ import {
   CustomInput,
   Button,
   InputGroup,
+  ButtonGroup,
   InputGroupAddon,
   Progress
 } from 'reactstrap';
@@ -58,6 +59,7 @@ class DetailsForm extends React.Component {
       locationMerge: '',
       currency: '',
       photoProfileUrl: '',
+      hidden: false,
       enable: 1,
       reason: '',
       blockedDate: null,
@@ -207,7 +209,6 @@ class DetailsForm extends React.Component {
       this.props.onSubmit(userMetadata, photographer, userAuth);
     } else {
       // create new data
-
       this.setState({submittingNewUser: true});
       axios
       .post(API_SERVICE_URL + "users", {
@@ -335,6 +336,15 @@ class DetailsForm extends React.Component {
 
   togglePassword = () => {
     this.setState({changePassword: !this.state.changePassword});
+  }
+
+  handleListedChange = hidden => () => {
+    this.setState({
+      userMetadata: {
+        ...this.state.userMetadata,
+        hidden
+      }
+    })
   }
 
   handleChangeCounterText = (event) => {
@@ -642,6 +652,30 @@ class DetailsForm extends React.Component {
                     </FormGroup>
                   </React.Fragment>
                 )}
+
+                <FormGroup row>
+                  <Col md="3">
+                    <Label htmlFor="selfDescription">Show on web?</Label>
+                  </Col>
+                  <Col xs="12" md="9">
+                    <ButtonGroup>
+                      <Button 
+                        color={!userMetadata.hidden ? "success" : "secondary"} 
+                        onClick={this.handleListedChange(false)} 
+                        active={!userMetadata.hidden}
+                      >
+                        Yes
+                      </Button>
+                      <Button 
+                        color={userMetadata.hidden ? "success" : "secondary"} 
+                        onClick={this.handleListedChange(true)} 
+                        active={userMetadata.hidden}
+                      >
+                        No
+                      </Button>
+                    </ButtonGroup>
+                  </Col>
+                </FormGroup>
 
                 <FormGroup row>
                   <Col>
