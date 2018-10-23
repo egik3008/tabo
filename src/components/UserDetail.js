@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
+import { withRouter } from 'react-router-dom';
 import {
   Card,
   CardHeader,
@@ -764,4 +765,4 @@ class UserDetail extends Component {
 
 export default connect(null, {
   fetchCountries
-})(UserDetail);
+})(withRouter(UserDetail));
