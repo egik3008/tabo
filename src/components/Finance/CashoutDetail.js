@@ -1,5 +1,18 @@
-import React, { Component } from 'react'
-import { Card, CardHeader, CardBody, Col, Row, Nav, NavItem, NavLink, TabContent, TabPane, Input } from 'reactstrap'
+import React, { Component } from 'react';
+import { withRouter } from 'react-router-dom';
+import { 
+  Card, 
+  CardHeader, 
+  CardBody, 
+  Col, 
+  Row, 
+  Nav, 
+  NavItem, 
+  NavLink, 
+  TabContent, 
+  TabPane, 
+  Input 
+} from 'reactstrap';
 import firebase from '../../services/database';
 import classnames from 'classnames';
 import moment from 'moment';
@@ -252,4 +265,4 @@ class CashoutDetail extends Component {
   }
 }
 
-export default CashoutDetail
+export default withRouter(CashoutDetail);

@@ -1,5 +1,17 @@
-import React, { Component } from 'react'
-import { Card, CardHeader, CardBody, Col, Row, Nav, NavItem, NavLink, TabContent, TabPane } from 'reactstrap'
+import React, { Component } from 'react';
+import { withRouter } from 'react-router-dom';
+import { 
+  Card, 
+  CardHeader, 
+  CardBody, 
+  Col, 
+  Row, 
+  Nav, 
+  NavItem, 
+  NavLink, 
+  TabContent, 
+  TabPane 
+} from 'reactstrap';
 import axios from 'axios'
 import classnames from 'classnames'
 import moment from 'moment';
@@ -301,4 +313,4 @@ class ReservationDetail extends Component {
   }
 }
 
-export default ReservationDetail
+export default withRouter(ReservationDetail);

@@ -1,11 +1,10 @@
 import React, { Component } from 'react';
 import { database } from '../../services/database';
 import ReactTable from 'react-table'
-import { Card, CardBody, CardHeader, Col, Row, Button } from 'reactstrap'
+import { Card, CardBody, CardHeader, Col, Row, Button, Input } from 'reactstrap'
 import { Link } from 'react-router-dom'
-import 'moment/locale/id'
+import 'moment/locale/id';
 import 'react-table/react-table.css';
-import SaveButton from '../commons/ManageSaveButton';
 
 const USD = "USD", IDR = "IDR";
 
@@ -14,6 +13,7 @@ class CurrencyRates extends Component {
     super()
     this.state = {
         defaultCurrency: IDR,
+        defaultCurrencyName: "Indonesia",
         filtered: [],
         currencyRates: {
             data: [],
@@ -69,8 +69,8 @@ class CurrencyRates extends Component {
                 currencyRates: {
                 loading: false,
                 loaded: true,
-                data: list
-                }
+                data: list,
+              }
             })
         })
     })
@@ -103,13 +103,22 @@ class CurrencyRates extends Component {
       });
   }
 
+  findCurrencyCountry = (isoCode) => {
+    const { data } = this.state.currencyRates;
+    if (data.length > 0) {
+      return this.state.currencyRates.data.find(currency => {
+        return currency.isoCode === isoCode;
+      });
+    }
+    return {};
+  }
+
   render() {
-    console.log(this.state.edited);
-    console.log(this.state.savedChange);
     const columns = [
       {
         Header: 'Currency ID',
         accessor: 'id',
+        maxWidth: 180,
       },
       {
         Header: 'Currency',
@@ -117,7 +126,8 @@ class CurrencyRates extends Component {
       },
       {
         Header: 'ISO Code',
-        accessor: 'isoCode'
+        accessor: 'isoCode',
+        maxWidth: 150,
       },
       {
         Header: 'Exchange Rates',
@@ -126,12 +136,13 @@ class CurrencyRates extends Component {
             const val = this.state.edited[row.original.id] 
                 || this.state.savedChange[row.original.id] 
                 || row.value;
-
-            return <input type="number" 
-                onChange={this.handleChange(row.original.id)} 
-                value={val}
+            return <Input 
+              type="number"
+              onChange={this.handleChange(row.original.id)}
+              value={val} 
             />
         },
+        maxWidth: 180,
         sortable: false,
         filterable: false,
       },
@@ -142,15 +153,10 @@ class CurrencyRates extends Component {
         sortable: false,
         filterable: false,
         Cell: row => (
-          <div style={{ textAlign: 'center' }}>
-            <Link to={'/finance/cashout/' + row.value}>
-              <i className="fa fa-pencil" />
-            </Link>
-          </div>
+          ""
         ),
       },
-    ]
-
+    ];
 
     return (
       <div className="animated fadeIn">
@@ -163,18 +169,20 @@ class CurrencyRates extends Component {
                 </h3>
               </CardHeader>
               <CardBody>
-                <h5>Currency Rates</h5>
-                <hr className="mt-0 mb-1" />
-                <dl className="row mb-2">
-                    <dt className="col-sm-3">ISO Code</dt>
-                    <dd className="col-sm-9">IDR</dd>
+                <div className="reservation-detail-header">
+                  <h5>DEFAULT Currency ID: <span style={{marginLeft: 15}}>{this.state.defaultCurrency + this.state.defaultCurrency}</span>
+                  </h5>
+                  <dl className="row mb-2 reservation-detail-content">
+                      <dt className="col-sm-3">ISO Code</dt>
+                      <dd className="col-sm-9">: {this.state.defaultCurrency}</dd>
 
-                    <dt className="col-sm-3">Currency</dt>
-                    <dd className="col-sm-9">Indonesia</dd>
-                </dl>
+                      <dt className="col-sm-3">Currency</dt>
+                      <dd className="col-sm-9">: {this.state.defaultCurrencyName}</dd>
+                  </dl>
+                </div>
 
 
-                <Row className="mb-2 justify-content-end">
+                <Row className="mb-2 mt-3 justify-content-end">
                     <Col md="3">
                         <Button 
                             color="primary"

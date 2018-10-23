@@ -54,14 +54,14 @@ const CurrencyRates = Loadable({
 // https://github.com/ReactTraining/react-router/tree/master/packages/react-router-config
 const routes = [
   { path: '/dashboard', name: 'Dashboard', component: Dashboard },
+  { path: '/users/:type', exact: true, name: 'User', component: User },
   { path: '/users/:type/add', name: 'Add User', component: UserDetail },
   { path: '/users/:type/:id', name: 'User Detail', component: UserDetail },
-  { path: '/users/:type', name: 'User', component: User },
+  { path: '/reservations', exact: true, name: 'Reservation', component: Reservation },
   { path: '/reservations/:id', name: 'Reservation Detail', component: ReservationDetail },
-  { path: '/reservations', name: 'Reservation', component: Reservation },
   { path: '/photo-album', name: 'Photo Album', component: PhotoAlbum },
-  { path: '/finance/cashout', name: 'Cashout', component: Cashout },
-  { path: '/finance/cashout/:id', name: 'Cashout', component: CashoutDetail },
+  { path: '/finance/cashout', exact: true, name: 'Cashout', component: Cashout },
+  { path: '/finance/cashout/:id', name: 'Cashout Detail', component: CashoutDetail },
   { path: '/finance/currency-rates', name: 'Currency Rates', component: CurrencyRates },
 ]
 
