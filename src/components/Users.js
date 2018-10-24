@@ -171,7 +171,7 @@ class Users extends Component {
         Header: 'Status',
         accessor: 'enable',
         id: 'enable',
-        maxWidth: 110,
+        maxWidth: 100,
         Cell: row => (Number(row.value) === 1 ? 'Active' : 'Blocked'),
         filterMethod: (filter, row) => {
           if (filter.value === 'all') {
@@ -223,6 +223,35 @@ class Users extends Component {
         accessor: 'completion',
         maxWidth: 90,
         Cell: row => (<span>{row.value} %</span>),
+      });
+
+      columns.splice(8, 0, {
+        Header: 'Show?',
+        id: 'hidden',
+        accessor: 'hidden',
+        maxWidth: 80,
+        Cell: row => row.value ? 'Hide' : 'Show',
+        filterMethod: (filter, row) => {
+          if (filter.value === 'all') {
+            return true
+          }
+
+          if (filter.value === '1') {
+            return !!row[filter.id] === false
+          }
+
+          return !!row[filter.id] === true
+        },
+        Filter: ({ filter, onChange }) => (
+          <select
+            onChange={event => onChange(event.target.value)}
+            style={{ width: '100%', height: '100%' }}
+            value={filter ? filter.value : 'all'}>
+            <option value="all">All</option>
+            <option value="1">Show</option>
+            <option value="0">Hide</option>
+          </select>
+        ),
       })
     }
 

@@ -36,7 +36,7 @@ export default {
           url: '/finance/currency-rates'
         },
         {
-          name: 'Cashout',
+          name: 'Cash Out',
           url: '/finance/cashout'
         },
       ] 

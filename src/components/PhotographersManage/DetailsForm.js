@@ -338,13 +338,54 @@ class DetailsForm extends React.Component {
     this.setState({changePassword: !this.state.changePassword});
   }
 
+  isProfileCompleted = () => {
+    let isCompleted = true;
+    const photographer = this.state.userMetadata;
+
+    // has photo profile
+    const hasPhotoProfilePublicId = photographer.photoProfilePublicId 
+    && photographer.photoProfilePublicId !== '-';
+
+    if (!hasPhotoProfilePublicId) isCompleted = false;
+
+
+    // has phone number
+    if (isCompleted) {
+      const hasPhoneNumber = photographer.phoneNumber 
+        && photographer.phoneNumber !== '-';
+      if (!hasPhoneNumber) isCompleted = false;
+    }
+
+    // has default portfolio
+    if (isCompleted) {
+      const hasDefaultDisplayPicturePublicId = photographer.defaultDisplayPicturePublicId 
+        && photographer.defaultDisplayPicturePublicId !== '-';
+      
+        if (!hasDefaultDisplayPicturePublicId) isCompleted = false;
+    }
+
+    // has start price
+    if (isCompleted) {
+      const hasStartPrice = photographer.priceStartFrom 
+        && Number(photographer.priceStartFrom) > 0;
+      
+        if (!hasStartPrice) isCompleted = false;
+    }
+
+    return isCompleted;
+  }
+
   handleListedChange = hidden => () => {
-    this.setState({
-      userMetadata: {
-        ...this.state.userMetadata,
-        hidden
-      }
-    })
+    if (!hidden && !this.isProfileCompleted()) {
+      Swal('', 'Photographer profile is incomplete. This Photographer cannot be displayed on the web.', 'info');
+    } else {
+      this.setState({
+        userMetadata: {
+          ...this.state.userMetadata,
+          hidden
+        }
+      });
+    }
   }
 
   handleChangeCounterText = (event) => {
@@ -530,7 +571,7 @@ class DetailsForm extends React.Component {
                       valueKey="value"
                       labelKey="label"
                       loadOptions={this.getCities}
-                      placeholder={userMetadata.country ? "Search and choose your city" : "Please select a country first"}
+                      placeholder={userMetadata.country ? "Search and choose your city (Type to search)" : "Please select a country first"}
                       isDisabled={!userMetadata.country}
                       filterOption={() => (true)}
                     />
@@ -664,14 +705,14 @@ class DetailsForm extends React.Component {
                         onClick={this.handleListedChange(false)} 
                         active={!userMetadata.hidden}
                       >
-                        Yes
+                        Show
                       </Button>
                       <Button 
                         color={userMetadata.hidden ? "success" : "secondary"} 
                         onClick={this.handleListedChange(true)} 
                         active={userMetadata.hidden}
                       >
-                        No
+                        Hide
                       </Button>
                     </ButtonGroup>
                   </Col>
