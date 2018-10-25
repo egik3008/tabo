@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { withRouter } from 'react-router-dom';
+import { withRouter, Link } from 'react-router-dom';
 import { 
   Card, 
   CardHeader, 
@@ -72,11 +72,6 @@ class ReservationDetail extends Component {
 
   isAlbumDelivered = () => {
     return this.state.reservation.albumDelivered === 'Y';
-  }
-
-  directToAlbum = (event) => {
-    event.preventDefault();
-    alert("will be available soon along with photo album..");
   }
 
   fetchReservation(id) {
@@ -163,7 +158,11 @@ class ReservationDetail extends Component {
 
                 <dt className="col-sm-3">Photo Album ID</dt>
                 <dd className="col-sm-9">
-                  <a href="#" onClick={this.directToAlbum}>{this.props.match.params.id}</a>
+                  {
+                    <Link to={"/photo-album/" + this.props.match.params.id}>
+                      {this.props.match.params.id}
+                    </Link>
+                  }
                 </dd>
                 
                 <dt className="col-sm-3">Album Delivered</dt>

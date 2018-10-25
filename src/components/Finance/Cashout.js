@@ -72,15 +72,35 @@ class Cashout extends Component {
         Header: 'Amount',
         id: 'amount',
         accessor: d => {
-          return `${d.currency || 'IDR'} ${d.amount}`;
+          const currency = d.currency || 'IDR';
+          const local = currency === 'IDR' ? 'id' : 'us';
+          return `${currency} ${Number(d.amount).toLocaleString(local)}`;
         },
       },
       {
         Header: 'Method',
-        id: 'paymentType',
-        accessor: d => {
-          return d.paymentType === CASHOUT.BANK_METHOD ? 'Bank Transfer' : 'PayPal';
-        }
+        accessor: 'paymentType',
+        Cell: row => {
+          return row.value === CASHOUT.BANK_METHOD ? 'Bank Transfer' : 'PayPal';
+        },
+        filterMethod: (filter, row) => {
+          if (filter.value === 'all') {
+            return true
+          }
+
+          if (filter.value === CASHOUT.PAYPAL_METHOD) return row[filter.id] === CASHOUT.PAYPAL_METHOD
+          else if (filter.value === CASHOUT.BANK_METHOD) return row[filter.id] === CASHOUT.BANK_METHOD
+        },
+        Filter: ({ filter, onChange }) => (
+          <select
+            onChange={event => onChange(event.target.value)}
+            style={{ width: '100%', height: "100%" }}
+            value={filter ? filter.value : 'all'}>
+            <option value="all">Show All</option>
+            <option value={CASHOUT.BANK_METHOD}>Bank Transfer</option>
+            <option value={CASHOUT.PAYPAL_METHOD}>PayPal</option>
+          </select>
+        ),
       },
       {
         Header: 'Created',

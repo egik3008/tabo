@@ -42,7 +42,7 @@ class PortofolioForm extends React.Component {
     hasPortofolio = () => {
       const { imagesAddedBuffer, imagesExisting } = this.state;
       return (imagesAddedBuffer.length > 0) || (imagesExisting.length > 0);
-  }
+    }
 
     selectImagesHandler = (event) => {
       const filesUpload = event.target.files;
@@ -281,7 +281,7 @@ class PortofolioForm extends React.Component {
         this.setState({ 
           isUploading: false 
         });
-        alert('There are no images to be upload');
+        Swal('', 'There are no images to be upload', 'info');
       }
     };
 

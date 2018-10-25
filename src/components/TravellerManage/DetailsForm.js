@@ -161,7 +161,7 @@ class DetailsForm extends React.Component {
     handleSubmit = () => {
         let { user } = this.state;
         if ((user.displayName === "") || (user.email === "")) {
-            alert("Field Name & Email are mandatory");
+            Swal('', 'Field Name & Email are mandatory', 'info');
             return;
         }
 

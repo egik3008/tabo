@@ -35,20 +35,27 @@ class PhotoAlbums extends Component {
     albumRef.once('value').then(snap => {
       let data = [];
       let albums = snap.val();
-      // console.log(Object.keys(albums).length);
       Object.keys(albums).forEach(async key => {
-        await reservationRef.child(key).once('value').then(snap => {
-          const rsrv = snap.val();
-          if (rsrv) {
-            let item = {
-              id: key,
-              albums: albums[key],
-              traveller: rsrv.uidMapping[rsrv.travellerId].displayName,
-              photographer: rsrv.uidMapping[rsrv.photographerId].displayName
-            }
-            data.push(item);
-          }
-        });
+        // await reservationRef.child(key).once('value').then(snap => {
+        //   const rsrv = snap.val();
+        //   if (rsrv) {
+        //     let item = {
+        //       id: key,
+        //       albums: albums[key],
+        //       traveller: rsrv.uidMapping[rsrv.travellerId].displayName,
+        //       photographer: rsrv.uidMapping[rsrv.photographerId].displayName
+        //     }
+        //     data.push(item);
+        //   }
+        // });
+
+        let item = {
+          id: key,
+          albums: albums[key],
+          traveller: "",
+          photographer: ""
+        }
+        data.push(item);
       });
       this.setState(prevState => {
         return {
@@ -98,6 +105,7 @@ class PhotoAlbums extends Component {
   }
 
   render() {
+    console.log(this.state.photoAlbums.data[0]);
     const columns = [
       {
         Header: 'ID Photo Album',
@@ -122,7 +130,7 @@ class PhotoAlbums extends Component {
         Header: 'Created',
         accessor: 'created',
         maxWidth: 220,
-        Cell: row =>
+        Cell: row => 
           moment(row.value)
             .locale('id')
             .format('lll'),
@@ -167,15 +175,13 @@ class PhotoAlbums extends Component {
         filterable: false,
         Cell: row => (
           <div style={{ textAlign: 'center' }}>
-            <Link to={'/reservations/' + row.value}>
+            <Link to={'/photo-album/' + row.value}>
               <i className="fa fa-pencil" />
             </Link>
           </div>
         ),
       },
     ]
-
-    console.log(this.state.photoAlbums);
 
     return (
       <div className="animated fadeIn">

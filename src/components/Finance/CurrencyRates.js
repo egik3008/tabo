@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
 import { database } from '../../services/database';
 import ReactTable from 'react-table'
-import { Card, CardBody, CardHeader, Col, Row, Button, Input } from 'reactstrap'
-import { Link } from 'react-router-dom'
+import { Card, CardBody, CardHeader, Col, Row, Button, Input } from 'reactstrap';
 import 'moment/locale/id';
 import 'react-table/react-table.css';
 

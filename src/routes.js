@@ -42,7 +42,12 @@ const CashoutDetail = Loadable({
 })
 
 const PhotoAlbum = Loadable({
-  loader: () => import('./components/PhotoAlbums/index'),
+  loader: () => import('./components/PhotoAlbums'),
+  loading: Loading,
+})
+
+const PhotoAlbumDetail = Loadable({
+  loader: () => import('./components/PhotoAlbums/Detail'),
   loading: Loading,
 })
 
@@ -59,7 +64,8 @@ const routes = [
   { path: '/users/:type/:id', name: 'User Detail', component: UserDetail },
   { path: '/reservations', exact: true, name: 'Reservation', component: Reservation },
   { path: '/reservations/:id', name: 'Reservation Detail', component: ReservationDetail },
-  { path: '/photo-album', name: 'Photo Album', component: PhotoAlbum },
+  { path: '/photo-album', exact: true, name: 'Photo Album', component: PhotoAlbum },
+  { path: '/photo-album/:id', name: 'Photo Album Detail', component: PhotoAlbumDetail },
   { path: '/finance/cashout', exact: true, name: 'Cashout', component: Cashout },
   { path: '/finance/cashout/:id', name: 'Cashout Detail', component: CashoutDetail },
   { path: '/finance/currency-rates', name: 'Currency Rates', component: CurrencyRates },

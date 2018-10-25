@@ -80,7 +80,7 @@ class MeetingPointForm extends React.Component {
             this.setState({meetingPoints});
             this.handleCancelEdit();
         } else {
-            alert("Sorry, meeting points is limited to three.")
+            Swal('', 'Sorry, meeting points is limited to three.', 'info');
         }
     };
 

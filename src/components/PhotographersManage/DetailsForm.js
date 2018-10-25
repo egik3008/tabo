@@ -173,7 +173,7 @@ class DetailsForm extends React.Component {
 
     // validate field mandatory
     if ((userMetadata.displayName === "") || (userMetadata.email === "")) {
-      alert("Field Name & Email are mandatory");
+      Swal('', 'Field Name & Email are mandatory', 'info');
       return;
     }
 
@@ -181,10 +181,10 @@ class DetailsForm extends React.Component {
     if (!this.isEditMode() || this.state.changePassword) {
       const { password, passwordConfirm } = this.state.userAuth;
       if (password.length < 6) {
-        alert("Password must be at least six characters long");
+        Swal('', 'Password must be at least six characters long', 'info');
         return;
       } else if (password !== passwordConfirm) {
-        alert("Password does not match the confirm password");
+        Swal('', 'Password does not match the confirm password', 'info');
         return;
       }
       userAuth = { password };
