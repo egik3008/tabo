@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import moment from 'moment';
 import Select from 'react-select';
 import CreatableSelect from 'react-select/lib/Creatable';
-
+import Swal from 'sweetalert2';
 import {
     Col,
     Row,

@@ -1,6 +1,7 @@
 import React from 'react';
 import uuidv4 from 'uuid/v4';
 import get from 'lodash/get';
+import Swal from 'sweetalert2';
 import {
     Button,
     Table,
