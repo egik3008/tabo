@@ -166,10 +166,10 @@ class CashoutDetail extends Component {
 
         <TabContent activeTab={this.state.activeTab}>
           <TabPane tabId="detail">
-            <div className="reservation-detail-header">
+            <div className="tabo-detail-header">
               <h5>Cashout</h5>
               <hr className="mt-0 mb-1" />
-              <dl className="row mb-2 reservation-detail-content">
+              <dl className="row mb-2 tabo-detail-content">
                 <dt className="col-sm-3">Number</dt>
                 <dd className="col-sm-9">{this.props.match.params.id}</dd>
 
@@ -190,10 +190,10 @@ class CashoutDetail extends Component {
               </dl>
             </div>
 
-          <div className="reservation-detail-body">
+          <div className="tabo-detail-body">
             <h5>Cash Out Summary</h5>
               <hr className="mt-0 mb-1" />
-              <dl className="row mb-2 reservation-detail-content">
+              <dl className="row mb-2 tabo-detail-content">
                 <dt className="col-sm-3">Method</dt>
                 <dd className="col-sm-9">
                   {displayMethodCashout(this.state.cashout.paymentType)}

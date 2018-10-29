@@ -43,28 +43,29 @@
     color: red;
 }
 
-.reservation-detail-header {
+.tabo-detail-header {
     border: 0.5px solid;
     padding: 10px 20px;
     margin-bottom: 15px;
     background-color: lightgray;
 }
 
-.reservation-detail-body {
+.tabo-detail-body {
     padding: 10px 20px;
 }
 
-.reservation-detail-content {
+.tabo-detail-content {
     padding-left: 20px;
 }
 
-.reservation-detail-subtitle {
+.tabo-detail-subtitle {
     margin-left: 20px;
 }
 
 
 
-/** Photographer portfolio  */
+/******************** photographer portfolio **************************/
+
 .portfolio-left-container {
     display: flex;
     justify-content: center;
@@ -180,6 +181,19 @@ span.set-default-photo-profile-manager {
 a.set-default-photo-profile-manager:hover {
     color: #fff !important;
 }
+
+/******************** end photographer portfolio **************************/
+
+
+/******************** portfolio **************************/
+.photo-album-left-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 300px;
+    padding: inherit !important;
+}
+
 
 /******************** end photographer portfolio **************************/
 

@@ -138,10 +138,10 @@ class ReservationDetail extends Component {
 
         <TabContent activeTab={this.state.activeTab}>
           <TabPane tabId="detail">
-            <div className="reservation-detail-header">
+            <div className="tabo-detail-header">
               <h5>Reservation</h5>
               <hr className="mt-0 mb-1" />
-              <dl className="row mb-2 reservation-detail-content">
+              <dl className="row mb-2 tabo-detail-content">
                 <dt className="col-sm-3">Number</dt>
                 <dd className="col-sm-9">{this.props.match.params.id}</dd>
 
@@ -179,10 +179,10 @@ class ReservationDetail extends Component {
               </dl>
             </div>
 
-          <div className="reservation-detail-body">
+          <div className="tabo-detail-body">
             <h5>Trip Summary</h5>
               <hr className="mt-0 mb-1" />
-              <dl className="row mb-2 reservation-detail-content">
+              <dl className="row mb-2 tabo-detail-content">
                 <dt className="col-sm-3">Schedule</dt>
                 <dd className="col-sm-9">
                   {'startDateTime' in this.state.reservation ? this.displayDateFormat(this.state.reservation.startDateTime) : "-"}
@@ -227,7 +227,7 @@ class ReservationDetail extends Component {
               </dl>
           </div>
 
-          <div className="reservation-detail-body">
+          <div className="tabo-detail-body">
             <h5 className="mt-3">Total Summary</h5>
             <hr className="mt-0 mb-1" />
 
@@ -237,7 +237,7 @@ class ReservationDetail extends Component {
                   paddingLeft: 20, 
                   textDecoration: 'underline'
                 }}>Traveller Price</h5>
-                <dl className="row mb-2 reservation-detail-content">
+                <dl className="row mb-2 tabo-detail-content">
                   <dt className="col-sm-5">Subtotal</dt>
                   <dd className="col-sm-7">{this.displayPriceFormat(tPhotographerFee, paymentCurrency)}</dd>
 
@@ -263,7 +263,7 @@ class ReservationDetail extends Component {
                   paddingLeft: 20, 
                   textDecoration: 'underline'
                 }}>Photographer Price</h5>
-                <dl className="row mb-2 reservation-detail-content" style={{borderLeft: "solid"}}>
+                <dl className="row mb-2 tabo-detail-content" style={{borderLeft: "solid"}}>
                   <dt className="col-sm-5">Subtotal</dt>
                   <dd className="col-sm-7">{this.displayPriceFormat(photographerFee, photographerCurrency)}</dd>
 

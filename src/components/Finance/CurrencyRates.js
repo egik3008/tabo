@@ -168,10 +168,10 @@ class CurrencyRates extends Component {
                 </h3>
               </CardHeader>
               <CardBody>
-                <div className="reservation-detail-header">
+                <div className="tabo-detail-header">
                   <h5>DEFAULT Currency ID: <span style={{marginLeft: 15}}>{this.state.defaultCurrency + this.state.defaultCurrency}</span>
                   </h5>
-                  <dl className="row mb-2 reservation-detail-content">
+                  <dl className="row mb-2 tabo-detail-content">
                       <dt className="col-sm-3">ISO Code</dt>
                       <dd className="col-sm-9">: {this.state.defaultCurrency}</dd>
 

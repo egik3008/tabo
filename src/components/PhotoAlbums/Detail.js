@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import cloudinary from 'cloudinary-core';
 import { withRouter, Link } from 'react-router-dom';
+import axios from 'axios';
 import uuidv4 from 'uuid/v4';
 import firebase from 'firebase';
 import Swal from 'sweetalert2';
@@ -125,6 +126,198 @@ class Detail extends Component {
       });
   }
 
+  selectImagesHandler = (evt) => {
+    const files = evt.target.files;
+    const fileOutOfSize = [];
+
+    Object.keys(files).forEach((itemKey) => {
+      const fileItemObject = files[itemKey];
+      if (fileItemObject.size <= 10000000) {
+        const fileReader = new FileReader();
+
+        fileReader.onloadend = (evtObj) => {
+          const imageItem = {imagePreview: evtObj.target.result, fileObject: fileItemObject};
+          this.setState({imagesAddedBuffer: [...this.state.imagesAddedBuffer, imageItem]});
+        };
+        fileReader.readAsDataURL(fileItemObject);
+
+      } else {
+        fileOutOfSize.push(fileItemObject.name);
+      }
+    });
+
+    if (fileOutOfSize.length > 0) {
+      const filesStr = fileOutOfSize.join("\n");
+      alert("Some photos will not be uploaded. Because there are one or more photos have more than 10MB size\n---------------------------------\n" + filesStr);
+    }
+  };
+
+  submitImagesHandler = async (evt) => {
+    evt.preventDefault();
+    this.setState({ isUploading: true });
+
+    let urlUploadRequest = process.env.REACT_APP_CLOUDINARY_API_BASE_URL;
+    urlUploadRequest += '/image/upload';
+
+    if (this.state.imagesAddedBuffer.length > 0) {
+      let uploads = [];
+      const images = this.state.imagesAddedBuffer;
+
+      images.forEach((item, index) => {
+        const formData = new FormData();
+        formData.append('upload_preset', process.env.REACT_APP_CLOUDINARY_ALBUMS_PRESET);
+        formData.append('tags', `album-${this.state.photoAlbum.id}`);
+        formData.append('file', item.fileObject);
+
+        const uploadConfig = {
+          onUploadProgress: (progressEvent) => {
+            images[index].percentCompleted = Math.round( (progressEvent.loaded * 100) / progressEvent.total );
+            this.setState({ imagesAddedBuffer: images });
+          }
+        };
+
+        uploads.push(
+          axios
+            .post(urlUploadRequest, formData, uploadConfig)
+            .then((response) => {
+              const newItem = {
+                id: uuidv4(),
+                publicId: response.data.public_id,
+                imageFormat: response.data.format,
+                url: response.data.secure_url,
+                width: response.data.width,
+                height: response.data.height,
+                sizebytes: response.data.bytes,
+                theme: '-',
+                defaultPicture: false
+              };
+
+              this.setState({ uploadedImagesList: [ ...this.state.uploadedImagesList, newItem ] });
+            })
+            .catch((error) => {
+              console.error('Catch error: ', error);
+            })
+        );
+      });
+
+      // // if any images existed deleted, run it first
+      // if (this.state.imagesExistingDeleted.length > 0) {
+      //   await this.deletePhotoAlbums(
+      //     uid,
+      //     this.state.imagesExistingDeleted,
+      //     this.state.imagesExisting
+      //   )
+      // }
+
+      if (images.length > 0) {
+        if (uploads.length > 0) {
+          Promise.all(uploads)
+            .then(() => {
+              const newImages = [
+                ...this.state.photoAlbum.albums,
+                ...this.state.uploadedImagesList
+              ];
+
+              this.saveUploadedImages(newImages);
+            })
+            .then(() => {
+              this.successUploadedEvent();
+            });
+        }
+      }
+
+    } else if (this.state.imagesExistingDeleted.length > 0) {
+      // await this.deletePortfolioPhotos(
+      //   uid,
+      //   this.state.imagesExistingDeleted,
+      //   this.state.imagesExisting
+      // )
+      
+      Swal('Success!', "Portofolio updated..", 'success');
+      this.setState({ 
+        imagesExistingDeleted: [], 
+        isUploading: false 
+      });
+
+    } else {
+      this.setState({ 
+        isUploading: false 
+      });
+      Swal('', 'There are no images to be upload', 'info');
+    }
+  };
+
+  saveUploadedImages(newImages) {
+    const db = firebase.database();
+    db
+      .ref('reservations')
+      .child(this.state.photoAlbum.id)
+      .child('defaultAlbumPhotoPublicId')
+      .once('value')
+      .then((snapshot) => {
+        db
+          .ref('albums')
+          .child(this.state.photoAlbum.id)
+          .set(newImages)
+          .then(() => {
+            db
+              .ref('reservations')
+              .child(this.state.photoAlbum.id)
+              .update({ defaultAlbumPhotoPublicId: newImages[0].publicId })
+              .catch((error) => {
+                console.log(error);
+              });
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      });
+  }
+
+  deletePhotoAlbums = (uid, photosDeleted, imagesExisting) => {
+    if (photosDeleted.length > 0) {
+      const publicIdList = photosDeleted.map((item) => item.publicId);
+
+      return axios({
+        method: 'DELETE',
+        url: `${process.env.REACT_APP_API_HOSTNAME}/api/cloudinary-images/delete`,
+        params: { public_ids: publicIdList }
+      })
+        .then(() => {
+          return firebase
+            .database()
+            .ref('albums')
+            .child(this.state.photoAlbum.id)
+            .set({ photosPortofolio: imagesExisting });
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    }
+  };
+
+  successUploadedEvent = () => {
+    Swal('Success!', "Photo Albums updated..", 'success');
+    let newImagesExisting = [
+      ...this.state.photoAlbum.albums,
+      ...this.state.uploadedImagesList
+    ];
+
+    if (this.state.photoAlbum.albums.length < 1) {
+      newImagesExisting[0].defaultPicture = true;
+    }
+
+    this.setState({ 
+      photoAlbum: {
+        ...this.state.photoAlbum,
+        albums: newImagesExisting
+      },
+      uploadedImagesList: [],
+      imagesAddedBuffer: [], 
+      isUploading: false 
+    });
+  }
+
   displayDateFormat = (date) => {
     return date ? (
       <React.Fragment>
@@ -160,7 +353,7 @@ class Detail extends Component {
 
         <TabContent activeTab={this.state.activeTab}>
           <TabPane tabId="detail">
-            <div className="reservation-detail-header">
+            <div className="tabo-detail-header" style={{marginBottom: 60}}>
               <dl className="row mb-2">
                 <dt className="col-sm-3">Photo Album ID</dt>
                 <dd className="col-sm-9">: {this.state.photoAlbum.id}</dd>
@@ -173,7 +366,7 @@ class Detail extends Component {
                   }
                 </dd>
               </dl>
-              <dl className="row mb-2 reservation-detail-content">
+              <dl className="row mb-2 tabo-detail-content">
                   <dt className="col-sm-3">Photographer</dt>
                   <dd className="col-sm-9">: {this.state.photoAlbum.photographer}</dd>
 
@@ -192,10 +385,9 @@ class Detail extends Component {
             </div>
 
             <Row>
-
-                <Col md={this.hasPhotos() ? 5:12} xs="12">
-                    <Card>
-                        <CardBody className="portfolio-left-container">
+                <Col md={this.hasPhotos() ? 4:12} xs="12">
+                    <Card style={{border: 'none'}}>
+                        <CardBody className="photo-album-left-container">
                             {
                                 !this.hasPhotos() && (
                                     <p>Photo Album is empty.</p>
@@ -212,6 +404,7 @@ class Detail extends Component {
                             <Button
                                 color="success" 
                                 size="lg"
+                                style={{lineHeight: "2.5"}}
                                 onClick={() => this._uploadFile.click()}
                             >
                                 Browse to add Photo
@@ -221,7 +414,7 @@ class Detail extends Component {
                     </Card>
                 </Col>
 
-                <Col md={this.hasPhotos() ? 7 : 12} xs={12}>
+                <Col md={this.hasPhotos() ? 8 : 12} xs={12} style={{marginBottom: 60}}>
                   <Row>
                   <div id="photo-preview">
                   {
