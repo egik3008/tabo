@@ -13,12 +13,13 @@ import {
   TabPane, 
   Input 
 } from 'reactstrap';
+import axios from 'axios';
 import firebase from '../../services/database';
 import classnames from 'classnames';
-import moment from 'moment';
-import 'moment/locale/id';
 import firebaseObj from 'firebase';
 import Swal from 'sweetalert2';
+import moment from 'moment';
+import 'moment/locale/id';
 
 import CASHOUT from '../../constants/cashout';
 import { displayMethodCashout } from '../../utils/cashoutUtils';
@@ -31,9 +32,7 @@ class CashoutDetail extends Component {
     this.toggle = this.toggle.bind(this)
     this.state = {
       activeTab: 'detail',
-      cashout: {
-        
-      },
+      cashout: {},
       updateStatus: '',
       loading: false,
       isSubmitting: false
@@ -74,6 +73,7 @@ class CashoutDetail extends Component {
                             ...this.state.cashout,
                             ...cashout
                         },
+                        updateStatus: cashout.status,
                         loading: false
                     })
                 })
@@ -109,9 +109,20 @@ class CashoutDetail extends Component {
                         status: newStatus,
                         updated: new Date().getTime()
                     },
-                    isSubmitting: false,
-                    updateStatus: ''
-                })
+                    isSubmitting: false
+                });
+
+                // send email when update status to DONE
+                if (newStatus === CASHOUT.STATUS_DONE) {
+                  const emailContent = "Your Cash Out Request has been processed!";
+
+                  axios.post(`${process.env.REACT_APP_API_HOSTNAME}/api/email-service/email-notifications`, {
+                    receiverName: this.state.cashout.photographerDisplayName,
+                    receiverEmail: this.state.cashout.photographerEmail,
+                    emailSubject: "Cash Out Request Notification",
+                    emailContent: emailContent
+                  });
+                }
             })
     }
   }

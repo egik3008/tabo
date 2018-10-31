@@ -6,7 +6,8 @@ import { Link } from 'react-router-dom'
 import axios from 'axios'
 import moment from 'moment'
 import 'moment/locale/id'
-import 'react-table/react-table.css'
+import 'react-table/react-table.css';
+import { filterCaseInsensitive } from '../utils/reactTable';
 
 class Users extends Component {
   constructor() {
@@ -84,13 +85,6 @@ class Users extends Component {
       .catch(error => {
         console.error(error)
       })
-  }
-
-  filterCaseInsensitive = (filter, row) => {
-    const id = filter.pivotId || filter.id
-    if (row[id] !== null) {
-      return row[id] !== undefined ? String(row[id]).toLowerCase().includes(filter.value.toLowerCase()) : true
-    }
   }
 
   setUpData = (data) => {
@@ -280,7 +274,7 @@ class Users extends Component {
                   className="-striped -hightlight"
                   columns={columns}
                   filterable={true}
-                  defaultFilterMethod={this.filterCaseInsensitive}
+                  defaultFilterMethod={filterCaseInsensitive}
                   sortable={true}
                   defaultSorted={[
                     {

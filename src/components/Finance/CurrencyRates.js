@@ -4,6 +4,7 @@ import ReactTable from 'react-table'
 import { Card, CardBody, CardHeader, Col, Row, Button, Input } from 'reactstrap';
 import 'moment/locale/id';
 import 'react-table/react-table.css';
+import { filterCaseInsensitive } from '../../utils/reactTable';
 
 const USD = "USD", IDR = "IDR";
 
@@ -73,13 +74,6 @@ class CurrencyRates extends Component {
             })
         })
     })
-  }
-
-  filterCaseInsensitive = (filter, row) => {
-    const id = filter.pivotId || filter.id
-    if (row[id] !== null) {
-      return row[id] !== undefined ? String(row[id].toLowerCase()).includes(filter.value.toLowerCase()) : true
-    }
   }
 
   handleChange = id => event => {
@@ -197,7 +191,7 @@ class CurrencyRates extends Component {
                   className="-striped -hightlight"
                   columns={columns}
                   filterable={true}
-                  defaultFilterMethod={this.filterCaseInsensitive}
+                  defaultFilterMethod={filterCaseInsensitive}
                   sortable={true}
                   defaultSorted={[
                     {

@@ -7,6 +7,7 @@ import moment from 'moment'
 import 'moment/locale/id'
 import 'react-table/react-table.css';
 
+import { filterCaseInsensitive } from '../utils/reactTable';
 import STATUS from '../constants/reservations';
 
 class Reservations extends Component {
@@ -43,13 +44,6 @@ class Reservations extends Component {
         }
       })
     })
-  }
-
-  filterCaseInsensitive = (filter, row) => {
-    const id = filter.pivotId || filter.id
-    if (row[id] !== null) {
-      return row[id] !== undefined ? String(row[id].toLowerCase()).includes(filter.value.toLowerCase()) : true
-    }
   }
 
   render() {
@@ -227,7 +221,7 @@ class Reservations extends Component {
                   className="-striped -hightlight"
                   columns={columns}
                   filterable={true}
-                  defaultFilterMethod={this.filterCaseInsensitive}
+                  defaultFilterMethod={filterCaseInsensitive}
                   sortable={true}
                   defaultSorted={[
                     {

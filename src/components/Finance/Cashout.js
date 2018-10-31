@@ -8,6 +8,7 @@ import 'moment/locale/id'
 import 'react-table/react-table.css';
 
 import CASHOUT from '../../constants/cashout';
+import { filterCaseInsensitive } from '../../utils/reactTable';
 
 class Cashout extends Component {
   constructor() {
@@ -49,13 +50,6 @@ class Cashout extends Component {
         }
       })
     })
-  }
-
-  filterCaseInsensitive = (filter, row) => {
-    const id = filter.pivotId || filter.id
-    if (row[id] !== null) {
-      return row[id] !== undefined ? String(row[id].toLowerCase()).includes(filter.value.toLowerCase()) : true
-    }
   }
 
   render() {
@@ -196,7 +190,7 @@ class Cashout extends Component {
                   className="-striped -hightlight"
                   columns={columns}
                   filterable={true}
-                  defaultFilterMethod={this.filterCaseInsensitive}
+                  defaultFilterMethod={filterCaseInsensitive}
                   sortable={true}
                   defaultSorted={[
                     {
