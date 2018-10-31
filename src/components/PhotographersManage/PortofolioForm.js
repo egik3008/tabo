@@ -446,8 +446,8 @@ class PortofolioForm extends React.Component {
 
                 <ManageSaveButton
                     onClick={this.submitImagesHandler}
-                    isSubmitting={this.state.isUploading || this.props.isSubmitting}
-                    disabled={this.state.isUploading || this.props.isSubmitting}
+                    isSubmitting={this.state.isUploading}
+                    disabled={this.state.isUploading}
                     isSubmittingLabel="Updating portfolio..."
                 />
             </Row>

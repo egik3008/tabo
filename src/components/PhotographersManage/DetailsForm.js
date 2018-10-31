@@ -115,6 +115,11 @@ class DetailsForm extends React.Component {
     this.setDefaultState(photographer);
   }
 
+  componentWillReceiveProps(newProps) {
+    const { photographer } = newProps;
+    this.setDefaultState(photographer);
+  }
+
   isEditMode = () => {
     return this.state.userMetadata.uid !== '';
   }

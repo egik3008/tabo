@@ -20,7 +20,8 @@ class PackageForm extends React.Component {
             {id: "PKG2", packageName: "2 hour", price: 0},
             {id: "PKG3", packageName: "4 hour", price: 0},
             {id: "PKG4", packageName: "8 hour", price: 0},
-        ]
+        ],
+        isSubmitting: false
     }
 
     handleChange = (event) => {
@@ -47,6 +48,8 @@ class PackageForm extends React.Component {
     }
 
     handleSubmit = () => {
+        this.setState({ isSubmitting: true });
+
         const {packagesPrice} = this.state;
         const db = database.database();
         const {uid} = this.props.photographer.userMetadata;
@@ -54,7 +57,7 @@ class PackageForm extends React.Component {
             .ref('photographer_service_information')
             .child(uid)
             .update({
-                packagesPrice: packagesPrice,
+                packagesPrice,
                 updated: firebase.database.ServerValue.TIMESTAMP
             })
             .then(() => {
@@ -67,6 +70,13 @@ class PackageForm extends React.Component {
                 })
                 .then(() => {
                     Swal('Success!', "Photographer package updated!", 'success');
+                    this.setState({ isSubmitting: false });
+                    this.props.updateParentState({
+                        userMetadata: {
+                            ...this.props.photographer.userMetadata,
+                            priceStartFrom: packagesPrice[0].price
+                        }
+                    });
                 });
             })
             .catch(error => {
@@ -114,7 +124,7 @@ class PackageForm extends React.Component {
 
                 <ManageSaveButton
                     onClick={this.handleSubmit}
-                    isSubmitting={this.props.isSubmitting}
+                    isSubmitting={this.state.isSubmitting}
                 />
             </div>
         )

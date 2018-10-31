@@ -164,13 +164,6 @@ class UserDetail extends Component {
     }
   }
 
-  filterCaseInsensitive = (filter, row) => {
-    const id = filter.pivotId || filter.id
-    if (row[id] !== null) {
-      return row[id] !== undefined ? String(row[id].toLowerCase()).includes(filter.value.toLowerCase()) : true
-    }
-  }
-
   isEditMode = () => {
     return ('id' in this.props.match.params);
   }
@@ -181,6 +174,15 @@ class UserDetail extends Component {
 
   isTraveller = () => {
     return (this.props.match.params.type === USER_TYPE.TRAVELLER);
+  }
+
+  updatePhotographerState = (changedState) => {
+    this.setState({
+      photographer: {
+        ...this.state.photographer,
+        ...changedState
+      }
+    })
   }
 
   updatePhotographerPortofolio = (newPortofolio, defaultPicture = false) => {
@@ -334,17 +336,6 @@ class UserDetail extends Component {
       photographer: {
         ...this.state.photographer,
         cameraEquipment
-      }
-    }, () => {
-      this.handleSubmit();
-    })
-  }
-
-  handleSubmitPackagesPrice = (packagesPrice) => {
-    this.setState({
-      photographer: {
-        ...this.state.photographer,
-        packagesPrice
       }
     }, () => {
       this.handleSubmit();
@@ -682,8 +673,7 @@ class UserDetail extends Component {
           <TabPane tabId="package">
             <PackageForm
               photographer={this.state.photographer}
-              onSubmit={this.handleSubmitPackagesPrice}
-              isSubmitting={this.state.isSubmitting}
+              updateParentState={this.updatePhotographerState}
             />
           </TabPane>
 
@@ -706,10 +696,6 @@ class UserDetail extends Component {
           <TabPane tabId="portfolio">
                 <PortofolioForm
                   photographer={this.state.photographer}
-                  onUploadPhotos={this.handleImagesUpload}
-                  isUploading={this.state.addingPortofolio}
-                  isDeleting={this.state.deletingPortofolio}
-                  onDeletePhotos={this.handleDeletePhotos}
                 />
           </TabPane>
 
