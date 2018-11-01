@@ -62,6 +62,14 @@
     margin-left: 20px;
 }
 
+.tabo-content-semicolon {
+    padding-left: 15px;
+}
+
+.tabo-content-value {
+    padding-left: 4px !important;
+}
+
 
 
 /******************** photographer portfolio **************************/

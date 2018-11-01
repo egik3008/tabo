@@ -25,6 +25,7 @@ import 'moment/locale/id';
 
 import LoadingAnimation from '../commons/LoadingAnimation';
 import ManageSaveButton from '../commons/ManageSaveButton';
+import { displayDateFormat } from '../../utils/commonUtils';
 
 class Detail extends Component {
   constructor(props) {
@@ -115,6 +116,8 @@ class Detail extends Component {
               this.setState({
                 photoAlbum: {
                   ...this.state.photoAlbum,
+                  created: rsrv.albumUpdated || rsrv.updated || rsrv.created,
+                  packageId: rsrv.packageId,
                   albums: snap.val(),
                   photographer,
                   traveller,
@@ -263,7 +266,10 @@ class Detail extends Component {
             db
               .ref('reservations')
               .child(this.state.photoAlbum.id)
-              .update({ defaultAlbumPhotoPublicId: newImages[0].publicId })
+              .update({
+                albumUpdated: firebase.database.ServerValue.TIMESTAMP,
+                defaultAlbumPhotoPublicId: newImages[0].publicId 
+              })
               .catch((error) => {
                 console.log(error);
               });
@@ -310,6 +316,7 @@ class Detail extends Component {
     this.setState({ 
       photoAlbum: {
         ...this.state.photoAlbum,
+        created: new Date().getTime(),
         albums: newImagesExisting
       },
       uploadedImagesList: [],
@@ -373,8 +380,9 @@ class Detail extends Component {
                   <dt className="col-sm-3">Traveller</dt>
                   <dd className="col-sm-9">: {this.state.photoAlbum.traveller}</dd>
 
-                  <dt className="col-sm-3">Created</dt>
-                  <dd className="col-sm-9">: {this.state.photoAlbum.created}</dd>
+                  <dt className="col-sm-3">Created/Last Deliverd</dt>
+                  <dd className="tabo-content-semicolon">:</dd>
+                  <dd className="col-sm-8 tabo-content-value">{displayDateFormat(this.state.photoAlbum.created)}</dd>
 
                   <dt className="col-sm-3">Number of Photos</dt>
                   <dd className="col-sm-9">: {this.state.photoAlbum.albums.length}</dd>
@@ -409,7 +417,7 @@ class Detail extends Component {
                             >
                                 Browse to add Photo
                             </Button>
-                            Maximum 30 Photos
+                            Minimum {packageMinimumPhotos[this.state.photoAlbum.packageId] || 0} Photos
                         </CardBody>
                     </Card>
                 </Col>
@@ -536,6 +544,13 @@ class Detail extends Component {
       </div>
     )
   }
+}
+
+const packageMinimumPhotos = {
+  'PKG1': 30,
+  'PKG2': 60,
+  'PKG3': 120,
+  'PKG4': 200,
 }
 
 export default withRouter(Detail);

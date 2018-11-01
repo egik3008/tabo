@@ -18,6 +18,7 @@ import moment from 'moment';
 import 'moment/locale/id';
 
 import LoadingAnimation from './commons/LoadingAnimation';
+import { displayDateFormat } from '../utils/commonUtils';
 
 class ReservationDetail extends Component {
   constructor(props) {
@@ -90,16 +91,6 @@ class ReservationDetail extends Component {
     })
   }
 
-  displayDateFormat = (date) => {
-    return date ? (
-      <React.Fragment>
-        {moment(date).format('DD/MM/YYYY')}
-        <br/>
-        {moment(date).format('HH:mm:ss')}
-      </React.Fragment>
-    ): '-';
-  }
-
   displayPriceFormat = (price, currency) => {
     currency = currency || "IDR";
     const local = currency === "IDR" ? "id" : 'us';
@@ -153,7 +144,7 @@ class ReservationDetail extends Component {
 
                 <dt className="col-sm-3">Created</dt>
                 <dd className="col-sm-9">
-                  {this.displayDateFormat(this.state.reservation.created)}
+                  {displayDateFormat(this.state.reservation.created)}
                 </dd>
 
                 <dt className="col-sm-3">Photo Album ID</dt>
@@ -167,7 +158,7 @@ class ReservationDetail extends Component {
                 
                 <dt className="col-sm-3">Album Delivered</dt>
                 <dd className="col-sm-9">
-                  {this.isAlbumDelivered() ? this.displayDateFormat(this.state.reservation.updated) : "-"}
+                  {this.isAlbumDelivered() ? displayDateFormat(this.state.reservation.updated) : "-"}
                 </dd>
 
                 <dt className="col-sm-3">Photo of album</dt>
@@ -185,7 +176,7 @@ class ReservationDetail extends Component {
               <dl className="row mb-2 tabo-detail-content">
                 <dt className="col-sm-3">Schedule</dt>
                 <dd className="col-sm-9">
-                  {'startDateTime' in this.state.reservation ? this.displayDateFormat(this.state.reservation.startDateTime) : "-"}
+                  {'startDateTime' in this.state.reservation ? displayDateFormat(this.state.reservation.startDateTime) : "-"}
                 </dd>
 
                 <dt className="col-sm-3">Package</dt>
