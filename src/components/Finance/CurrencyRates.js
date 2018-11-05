@@ -26,7 +26,7 @@ class CurrencyRates extends Component {
   }
 
   componentWillMount() {
-    this.fetchData(this.state.defaultCurrency);
+    this.fetchData(USD);
   }
 
   fetchData = (code) => {

@@ -24,6 +24,7 @@
     "prettier": "^1.14.2",
     "query-string": "5.1.1",
     "react": "^16.4.1",
+    "react-csv": "^1.0.18",
     "react-day-picker": "^7.2.4",
     "react-dom": "^16.4.1",
     "react-google-maps": "^9.4.5",

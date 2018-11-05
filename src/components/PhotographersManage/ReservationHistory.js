@@ -1,15 +1,51 @@
 import React from 'react';
+import {
+  Row,
+  Col,
+  Button
+} from 'reactstrap';
 import ReactTable from 'react-table';
 import 'react-table/react-table.css';
 import moment from 'moment';
+import { CSVLink } from "react-csv";
+
 import STATUS from '../../constants/reservations';
 import {filterCaseInsensitive} from '../../utils/reactTable';
 
 class ReservationHistory extends React.Component  {
 
-    render() {
-        const { photographer } = this.props;
-        return (
+  getCSVData = () => {
+    const { photographer } = this.props;
+    if (photographer.reservationHistory) {
+      return photographer.reservationHistory.map(rsrv => ({
+        "Traveller ID": rsrv.travellerId,
+        "Traveler Name": rsrv.uidMapping[rsrv.travellerId].displayName,
+        "Destination": rsrv.destination,
+        "Email": rsrv.uidMapping[rsrv.travellerId].email,
+        "Currency": rsrv.paymentCurrency ? rsrv.paymentCurrency : "IDR",
+        "Updated": moment(rsrv.created).locale('id').format('lll'),
+        "Status": rsrv.status
+      }));
+    } else return [];
+  }
+
+  render() {
+      const { photographer } = this.props;
+      return (
+          <React.Fragment>
+            <Row className="mb-2 justify-content-end">
+              <Col md="2">
+              <CSVLink 
+                data={this.getCSVData()}
+                filename={"reservation-history.csv"}
+                target="_blank"
+              >
+                <Button block color="primary">
+                  Export
+                </Button>
+                </CSVLink>
+              </Col>
+            </Row>
             <ReactTable
               className="-striped -hightlight"
               columns={this.historyColumns()}
@@ -26,7 +62,8 @@ class ReservationHistory extends React.Component  {
               data={photographer.reservationHistory}
             //   loading={this.state.loading}
             />
-        )
+          </React.Fragment>
+      )
     }
 
     historyColumns = () => {

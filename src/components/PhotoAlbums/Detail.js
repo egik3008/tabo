@@ -203,14 +203,13 @@ class Detail extends Component {
         );
       });
 
-      // // if any images existed deleted, run it first
-      // if (this.state.imagesExistingDeleted.length > 0) {
-      //   await this.deletePhotoAlbums(
-      //     uid,
-      //     this.state.imagesExistingDeleted,
-      //     this.state.imagesExisting
-      //   )
-      // }
+      // if any images existed deleted, run it first
+      if (this.state.imagesExistingDeleted.length > 0) {
+        await this.deletePhotoAlbums(
+          this.state.imagesExistingDeleted,
+          this.state.photoAlbum.albums
+        )
+      }
 
       if (images.length > 0) {
         if (uploads.length > 0) {
@@ -230,11 +229,10 @@ class Detail extends Component {
       }
 
     } else if (this.state.imagesExistingDeleted.length > 0) {
-      // await this.deletePortfolioPhotos(
-      //   uid,
-      //   this.state.imagesExistingDeleted,
-      //   this.state.imagesExisting
-      // )
+      await this.deletePhotoAlbums(
+        this.state.imagesExistingDeleted,
+        this.state.photoAlbum.albums
+      )
       
       Swal('Success!', "Portofolio updated..", 'success');
       this.setState({ 
@@ -280,7 +278,7 @@ class Detail extends Component {
       });
   }
 
-  deletePhotoAlbums = (uid, photosDeleted, imagesExisting) => {
+  deletePhotoAlbums = (photosDeleted, imagesExisting) => {
     if (photosDeleted.length > 0) {
       const publicIdList = photosDeleted.map((item) => item.publicId);
 
@@ -290,11 +288,22 @@ class Detail extends Component {
         params: { public_ids: publicIdList }
       })
         .then(() => {
+          if (!imagesExisting || imagesExisting.length <= 0) {
+            firebase.database()
+              .ref('reservations')
+              .child(this.state.photoAlbum.id)
+              .child('defaultAlbumPhotoPublicId')
+              .remove()
+              .catch((error) => {
+                console.log(error);
+              });
+          };
+
           return firebase
             .database()
             .ref('albums')
             .child(this.state.photoAlbum.id)
-            .set({ photosPortofolio: imagesExisting });
+            .set(imagesExisting);
         })
         .catch((error) => {
           console.error(error);
