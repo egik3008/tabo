@@ -99,6 +99,10 @@ class PortofolioForm extends React.Component {
       const ref = db.ref('/user_metadata');
       const userRef = ref.child(reference);
 
+      this.props.updateParentState({
+        defaultDisplayPicturePublicId: picturePublicId
+      });
+
       return userRef.update({
         defaultDisplayPictureUrl: pictureUrl,
         defaultDisplayPicturePublicId: picturePublicId,
@@ -121,6 +125,11 @@ class PortofolioForm extends React.Component {
               updated: firebase.database.ServerValue.TIMESTAMP
             })
             .then(() => {
+              
+              this.props.updateParentState({
+                defaultDisplayPicturePublicId: data[0].publicId
+              });
+
               // Update photos portofolio in photographer service information
               const photos = data.map((item, index) => index === 0
                 ? { ...item, defaultPicture: true }
@@ -159,6 +168,11 @@ class PortofolioForm extends React.Component {
           }
         })
           .then(() => {
+            // delete defaultDisplayPicturePublicId in userMetadata if all portfolio deleted
+            if (imagesExisting.length <= 0) {
+              this.updateUserMetadataDefaultDisplayPicture(uid, "-", "-");
+            }
+            
             return database
               .database()
               .ref('photographer_service_information')

@@ -321,6 +321,7 @@ class DetailsForm extends React.Component {
                 userMetadata: {
                   ...this.state.userMetadata,
                   photoProfileUrl: response.data.secure_url,
+                  photoProfilePublicId: response.data.public_id
                 },
                 newPhotoProfile: {
                   fileObject: null,
@@ -345,28 +346,36 @@ class DetailsForm extends React.Component {
 
   isProfileCompleted = () => {
     let isCompleted = true;
+    let error = "";
     const photographer = this.state.userMetadata;
 
     // has photo profile
     const hasPhotoProfilePublicId = photographer.photoProfilePublicId 
     && photographer.photoProfilePublicId !== '-';
 
-    if (!hasPhotoProfilePublicId) isCompleted = false;
-
+    if (!hasPhotoProfilePublicId) {
+      isCompleted = false;
+      error = "empty photo profile";
+    }
 
     // has phone number
     if (isCompleted) {
       const hasPhoneNumber = photographer.phoneNumber 
         && photographer.phoneNumber !== '-';
-      if (!hasPhoneNumber) isCompleted = false;
+      if (!hasPhoneNumber) {
+        isCompleted = false;
+        error = "empty phone number"
+      }
     }
 
     // has default portfolio
     if (isCompleted) {
       const hasDefaultDisplayPicturePublicId = photographer.defaultDisplayPicturePublicId 
         && photographer.defaultDisplayPicturePublicId !== '-';
-      
-        if (!hasDefaultDisplayPicturePublicId) isCompleted = false;
+        if (!hasDefaultDisplayPicturePublicId) {
+          isCompleted = false;
+          error = "empty default portfolio photo";
+        }
     }
 
     // has start price
@@ -374,15 +383,23 @@ class DetailsForm extends React.Component {
       const hasStartPrice = photographer.priceStartFrom 
         && Number(photographer.priceStartFrom) > 0;
       
-        if (!hasStartPrice) isCompleted = false;
+        if (!hasStartPrice) {
+          isCompleted = false;
+          error = "empty pricing";
+        }
     }
 
-    return isCompleted;
+    return {
+      isCompleted,
+      error
+    };
   }
 
   handleListedChange = hidden => () => {
-    if (!hidden && !this.isProfileCompleted()) {
-      Swal('', 'Photographer profile is incomplete. This Photographer cannot be displayed on the web.', 'info');
+    const pProfile = this.isProfileCompleted();
+
+    if (!hidden && !pProfile.isCompleted) {
+      Swal('', `Photographer profile is incomplete (${pProfile.error}). This Photographer cannot be displayed on the web.`, 'info');
     } else {
       this.setState({
         userMetadata: {

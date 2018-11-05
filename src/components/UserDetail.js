@@ -176,11 +176,14 @@ class UserDetail extends Component {
     return (this.props.match.params.type === USER_TYPE.TRAVELLER);
   }
 
-  updatePhotographerState = (changedState) => {
+  updatePhotographerUserMetadataState = (changedState) => {
     this.setState({
       photographer: {
         ...this.state.photographer,
-        ...changedState
+        userMetadata: {
+          ...this.state.photographer.userMetadata,
+          ...changedState
+        }
       }
     })
   }
@@ -673,7 +676,7 @@ class UserDetail extends Component {
           <TabPane tabId="package">
             <PackageForm
               photographer={this.state.photographer}
-              updateParentState={this.updatePhotographerState}
+              updateParentState={this.updatePhotographerUserMetadataState}
             />
           </TabPane>
 
@@ -696,6 +699,7 @@ class UserDetail extends Component {
           <TabPane tabId="portfolio">
                 <PortofolioForm
                   photographer={this.state.photographer}
+                  updateParentState={this.updatePhotographerUserMetadataState}
                 />
           </TabPane>
 

@@ -72,10 +72,7 @@ class PackageForm extends React.Component {
                     Swal('Success!', "Photographer package updated!", 'success');
                     this.setState({ isSubmitting: false });
                     this.props.updateParentState({
-                        userMetadata: {
-                            ...this.props.photographer.userMetadata,
-                            priceStartFrom: packagesPrice[0].price
-                        }
+                        priceStartFrom: packagesPrice[0].price
                     });
                 });
             })
