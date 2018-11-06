@@ -648,7 +648,7 @@ class DetailsForm extends React.Component {
                     <CreatableSelect
                       id="languages"
                       value={
-                        'languages' in photographer
+                        ('languages' in photographer && Array.isArray(photographer.languages))
                           ? photographer.languages.map(item => {
                               return { value: item, label: item }
                             })
