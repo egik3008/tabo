@@ -234,7 +234,7 @@ class Detail extends Component {
         this.state.photoAlbum.albums
       )
       
-      Swal('Success!', "Portofolio updated..", 'success');
+      Swal('Success!', "Photo Album updated..", 'success');
       this.setState({ 
         imagesExistingDeleted: [], 
         isUploading: false 
