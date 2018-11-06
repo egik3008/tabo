@@ -143,7 +143,7 @@ class Cashout extends Component {
           }
 
           if (filter.value === CASHOUT.STATUS_REQUESTED) return row[filter.id] === CASHOUT.STATUS_REQUESTED
-          else if (filter.value === CASHOUT.STATUS_PROCESSING) return row[filter.id] === CASHOUT.STATUS_PROCESSING
+          else if (filter.value === CASHOUT.STATUS_DENIED) return row[filter.id] === CASHOUT.STATUS_DENIED
           else if (filter.value === CASHOUT.STATUS_DONE) return row[filter.id] === CASHOUT.STATUS_DONE
         },
         Filter: ({ filter, onChange }) => (
@@ -153,7 +153,7 @@ class Cashout extends Component {
             value={filter ? filter.value : 'all'}>
             <option value="all">Show All</option>
             <option value={CASHOUT.STATUS_REQUESTED}>Requested</option>
-            <option value={CASHOUT.STATUS_PROCESSING}>Processing</option>
+            <option value={CASHOUT.STATUS_DENIED}>Denied</option>
             <option value={CASHOUT.STATUS_DONE}>Done</option>
           </select>
         ),

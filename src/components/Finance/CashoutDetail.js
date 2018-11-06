@@ -235,8 +235,8 @@ class CashoutDetail extends Component {
                         <option value={CASHOUT.STATUS_REQUESTED}>
                             {CASHOUT.STATUS_REQUESTED}
                         </option>
-                        <option value={CASHOUT.STATUS_PROCESSING}>
-                            {CASHOUT.STATUS_PROCESSING}
+                        <option value={CASHOUT.STATUS_DENIED}>
+                            {CASHOUT.STATUS_DENIED}
                         </option>
                         <option value={CASHOUT.STATUS_DONE}>
                             {CASHOUT.STATUS_DONE}
