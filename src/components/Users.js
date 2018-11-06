@@ -212,6 +212,16 @@ class Users extends Component {
         maxWidth: 70,
       })
 
+      columns.splice(3, 0, {
+        Header: 'City',
+        accessor: 'locationAdmLevel2',
+        maxWidth: 130,
+        filterMethod: (filter, row) => {
+          const str = row.locationAdmLevel2 ? row.locationAdmLevel2 : "-";
+          return String(str.toLowerCase()).includes(filter.value.toLowerCase())
+        },
+      })
+
       columns.splice(6, 0, {
         Header: 'Completion',
         accessor: 'completion',
