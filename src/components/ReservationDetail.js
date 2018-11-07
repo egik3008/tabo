@@ -136,6 +136,9 @@ class ReservationDetail extends Component {
                 <dt className="col-sm-3">Number</dt>
                 <dd className="col-sm-9">{this.props.match.params.id}</dd>
 
+                <dt className="col-sm-3">Status</dt>
+                <dd className="col-sm-9">{this.state.reservation.status}</dd>
+
                 <dt className="col-sm-3">Photographer</dt>
                 <dd className="col-sm-9">{this.state.reservation.photographer}</dd>
 
