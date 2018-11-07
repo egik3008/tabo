@@ -113,13 +113,18 @@ class CashoutDetail extends Component {
                 });
 
                 // send email when update status to DONE
-                if (newStatus === CASHOUT.STATUS_DONE) {
-                  const emailContent = "Your Cash Out Request has been processed!";
+                if (newStatus === CASHOUT.STATUS_DONE || newStatus === CASHOUT.STATUS_DENIED) {
+                  let emailContent = "";
+                  if (newStatus === CASHOUT.STATUS_DONE)
+                  emailContent = "Your cash out request has been successfully transferred to your bank account!";
+                  
+                  if (newStatus === CASHOUT.STATUS_DENIED)
+                  emailContent = "sorry! your cash out request transaction was declined. Kindly check again your cash out request or contact us support@takapic.com";
 
                   axios.post(`${process.env.REACT_APP_API_HOSTNAME}/api/email-service/email-notifications`, {
                     receiverName: this.state.cashout.photographerDisplayName,
                     receiverEmail: this.state.cashout.photographerEmail,
-                    emailSubject: "Cash Out Request Notification",
+                    emailSubject: "cash out confirmation.",
                     emailContent: emailContent
                   });
                 }
