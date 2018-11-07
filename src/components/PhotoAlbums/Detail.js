@@ -526,7 +526,7 @@ class Detail extends Component {
                     onClick={this.submitImagesHandler}
                     isSubmitting={this.state.isUploading || this.props.isSubmitting}
                     disabled={this.state.isUploading || this.props.isSubmitting}
-                    isSubmittingLabel="Updating portfolio..."
+                    isSubmittingLabel="Updating photo album..."
                 />
             </Row>
           </TabPane>
