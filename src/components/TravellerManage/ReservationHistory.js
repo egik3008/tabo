@@ -76,7 +76,7 @@ const historyColumns = [
     {
       Header: 'Service Fee',
       maxWidth: 100,
-      id: 'photographerFee',
+      id: 'fee',
       accessor: d => {
         let currency = "IDR";
         if (d.paymentCurrency) currency = d.paymentCurrency;
@@ -87,7 +87,101 @@ const historyColumns = [
         if (cellInfo.original.paymentCurrency) currency = cellInfo.original.paymentCurrency;
         const serviceFee = currency === "IDR" ? Number(cellInfo.original.totalPriceIDR) - Number(cellInfo.original.photographerFeeIDR) : Number(cellInfo.original.totalPriceUSD) - Number(cellInfo.original.photographerFeeUSD);
         return currency + " " + (currency === "IDR" ? serviceFee.toLocaleString('id') : serviceFee.toLocaleString('us'));
-      }
+      },
+      filterMethod: (filter, row) => {
+        if (filter.value === 'all') {
+          return true
+        }
+        if (filter.value === "IDR") 
+          return row._original.paymentCurrency ? 
+            (row._original.paymentCurrency === "IDR") : true
+        else if (filter.value === "USD") 
+          return row._original.paymentCurrency ? 
+            (row._original.paymentCurrency === "USD") : false
+      },
+      Filter: ({ filter, onChange }) => (
+        <select
+          onChange={event => onChange(event.target.value)}
+          style={{ width: '100%', height: "100%" }}
+          value={filter ? filter.value : 'all'}>
+          <option value="all">Show All</option>
+          <option value="IDR">IDR</option>
+          <option value="USD">USD</option>
+        </select>
+      ),
+    },
+    {
+      Header: 'Credit',
+      maxWidth: 100,
+      id: 'fee',
+      accessor: d => {
+        let currency = "IDR";
+        if (d.paymentCurrency) currency = d.paymentCurrency;
+        return currency === "IDR" ? Number(d.totalPriceIDR) - Number(d.photographerFeeIDR) : Number(d.totalPriceUSD) - Number(d.photographerFeeUSD)
+      },
+      Cell: cellInfo => {
+        let currency = "IDR";
+        if (cellInfo.original.paymentCurrency) currency = cellInfo.original.paymentCurrency;
+        return currency + " 0";
+      },
+      filterMethod: (filter, row) => {
+        if (filter.value === 'all') {
+          return true
+        }
+        if (filter.value === "IDR") 
+          return row._original.paymentCurrency ? 
+            (row._original.paymentCurrency === "IDR") : true
+        else if (filter.value === "USD") 
+          return row._original.paymentCurrency ? 
+            (row._original.paymentCurrency === "USD") : false
+      },
+      Filter: ({ filter, onChange }) => (
+        <select
+          onChange={event => onChange(event.target.value)}
+          style={{ width: '100%', height: "100%" }}
+          value={filter ? filter.value : 'all'}>
+          <option value="all">Show All</option>
+          <option value="IDR">IDR</option>
+          <option value="USD">USD</option>
+        </select>
+      ),
+    },
+    {
+      Header: 'Total',
+      maxWidth: 100,
+      id: 'fee',
+      accessor: d => {
+        let currency = "IDR";
+        if (d.paymentCurrency) currency = d.paymentCurrency;
+        return currency === "IDR" ? Number(d.totalPriceIDR) : Number(d.totalPriceUSD)
+      },
+      Cell: cellInfo => {
+        let currency = "IDR";
+        if (cellInfo.original.paymentCurrency) currency = cellInfo.original.paymentCurrency;
+        const total = currency === "IDR" ? Number(cellInfo.original.totalPriceIDR) : Number(cellInfo.original.totalPriceUSD);
+        return currency + " " + (currency === "IDR" ? total.toLocaleString('id') : total.toLocaleString('us'));
+      },
+      filterMethod: (filter, row) => {
+        if (filter.value === 'all') {
+          return true
+        }
+        if (filter.value === "IDR") 
+          return row._original.paymentCurrency ? 
+            (row._original.paymentCurrency === "IDR") : true
+        else if (filter.value === "USD") 
+          return row._original.paymentCurrency ? 
+            (row._original.paymentCurrency === "USD") : false
+      },
+      Filter: ({ filter, onChange }) => (
+        <select
+          onChange={event => onChange(event.target.value)}
+          style={{ width: '100%', height: "100%" }}
+          value={filter ? filter.value : 'all'}>
+          <option value="all">Show All</option>
+          <option value="IDR">IDR</option>
+          <option value="USD">USD</option>
+        </select>
+      ),
     },
     {
       Header: 'Status',

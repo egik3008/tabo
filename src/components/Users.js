@@ -212,7 +212,7 @@ class Users extends Component {
         maxWidth: 70,
       })
 
-      columns.splice(3, 0, {
+      columns.splice(4, 0, {
         Header: 'City',
         accessor: 'locationAdmLevel2',
         maxWidth: 130,
