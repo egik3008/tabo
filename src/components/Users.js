@@ -163,10 +163,6 @@ class Users extends Component {
   render() {
     const columns = [
       {
-        Header: this.isPhotographers() ? 'ID Photographer' : 'ID Traveller',
-        accessor: 'uid',
-      },
-      {
         Header: 'Name',
         accessor: 'displayName',
       },
@@ -216,7 +212,7 @@ class Users extends Component {
         Header: 'Status',
         accessor: 'enable',
         id: 'enable',
-        maxWidth: 100,
+        maxWidth: 90,
         Cell: row => (Number(row.value) === 1 ? 'Active' : 'Blocked'),
         filterMethod: (filter, row) => {
           if (filter.value === 'all') {
@@ -260,6 +256,16 @@ class Users extends Component {
         ),
       },
     ]
+
+    if (!this.isPhotographers()) {
+
+      columns.splice(0, 0, {
+        Header: 'ID Traveller',
+        accessor: 'uid',
+      })
+      // {
+      // },
+    }
 
     if (this.isPhotographers()) {
       columns.splice(2, 0, {
