@@ -1,12 +1,13 @@
 import React, { Component } from 'react';
 import ReactTable from 'react-table';
 import { withRouter } from 'react-router-dom';
-import { Card, CardBody, CardHeader, Col, Row, Button } from 'reactstrap'
+import { Card, CardBody, CardHeader, Col, Row, Button } from 'reactstrap';
 import { Link } from 'react-router-dom'
-import axios from 'axios'
+import axios from 'axios';
 import moment from 'moment'
 import 'moment/locale/id'
 import 'react-table/react-table.css';
+import swal from 'sweetalert2';
 import { filterCaseInsensitive } from '../utils/reactTable';
 
 class Users extends Component {
@@ -87,7 +88,7 @@ class Users extends Component {
       })
   }
 
-  setUpData = (data) => {
+  setupData = (data) => {
     return data.map(d => {
       let completion = 100
       if ('photographerInfo' in d) {
@@ -106,6 +107,56 @@ class Users extends Component {
       if (this.isPhotographers()) d.currency = d.currency ? d.currency : '-';
 
       return d;
+    })
+  }
+
+  handleDelete = (uid, email) => () => {
+    swal({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Yes, delete it!',
+      showLoaderOnConfirm: true,
+      preConfirm: (confirm) => {
+        if (confirm) {
+          return axios
+          .delete(`${process.env.REACT_APP_API_HOSTNAME}/api/users/traveller/${uid}`)
+          .then(response => {
+            return response;
+          })
+          .catch(error => {
+            console.log(error);
+          })
+        }
+        
+      },
+      allowOutsideClick: () => !swal.isLoading()
+    }).then((result) => {
+      const response = result.value.data;
+      if (!response.status) {
+        swal('Error', response.message, 'error');
+      } else {
+        swal(
+          'Deleted!',
+          response.message,
+          'success'
+        );
+        const newData = this.state.users.data.filter(user => {
+          return (user.uid !== uid)
+        });
+        this.setState(prevState => {
+          return {
+            users: {
+              ...prevState.users,
+              loading: false,
+              loaded: true,
+              data: newData,
+            },
+          }
+        })
+      }
     })
   }
 
@@ -200,6 +251,11 @@ class Users extends Component {
             <Link to={'/users/' + this.props.match.params.type + '/' + row.value}>
               <i className="fa fa-pencil" />
             </Link>
+            { !this.isPhotographers() && (
+              <span style={{marginLeft: 8, cursor: 'pointer'}} onClick={this.handleDelete(row.value, row.original.email)}>
+                <i className="fa fa-trash" />
+              </span>
+            )}
           </div>
         ),
       },
@@ -297,7 +353,7 @@ class Users extends Component {
                   onFilteredChange={filtered => {
                     this.setState({ filtered })
                   }}
-                  data={this.setUpData(this.state.users.data)}
+                  data={this.setupData(this.state.users.data)}
                   loading={this.state.users.loading}
                   type={this.state.type}
                 />
