@@ -42,6 +42,21 @@ export default {
       ] 
     },
     {
+      name: 'Coupon Vouchers',
+      url: '/vouchers',
+      icon: 'fa fa-tasks fa-fw',
+      children: [
+        {
+          name: 'Coupon Manage',
+          url: '/vouchers'
+        },
+        {
+          name: 'Coupon Usage',
+          url: '/vouchers/usage'
+        },
+      ] 
+    },
+    {
       name: 'Management',
       url: '/management',
       icon: 'fa fa-tasks fa-fw',

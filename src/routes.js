@@ -56,6 +56,21 @@ const CurrencyRates = Loadable({
   loading: Loading,
 })
 
+const VouchersMain = Loadable({
+  loader: () => import('./components/Vouchers/index'),
+  loading: Loading,
+})
+
+const VouchersForm = Loadable({
+  loader: () => import('./components/Vouchers/VoucherForm'),
+  loading: Loading,
+})
+
+const VouchersUsage = Loadable({
+  loader: () => import('./components/Vouchers/VoucherUsage'),
+  loading: Loading,
+})
+
 // https://github.com/ReactTraining/react-router/tree/master/packages/react-router-config
 const routes = [
   { path: '/dashboard', name: 'Dashboard', component: Dashboard },
@@ -69,6 +84,9 @@ const routes = [
   { path: '/finance/cashout', exact: true, name: 'Cashout', component: Cashout },
   { path: '/finance/cashout/:id', name: 'Cashout Detail', component: CashoutDetail },
   { path: '/finance/currency-rates', name: 'Currency Rates', component: CurrencyRates },
+  { path: '/vouchers/form/:id', name: 'Vouchers Manage', component: VouchersForm },
+  { path: '/vouchers/usage', name: 'Vouchers Usage', component: VouchersUsage },
+  { path: '/vouchers', name: 'Vouchers', component: VouchersMain },
 ]
 
 export default routes
