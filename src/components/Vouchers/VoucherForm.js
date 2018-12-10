@@ -47,7 +47,10 @@ class VoucherForm extends React.Component {
             type: VOUCHERS.TYPE_FIXED,
             amountIDR: '',
             amountUSD: '',
+            maxPercentAmountIDR: '',
+            maxPercentAmountUSD: '',
             usageLimitUser: 1,
+            usageLimitVoucher: "",
             validStart: undefined,
             validEnd: undefined
         }
@@ -135,6 +138,7 @@ class VoucherForm extends React.Component {
         this.setState({ isSubmitting: true });
 
         voucher.usageLimitUser = voucher.usageLimitUser === "" ? null : voucher.usageLimitUser;
+        voucher.usageLimitVoucher = voucher.usageLimitVoucher === "" ? null : voucher.usageLimitVoucher;
         voucher.updated = firebase.database.ServerValue.TIMESTAMP;
         voucher.validEnd = voucher.validEnd.toLocaleDateString();
         voucher.validStart = voucher.validStart.toLocaleDateString();
@@ -402,6 +406,45 @@ class VoucherForm extends React.Component {
                             </FormGroup>
                         )}
 
+                        {!this.isFixedType() && (
+                            <div>
+                                <FormGroup row>
+                                    <Col md="3">
+                                        <Label>Max Amount IDR</Label>
+                                    </Col>
+                                    <Col xs="12" md="4">
+                                        <InputGroup>
+                                            <Input
+                                                type="number"
+                                                name="maxPercentAmountIDR"
+                                                value={this.state.voucher.maxPercentAmountIDR}
+                                                placeholder=""
+                                                onChange={this.handleChange}
+                                            />
+                                            <InputGroupAddon addonType="append">IDR</InputGroupAddon>
+                                        </InputGroup>
+                                    </Col>
+                                </FormGroup>
+                                <FormGroup row>
+                                    <Col md="3">
+                                        <Label>Max Amount USD</Label>
+                                    </Col>
+                                    <Col xs="12" md="4">
+                                        <InputGroup>
+                                            <Input
+                                                type="number"
+                                                name="maxPercentAmountUSD"
+                                                value={this.state.voucher.maxPercentAmountUSD}
+                                                placeholder=""
+                                                onChange={this.handleChange}
+                                            />
+                                            <InputGroupAddon addonType="append">USD</InputGroupAddon>
+                                        </InputGroup>
+                                    </Col>
+                                </FormGroup>
+                            </div>
+                        )}
+
                         <FormGroup row>
                             <Col md="3">
                                 <Label>Usage limit per traveller</Label>
@@ -411,6 +454,22 @@ class VoucherForm extends React.Component {
                                     type="number"
                                     name="usageLimitUser"
                                     value={this.state.voucher.usageLimitUser}
+                                    placeholder="Unlimited usage"
+                                    onChange={this.handleChange}
+                                />
+                                <FormText>Set empty for Unlimited usage</FormText>
+                            </Col>
+                        </FormGroup>
+
+                        <FormGroup row>
+                            <Col md="3">
+                                <Label>Usage limit per coupon</Label>
+                            </Col>
+                            <Col xs="12" md="4">
+                                <Input
+                                    type="number"
+                                    name="usageLimitVoucher"
+                                    value={this.state.voucher.usageLimitVoucher}
                                     placeholder="Unlimited usage"
                                     onChange={this.handleChange}
                                 />
