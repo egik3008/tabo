@@ -1,7 +1,7 @@
 import React from 'react';
 import { withRouter } from 'react-router-dom';
 import moment from 'moment';
-
+import CreatableSelect from 'react-select/lib/Creatable';
 import db from '../../services/database';
 import firebase from 'firebase';
 import Swal from 'sweetalert2';
@@ -27,6 +27,7 @@ import 'react-day-picker/lib/style.css';
 
 import LoadingAnimation from '../commons/LoadingAnimation';
 import VOUCHERS from '../../constants/vouchers';
+import { DESTINATIONS } from '../../constants/commons';
 
 
 class VoucherForm extends React.Component {
@@ -52,7 +53,8 @@ class VoucherForm extends React.Component {
             usageLimitUser: 1,
             usageLimitVoucher: "",
             validStart: undefined,
-            validEnd: undefined
+            validEnd: undefined,
+            destinations: null
         }
     }
 
@@ -120,8 +122,28 @@ class VoucherForm extends React.Component {
                 }
             }
 
-            this.setState({ voucher});
+            this.setState({ voucher });
         }
+    }
+
+    handleDestinationsChange = (selected) => {
+        const arrSelected = selected.map(item => {
+            return item.value
+          });
+      
+          this.setState({
+            voucher: {
+              ...this.state.voucher,
+              destinations: arrSelected,
+            },
+          })
+    }
+
+    checkEmptyValue = (val) => {
+        if (!val || val === "") {
+            return null;
+        }
+        return val;
     }
 
     handleSubmit = () => {
@@ -137,8 +159,9 @@ class VoucherForm extends React.Component {
 
         this.setState({ isSubmitting: true });
 
-        voucher.usageLimitUser = voucher.usageLimitUser === "" ? null : voucher.usageLimitUser;
-        voucher.usageLimitVoucher = voucher.usageLimitVoucher === "" ? null : voucher.usageLimitVoucher;
+        voucher.usageLimitUser = this.checkEmptyValue(voucher.usageLimitUser);
+        voucher.usageLimitVoucher = this.checkEmptyValue(voucher.usageLimitVoucher);
+
         voucher.updated = firebase.database.ServerValue.TIMESTAMP;
         voucher.validEnd = voucher.validEnd.toLocaleDateString();
         voucher.validStart = voucher.validStart.toLocaleDateString();
@@ -270,6 +293,8 @@ class VoucherForm extends React.Component {
             } 
         }, this.showFromMonth);
       }
+
+    
       
 
     renderForm = () => {
@@ -357,9 +382,9 @@ class VoucherForm extends React.Component {
 
                         <FormGroup row>
                             <Col md="3">
-                            <Label>Amount Type <span style={{color:"red"}}>*</span></Label>
+                                <Label>Amount Type <span style={{color:"red"}}>*</span></Label>
                             </Col>
-                            <Col xs="12" md="4">
+                            <Col xs="12" md="5">
                                 <Input value={this.state.voucher.type} type="select" name="type" onChange={this.handleChange}>
                                     <option value={VOUCHERS.TYPE_FIXED}>Fixed</option>
                                     <option value={VOUCHERS.TYPE_PERCENT}>Percent</option>
@@ -369,10 +394,9 @@ class VoucherForm extends React.Component {
 
                         <FormGroup row>
                             <Col md="3">
-                                <Label>{this.isFixedType() ? 'Amount IDR' : 'Percent Amount'}  <span style={{color:"red"}}>*</span></Label>
+                                <Label>{this.isFixedType() ? 'Amount' : 'Percent Amount'}  <span style={{color:"red"}}>*</span></Label>
                             </Col>
-                            <Col xs="12" md="4">
-
+                            <Col xs="12" md="5">
                                 <InputGroup>
                                     <Input
                                         type="number"
@@ -384,13 +408,7 @@ class VoucherForm extends React.Component {
                                     <InputGroupAddon addonType="append">{this.isFixedType() ? 'IDR' : '%'}</InputGroupAddon>
                                 </InputGroup>
                             </Col>
-                        </FormGroup>
-
-                        {this.isFixedType() && (
-                            <FormGroup row>
-                                <Col md="3">
-                                    <Label>Amount USD <span style={{color:"red"}}>*</span></Label>
-                                </Col>
+                            {this.isFixedType() && (
                                 <Col xs="12" md="4">
                                     <InputGroup>
                                         <Input
@@ -403,16 +421,16 @@ class VoucherForm extends React.Component {
                                         <InputGroupAddon addonType="append">USD</InputGroupAddon>
                                     </InputGroup>
                                 </Col>
-                            </FormGroup>
-                        )}
+                            )}
+                        </FormGroup>
 
                         {!this.isFixedType() && (
                             <div>
                                 <FormGroup row>
                                     <Col md="3">
-                                        <Label>Max Amount IDR</Label>
+                                        <Label>Max Amount</Label>
                                     </Col>
-                                    <Col xs="12" md="4">
+                                    <Col xs="12" md="5">
                                         <InputGroup>
                                             <Input
                                                 type="number"
@@ -423,11 +441,6 @@ class VoucherForm extends React.Component {
                                             />
                                             <InputGroupAddon addonType="append">IDR</InputGroupAddon>
                                         </InputGroup>
-                                    </Col>
-                                </FormGroup>
-                                <FormGroup row>
-                                    <Col md="3">
-                                        <Label>Max Amount USD</Label>
                                     </Col>
                                     <Col xs="12" md="4">
                                         <InputGroup>
@@ -449,7 +462,7 @@ class VoucherForm extends React.Component {
                             <Col md="3">
                                 <Label>Usage limit per traveller</Label>
                             </Col>
-                            <Col xs="12" md="4">
+                            <Col xs="12" md="9">
                                 <Input
                                     type="number"
                                     name="usageLimitUser"
@@ -465,7 +478,7 @@ class VoucherForm extends React.Component {
                             <Col md="3">
                                 <Label>Usage limit per coupon</Label>
                             </Col>
-                            <Col xs="12" md="4">
+                            <Col xs="12" md="9">
                                 <Input
                                     type="number"
                                     name="usageLimitVoucher"
@@ -474,6 +487,31 @@ class VoucherForm extends React.Component {
                                     onChange={this.handleChange}
                                 />
                                 <FormText>Set empty for Unlimited usage</FormText>
+                            </Col>
+                        </FormGroup>
+
+                        <FormGroup row>
+                            <Col md="3">
+                            <Label htmlFor="destinations">Destinations</Label>
+                            </Col>
+                            <Col xs="12" md="9">
+                            <CreatableSelect
+                                value={this.state.voucher.destinations ? 
+                                    this.state.voucher.destinations.map(item => {
+                                    return { value: item, label: item }
+                                }) : ''
+                                }
+                                options={DESTINATIONS.map(item => ({
+                                    label: item,
+                                    value: item,
+                                    style: {
+                                    margin: "5px 0px 5px 5px"
+                                    }
+                                }))}
+                                onChange={this.handleDestinationsChange}
+                                allowCreate={true}
+                                isMulti
+                            />
                             </Col>
                         </FormGroup>
 

@@ -34,3 +34,13 @@ export const LANGUAGES =  [
     "Gujarati",
     "Persian"
   ];
+
+  export const DESTINATIONS =  [
+    "Bali",
+    "Jakarta",
+    "Surabaya",
+    "Bandung",
+    "Makassar",
+    "Barcelona",
+    "London",
+  ];

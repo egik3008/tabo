@@ -27,30 +27,64 @@ class VouchersUsage extends Component {
   }
 
   fetchData = () => {
-    
+    this.setState(prevState => ({
+      vouchers: { ...prevState.vouchers, loading: true },
+    }));
+
+    const vouchersRef = db.database().ref(VOUCHERS.NODE_REDEEM);
+
+    vouchersRef.once('value').then(snap => {
+      let data = [];
+      let vouchers = snap.val();
+      
+      if (vouchers) {
+        Object.keys(vouchers).forEach(key => {
+          let dt = vouchers[key];
+          Object.keys(dt).forEach(dKey => {
+            let item = {
+              id: dKey,
+              code: key,
+              ...dt[dKey]
+            }
+            data.push(item);
+          });
+        });
+      }
+
+      this.setState(prevState => {
+        return {
+          vouchers: {
+            ...prevState.vouchers,
+            loading: false,
+            loaded: true,
+            data: data,
+          },
+        }
+      })
+    });
   }
 
   render() {
     const columns = [
       {
         Header: 'Usage ID',
-        accessor: 'code',
+        accessor: 'id',
       },
       {
         Header: 'Traveller',
-        accessor: 'type'
+        accessor: 'travellerName'
       },
       {
         Header: 'Photographer',
-        accessor: 'amount_IDR',
+        accessor: 'photographerName',
       },
       {
         Header: 'Coupon Name',
-        accessor: 'amount_USD',
+        accessor: 'code',
       },
       {
         Header: 'Amount',
-        accessor: 'amount_USD',
+        accessor: 'priceIDR',
       },
       {
         Header: 'Date Applied',
@@ -66,25 +100,7 @@ class VouchersUsage extends Component {
             .format('lll')
           return String(dateString.toLowerCase()).includes(filter.value.toLowerCase())
         },
-      },
-      {
-        Header: 'Booking Date',
-        accessor: 'updated',
-        maxWidth: 220,
-        Cell: row => {
-          return row.value
-            ? moment(row.value)
-                .locale('id')
-                .format('lll')
-            : '-'
-        },
-        filterMethod: (filter, row) => {
-          const dateString = row.updated ? moment(row.updated)
-            .locale('id')
-            .format('lll') : '-';
-          return String(dateString.toLowerCase()).includes(filter.value.toLowerCase())
-        },
-      },
+      }
     ]
 
     return (
