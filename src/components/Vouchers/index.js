@@ -159,6 +159,13 @@ class Vouchers extends Component {
         }
       },
       {
+        Header: 'Usage/Limit',
+        id: 'usageLimitVoucher',
+        accessor: d => {
+          return d.usageLimitVoucher ?  (d.usageLimitVoucher) : 'Unlimited'
+        }
+      },
+      {
         Header: 'Created',
         accessor: 'created',
         maxWidth: 220,

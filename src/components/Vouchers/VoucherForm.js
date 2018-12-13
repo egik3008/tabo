@@ -46,6 +46,7 @@ class VoucherForm extends React.Component {
             code: '',
             description: '',
             type: VOUCHERS.TYPE_FIXED,
+            discountType: VOUCHERS.DISC_TYPE_PROMO,
             amountIDR: '',
             amountUSD: '',
             maxPercentAmountIDR: '',
@@ -382,6 +383,19 @@ class VoucherForm extends React.Component {
 
                         <FormGroup row>
                             <Col md="3">
+                                <Label>Discount Type <span style={{color:"red"}}>*</span></Label>
+                            </Col>
+                            <Col xs="12" md="5">
+                                <Input value={this.state.voucher.discountType} type="select" name="discountType" onChange={this.handleChange}>
+                                    <option value={VOUCHERS.DISC_TYPE_PROMO}>Sales Promotion</option>
+                                    <option value={VOUCHERS.DISC_TYPE_PARTNER}>Partner</option>
+                                    <option value={VOUCHERS.DISC_TYPE_GIFT}>Personal Gift</option>
+                                </Input>
+                            </Col>
+                        </FormGroup>
+
+                        <FormGroup row>
+                            <Col md="3">
                                 <Label>Amount Type <span style={{color:"red"}}>*</span></Label>
                             </Col>
                             <Col xs="12" md="5">
@@ -470,7 +484,7 @@ class VoucherForm extends React.Component {
                                     placeholder="Unlimited usage"
                                     onChange={this.handleChange}
                                 />
-                                <FormText>Set empty for Unlimited usage</FormText>
+                                <FormText>Fill in blank for Unlimited usage</FormText>
                             </Col>
                         </FormGroup>
 
@@ -486,7 +500,7 @@ class VoucherForm extends React.Component {
                                     placeholder="Unlimited usage"
                                     onChange={this.handleChange}
                                 />
-                                <FormText>Set empty for Unlimited usage</FormText>
+                                <FormText>Fill in blank for Unlimited usage</FormText>
                             </Col>
                         </FormGroup>
 
@@ -512,6 +526,7 @@ class VoucherForm extends React.Component {
                                 allowCreate={true}
                                 isMulti
                             />
+                            <FormText>Fill in blank for use in all destinations</FormText>
                             </Col>
                         </FormGroup>
 
