@@ -148,14 +148,14 @@ class Vouchers extends Component {
         Header: 'Amount IDR',
         accessor: 'amountIDR',
         Cell: row => {
-          return row.value + (row.original.type === VOUCHERS.TYPE_PERCENT ? ' %' : '')
+          return Number(row.value).toLocaleString('id') + (row.original.type === VOUCHERS.TYPE_PERCENT ? ' %' : '')
         }
       },
       {
         Header: 'Amount USD',
         accessor: 'amountUSD',
         Cell: row => {
-          return row.value + (row.original.type === VOUCHERS.TYPE_PERCENT ? ' %' : '')
+          return Number(row.value).toLocaleString('us') + (row.original.type === VOUCHERS.TYPE_PERCENT ? ' %' : '')
         }
       },
       {

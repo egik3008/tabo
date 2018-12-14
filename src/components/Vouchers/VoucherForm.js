@@ -55,6 +55,8 @@ class VoucherForm extends React.Component {
             usageLimitVoucher: "",
             validStart: undefined,
             validEnd: undefined,
+            reservationStart: undefined,
+            reservationEnd: undefined,
             destinations: null
         }
     }
@@ -79,7 +81,9 @@ class VoucherForm extends React.Component {
                     voucher: {
                         ...voucher,
                         validStart: parseDate(voucher.validStart, 'M/D/Y'),
-                        validEnd: parseDate(voucher.validEnd, 'M/D/Y')
+                        validEnd: parseDate(voucher.validEnd, 'M/D/Y'),
+                        reservationStart: parseDate(voucher.reservationStart, 'M/D/Y'),
+                        reservationEnd: parseDate(voucher.reservationEnd, 'M/D/Y'),
 
                     },
                     loading: false
@@ -162,10 +166,14 @@ class VoucherForm extends React.Component {
 
         voucher.usageLimitUser = this.checkEmptyValue(voucher.usageLimitUser);
         voucher.usageLimitVoucher = this.checkEmptyValue(voucher.usageLimitVoucher);
+        voucher.maxPercentAmountIDR = this.checkEmptyValue(voucher.maxPercentAmountIDR);
+        voucher.maxPercentAmountUSD = this.checkEmptyValue(voucher.maxPercentAmountUSD);
 
         voucher.updated = firebase.database.ServerValue.TIMESTAMP;
         voucher.validEnd = voucher.validEnd.toLocaleDateString();
         voucher.validStart = voucher.validStart.toLocaleDateString();
+        voucher.reservationEnd = voucher.reservationEnd.toLocaleDateString();
+        voucher.reservationStart = voucher.reservationStart.toLocaleDateString();
 
         if (this.isEditMode()) {
             db.database().ref(VOUCHERS.NODE_VOUCHER)
@@ -242,6 +250,26 @@ class VoucherForm extends React.Component {
             message = "Code is required!"
         }
 
+        if (isValid && (!voucher.validStart || voucher.validStart === "")) {
+            isValid = false;
+            message = "Booking period is required!";
+        }
+
+        if (isValid && (!voucher.validEnd || voucher.validEnd === "")) {
+            isValid = false;
+            message = "Booking period is required!";
+        }
+
+        if (isValid && (!voucher.reservationStart || voucher.reservationStart === "")) {
+            isValid = false;
+            message = "Photoshoot period is required!";
+        }
+
+        if (isValid && (!voucher.reservationEnd || voucher.reservationEnd === "")) {
+            isValid = false;
+            message = "Photoshoot period is required!";
+        }
+
         if (isValid && voucher.amountIDR === "") {
             isValid = false;
             message = (this.isFixedType() ? "Amount IDR" : "Percent Amount") + " is required!";
@@ -250,16 +278,6 @@ class VoucherForm extends React.Component {
         if (isValid && voucher.amountUSD === "") {
             isValid = false;
             message = "Amount USD is required!";
-        }
-
-        if (isValid && (!voucher.validStart || voucher.validStart === "")) {
-            isValid = false;
-            message = "Valid Date is required!";
-        }
-
-        if (isValid && (!voucher.validEnd || voucher.validEnd === "")) {
-            isValid = false;
-            message = "Valid Date is required!";
         }
 
         return { isValid, message }
@@ -277,38 +295,55 @@ class VoucherForm extends React.Component {
         if (moment(validEnd).diff(moment(validStart), 'months') < 2) {
           this.validEnd.getDayPicker().showMonth(validStart);
         }
-      }
-      handleFromChange = (validStart) => {
+    }
+
+    showFromMonthReservation = () => {
+        const { reservationStart, reservationEnd } = this.state;
+        if (!reservationStart) {
+          return;
+        }
+        if (moment(reservationEnd).diff(moment(reservationStart), 'months') < 2) {
+          this.reservationEnd.getDayPicker().showMonth(reservationStart);
+        }
+    }
+
+    handleFromChange = (name) => (validStart) => {
         this.setState({ 
             voucher: {
                 ...this.state.voucher,
-                validStart
+                [name]: validStart
             }
         });
-      }
-      handleToChange = (validEnd) => {
+    }
+
+    handleToChange = (name) => (validEnd) => {
         this.setState({ 
             voucher: {
                 ...this.state.voucher,
-                validEnd
+                [name]: validEnd
             } 
-        }, this.showFromMonth);
-      }
+        }, (name === "validEnd") ? this.showFromMonth : this.showFromMonthReservation);
+    }
 
     
       
 
     renderForm = () => {
-        const { validStart, validEnd } = this.state.voucher;
+        const { 
+            validStart, validEnd,
+            reservationStart, reservationEnd,
+
+        } = this.state.voucher;
         const modifiers = { start: validStart, end: validEnd };
+        const modifiersReservation = { start: reservationStart, end: reservationEnd };
         
         return (
             <Row>
                 <Col md="9" >
                     <Form action="" className="form-horizontal px-3">
-                    <FormGroup row>
+                        <FormGroup row>
                             <Col md="3">
-                                <Label htmlFor="phoneNumber">Valid Date <span style={{color:"red"}}>*</span></Label>
+                                <Label>Booking Period <span style={{color:"red"}}>*</span></Label>
                             </Col>
                             <Col xs="12" md="9">
                                 <DayPickerInput
@@ -326,7 +361,7 @@ class VoucherForm extends React.Component {
                                         numberOfMonths: 1,
                                         onDayClick: () => this.validEnd.getInput().focus(),
                                     }}
-                                    onDayChange={this.handleFromChange}
+                                    onDayChange={this.handleFromChange('validStart')}
                                 />{' '}
                                 —{' '}
                                 <span className="InputFromTo-to">
@@ -346,11 +381,59 @@ class VoucherForm extends React.Component {
                                     fromMonth: validStart,
                                     numberOfMonths: 1,
                                     }}
-                                    onDayChange={this.handleToChange}
+                                    onDayChange={this.handleToChange('validEnd')}
                                 />
                                 </span>
                             </Col>
                         </FormGroup>
+
+                        <FormGroup row>
+                            <Col md="3">
+                                <Label>Photoshoot Period <span style={{color:"red"}}>*</span></Label>
+                            </Col>
+                            <Col xs="12" md="9">
+                                <DayPickerInput
+                                    value={reservationStart}
+                                    placeholder="From"
+                                    inputProps={{className: 'form-control'}}
+                                    format="LL"
+                                    formatDate={formatDate}
+                                    parseDate={parseDate}
+                                    dayPickerProps={{
+                                        selectedDays: [reservationStart, { reservationStart, reservationEnd }],
+                                        disabledDays: { after: reservationEnd },
+                                        toMonth: reservationEnd,
+                                        modifiersReservation,
+                                        numberOfMonths: 1,
+                                        onDayClick: () => this.reservationEnd.getInput().focus(),
+                                    }}
+                                    onDayChange={this.handleFromChange('reservationStart')}
+                                />{' '}
+                                —{' '}
+                                <span className="InputFromTo-to">
+                                <DayPickerInput
+                                    ref={el => (this.reservationEnd = el)}
+                                    value={reservationEnd}
+                                    placeholder="To"
+                                    inputProps={{className: 'form-control'}}
+                                    format="LL"
+                                    formatDate={formatDate}
+                                    parseDate={parseDate}
+                                    dayPickerProps={{
+                                    selectedDays: [reservationStart, { reservationStart, reservationEnd }],
+                                    disabledDays: { before: reservationStart },
+                                    modifiersReservation,
+                                    month: reservationStart,
+                                    fromMonth: reservationStart,
+                                    numberOfMonths: 1,
+                                    }}
+                                    onDayChange={this.handleToChange('reservationEnd')}
+                                />
+                                </span>
+                            </Col>
+                        </FormGroup>
+
+
                         <FormGroup row>
                             <Col md="3">
                                 <Label>Code <span style={{color:"red"}}>*</span></Label>
@@ -359,6 +442,7 @@ class VoucherForm extends React.Component {
                                 <Input 
                                     type="text" 
                                     name="code" 
+                                    placeholder="Voucher Code"
                                     value={this.state.voucher.code} 
                                     onChange={this.handleChange}
                                 />

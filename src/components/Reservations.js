@@ -118,14 +118,7 @@ class Reservations extends Component {
           if (d.paymentCurrency) {
             currency = d.paymentCurrency;
           }
-          return Number(d["totalPrice" + currency]);
-        },
-        Cell: cellInfo => {
-          let currency = "IDR"
-          if (cellInfo.original.paymentCurrency) {
-            currency = cellInfo.original.paymentCurrency;
-          }
-          const price = Number(cellInfo.original["totalPrice" + currency]);
+          const price =  Number(d["totalPrice" + currency]);
           return currency + " " + (currency === "IDR" ? price.toLocaleString('id') : price.toLocaleString('us'));
         },
         filterMethod: (filter, row) => {

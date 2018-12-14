@@ -4,7 +4,6 @@ export default {
     DISC_TYPE_GIFT: 'gift',
     DISC_TYPE_PARTNER: 'partner',
     DISC_TYPE_PROMO: 'promotion',
-    TYPE_FIXED: 'fixed',
     NODE_VOUCHER: 'vouchers',
     NODE_REDEEM: 'vouchers_redeem',
 }

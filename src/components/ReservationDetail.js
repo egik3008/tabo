@@ -19,6 +19,10 @@ import 'moment/locale/id';
 
 import LoadingAnimation from './commons/LoadingAnimation';
 import { displayDateFormat } from '../utils/commonUtils';
+import { 
+  countReservationDiscount, 
+  countReservationDiscountForPhotographer 
+} from '../utils/reservationUtils';
 
 class ReservationDetail extends Component {
   constructor(props) {
@@ -52,8 +56,8 @@ class ReservationDetail extends Component {
         totalPriceIDR: 0,
         totalPriceUSD: 0,
         photographerCurrency: "",
-        paymentCurrency: "IDR"
-
+        paymentCurrency: "IDR",
+        voucher: null,
       },
       loading: false,
     }
@@ -99,6 +103,7 @@ class ReservationDetail extends Component {
 
   render() {
     const {
+      voucher,
       photographerCurrency,
       photographerFeeIDR,
       photographerFeeUSD,
@@ -111,6 +116,10 @@ class ReservationDetail extends Component {
     } = this.state.reservation;
     const tPhotographerFee = paymentCurrency === "IDR" ? photographerFeeIDR : photographerFeeUSD;
     const tTotalPrice = paymentCurrency === "IDR" ? totalPriceIDR : totalPriceUSD;
+
+    const tDiscount = countReservationDiscount(this.state.reservation);
+
+    const pDiscount = countReservationDiscountForPhotographer(this.state.reservation);
     
     
     const renderReservationDetail = (
@@ -237,7 +246,7 @@ class ReservationDetail extends Component {
 
                   <dt className="col-sm-5">Service Fee</dt>
                   <dd className="col-sm-7">
-                    {this.displayPriceFormat(tTotalPrice - tPhotographerFee, paymentCurrency)}
+                    {this.displayPriceFormat(tTotalPrice - tPhotographerFee + tDiscount, paymentCurrency)}
                   </dd>
 
                   <dt className="col-sm-5">Credit</dt>
@@ -247,6 +256,18 @@ class ReservationDetail extends Component {
                       : this.displayPriceFormat(credit, paymentCurrency)
                     }
                   </dd>
+
+                  {voucher && (
+                    <React.Fragment>
+                    <dt className="col-sm-5">Discount</dt>
+                    <dd className="col-sm-7">
+                      {tDiscount === 0
+                        ? '-'
+                        : this.displayPriceFormat(tDiscount, paymentCurrency)
+                      }
+                    </dd>
+                    </React.Fragment>
+                  )}
 
                   <dt className="col-sm-5">Total</dt>
                   <dd className="col-sm-7">{this.displayPriceFormat(tTotalPrice, paymentCurrency)}</dd>
@@ -273,6 +294,18 @@ class ReservationDetail extends Component {
                       : this.displayPriceFormat(credit, photographerCurrency)
                     }
                   </dd>
+
+                  {voucher && (
+                    <React.Fragment>
+                    <dt className="col-sm-5">Discount</dt>
+                    <dd className="col-sm-7">
+                      {pDiscount === 0
+                        ? '-'
+                        : this.displayPriceFormat(pDiscount, paymentCurrency)
+                      }
+                    </dd>
+                    </React.Fragment>
+                  )}
 
                   <dt className="col-sm-5">Total</dt>
                   <dd className="col-sm-7">{this.displayPriceFormat(totalPrice, photographerCurrency)}</dd>

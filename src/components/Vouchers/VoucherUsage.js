@@ -86,11 +86,7 @@ class VouchersUsage extends Component {
         Header: 'Amount',
         id: 'amount',
         accessor: d => {
-          let pFee = d.photographerFee;
-          let serviceFee = d.serviceFee;
-          let discount = (d.type === VOUCHERS.TYPE_FIXED) ? d['amount' + d.photographerCurrency] : Math.around((Number(pFee) * d.amountIDR / 100));
-          
-          return pFee + serviceFee - discount;
+          return d.paymentCurrency + " " + Number(d['totalPrice' + d.paymentCurrency]).toLocaleString(d.paymentCurrency === "IDR" ? 'id' : 'us');
         }
       },
       {
