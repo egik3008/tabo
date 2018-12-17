@@ -299,10 +299,7 @@ class ReservationDetail extends Component {
                     <React.Fragment>
                     <dt className="col-sm-5">Discount</dt>
                     <dd className="col-sm-7">
-                      {pDiscount === 0
-                        ? '-'
-                        : this.displayPriceFormat(pDiscount, paymentCurrency)
-                      }
+                      -
                     </dd>
                     </React.Fragment>
                   )}
