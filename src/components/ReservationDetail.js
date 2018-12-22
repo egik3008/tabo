@@ -58,6 +58,7 @@ class ReservationDetail extends Component {
         photographerCurrency: "",
         paymentCurrency: "IDR",
         voucher: null,
+        travellerContactPerson: null
       },
       loading: false,
     }
@@ -104,6 +105,7 @@ class ReservationDetail extends Component {
   render() {
     const {
       voucher,
+      travellerContactPerson,
       photographerCurrency,
       photographerFeeIDR,
       photographerFeeUSD,
@@ -120,6 +122,7 @@ class ReservationDetail extends Component {
     const tDiscount = countReservationDiscount(this.state.reservation);
 
     const pDiscount = countReservationDiscountForPhotographer(this.state.reservation);
+    const pServiceFee = totalPrice - photographerFee;
     
     
     const renderReservationDetail = (
@@ -153,6 +156,9 @@ class ReservationDetail extends Component {
 
                 <dt className="col-sm-3">Traveler</dt>
                 <dd className="col-sm-9">{this.state.reservation.traveler}</dd>
+
+                <dt className="col-sm-3">Traveler CP</dt>
+                <dd className="col-sm-9">{travellerContactPerson ? travellerContactPerson : '-'}</dd>
 
                 <dt className="col-sm-3">Created</dt>
                 <dd className="col-sm-9">
@@ -284,7 +290,7 @@ class ReservationDetail extends Component {
 
                   <dt className="col-sm-5">Service Fee</dt>
                   <dd className="col-sm-7">
-                    {this.displayPriceFormat(totalPrice - photographerFee, photographerCurrency)}
+                    {this.displayPriceFormat(pServiceFee, photographerCurrency)}
                   </dd>
 
                   <dt className="col-sm-5">Credit</dt>
@@ -305,7 +311,7 @@ class ReservationDetail extends Component {
                   )}
 
                   <dt className="col-sm-5">Total</dt>
-                  <dd className="col-sm-7">{this.displayPriceFormat(totalPrice, photographerCurrency)}</dd>
+                  <dd className="col-sm-7">{this.displayPriceFormat(photographerFee - pServiceFee, photographerCurrency)}</dd>
                 </dl>
               </div>
             </div>
