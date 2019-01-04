@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { database } from '../../services/database';
-import ReactTable from 'react-table'
+import ReactTable from 'react-table';
+import Swal from 'sweetalert2';
 import { Card, CardBody, CardHeader, Col, Row, Button, Input } from 'reactstrap';
 import 'moment/locale/id';
 import 'react-table/react-table.css';
@@ -87,13 +88,28 @@ class CurrencyRates extends Component {
   }
 
   saveChange = () => {
-      this.setState({
-        edited: {},
-        savedChange: {
-            ...this.state.savedChange,
-            ...this.state.edited
-        }
-      });
+    const { edited, savedChange } = this.state;
+
+    for (let key in edited) {
+      let toUSDKey = key.split('USD')[1] + "USD";
+      edited[key]       = Number(edited[key])
+      edited[toUSDKey]  = Number(Number(1/Number(edited[key])).toFixed(6));
+    }
+    
+    const db = database.database();
+    db.ref('currency_exchange_rates')
+      .update(edited)
+      .then(() => {
+        Swal('Success!', 'Currency Rate is updated..', 'success');
+        this.setState({
+          edited: {},
+          savedChange: {
+              ...savedChange,
+              ...edited
+          }
+        });
+      })
+
   }
 
   findCurrencyCountry = (isoCode) => {
@@ -114,7 +130,7 @@ class CurrencyRates extends Component {
         maxWidth: 180,
       },
       {
-        Header: 'Currency',
+        Header: 'Country',
         accessor: 'currency',
       },
       {
@@ -139,16 +155,16 @@ class CurrencyRates extends Component {
         sortable: false,
         filterable: false,
       },
-      {
-        Header: 'Enable',
-        accessor: 'id',
-        maxWidth: 70,
-        sortable: false,
-        filterable: false,
-        Cell: row => (
-          ""
-        ),
-      },
+      // {
+      //   Header: 'Enable',
+      //   accessor: 'id',
+      //   maxWidth: 70,
+      //   sortable: false,
+      //   filterable: false,
+      //   Cell: row => (
+      //     ""
+      //   ),
+      // },
     ];
 
     return (
@@ -162,7 +178,7 @@ class CurrencyRates extends Component {
                 </h3>
               </CardHeader>
               <CardBody>
-                <div className="tabo-detail-header">
+                {/* <div className="tabo-detail-header">
                   <h5>DEFAULT Currency ID: <span style={{marginLeft: 15}}>{this.state.defaultCurrency + this.state.defaultCurrency}</span>
                   </h5>
                   <dl className="row mb-2 tabo-detail-content">
@@ -172,7 +188,7 @@ class CurrencyRates extends Component {
                       <dt className="col-sm-3">Currency</dt>
                       <dd className="col-sm-9">: {this.state.defaultCurrencyName}</dd>
                   </dl>
-                </div>
+                </div> */}
 
 
                 <Row className="mb-2 mt-3 justify-content-end">
