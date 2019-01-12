@@ -35,14 +35,14 @@ class ReservationHistory extends React.Component  {
           <React.Fragment>
             <Row className="mb-2 justify-content-end">
               <Col md="2">
-              <CSVLink 
-                data={this.getCSVData()}
-                filename={"reservation-history.csv"}
-                target="_blank"
-              >
-                <Button block color="primary">
-                  Export
-                </Button>
+                <CSVLink 
+                  data={this.getCSVData()}
+                  filename={"reservation-history.csv"}
+                  target="_blank"
+                >
+                  <Button block color="primary">
+                    Export
+                  </Button>
                 </CSVLink>
               </Col>
             </Row>

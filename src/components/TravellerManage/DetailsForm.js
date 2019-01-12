@@ -39,6 +39,7 @@ class DetailsForm extends React.Component {
                 displayName: '',
                 email: '',
                 country: '',
+                countryName: '',
                 phoneDialCode: '',
                 phoneNumber: '',
                 address: '',
@@ -121,11 +122,12 @@ class DetailsForm extends React.Component {
 
     handleCountryChange = (selectedChoice) => {
         if (selectedChoice) {
-          let { countriesData: {currencies} } = this.props;
+          let { countriesData: { currencies } } = this.props;
           this.setState({
             user: {
               ...this.state.user,
               country: selectedChoice.value,
+              countryName: selectedChoice.label,
               currency: currencies[selectedChoice.value],
               phoneDialCode: selectedChoice.phoneDialCode
             }

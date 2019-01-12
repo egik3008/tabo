@@ -17,9 +17,9 @@ class PackageForm extends React.Component {
     state = {
         packagesPrice: [
             {id: "PKG1", packageName: "1 hour", price: 0},
-            {id: "PKG2", packageName: "2 hour", price: 0},
-            {id: "PKG3", packageName: "4 hour", price: 0},
-            {id: "PKG4", packageName: "8 hour", price: 0},
+            {id: "PKG2", packageName: "2 hours", price: 0},
+            {id: "PKG3", packageName: "4 hours", price: 0},
+            {id: "PKG4", packageName: "8 hours", price: 0},
         ],
         isSubmitting: false
     }

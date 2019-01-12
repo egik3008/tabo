@@ -71,8 +71,14 @@ const VouchersUsage = Loadable({
   loading: Loading,
 })
 
+const Testing = Loadable({
+  loader: () => import('./components/Testing'),
+  loading: Loading,
+})
+
 // https://github.com/ReactTraining/react-router/tree/master/packages/react-router-config
 const routes = [
+  { path: '/testing', name: 'Testing', component: Testing },
   { path: '/dashboard', name: 'Dashboard', component: Dashboard },
   { path: '/users/:type', exact: true, name: 'User', component: User },
   { path: '/users/:type/add', name: 'Add User', component: UserDetail },
