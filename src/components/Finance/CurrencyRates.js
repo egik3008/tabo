@@ -87,13 +87,39 @@ class CurrencyRates extends Component {
       })
   }
 
+  getUSDtoIDR = (edited) => {
+    let keyUSDIDR = 'USDIDR';
+    let USDtoIDR = edited[keyUSDIDR];
+
+    if (!USDtoIDR) {
+        const curRates = this.state.currencyRates.data.find(item => 
+          item.id === keyUSDIDR
+        );
+        USDtoIDR = Number(curRates.rate);
+    }
+
+    return Number(USDtoIDR);
+  }
+
   saveChange = () => {
     const { edited, savedChange } = this.state;
+    const USDtoIDR = this.getUSDtoIDR(edited);
 
     for (let key in edited) {
-      let toUSDKey = key.split('USD')[1] + "USD";
-      edited[key]       = Number(edited[key])
-      edited[toUSDKey]  = Number(Number(1/Number(edited[key])).toFixed(6));
+      edited[key]       = Number(edited[key]);
+
+      let currencyEdited = key.split('USD')[1];
+
+      // if currencies changed from USD to other than IDR
+      if (currencyEdited !== 'IDR') {
+          let fromIDRtoEditedKey = "IDR" + currencyEdited;
+          edited[fromIDRtoEditedKey] = Number(Number(edited[key]/USDtoIDR).toFixed(6));
+
+      // if currencies changed fron USD to IDR => change valu IDR to USD
+      } else {
+        let toUSDKey =  currencyEdited + "USD";
+        edited[toUSDKey]  = Number(Number(1/edited[key]).toFixed(6));
+      }
     }
     
     const db = database.database();
