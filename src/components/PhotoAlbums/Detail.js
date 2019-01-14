@@ -106,7 +106,8 @@ class Detail extends Component {
     });
 
     const db = firebase.database();
-    db.ref('albums').child(id).once('value')
+    db.ref('albums').child(id)
+      .once('value')
       .then(snap => {
         db.ref('reservations').child(id).once('value')
           .then(snapRes => {
@@ -118,7 +119,7 @@ class Detail extends Component {
                   ...this.state.photoAlbum,
                   created: rsrv.albumUpdated || rsrv.updated || rsrv.created,
                   packageId: rsrv.packageId,
-                  albums: snap.val(),
+                  albums: snap.val() || [],
                   photographer,
                   traveller,
                   id

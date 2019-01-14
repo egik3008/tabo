@@ -34,73 +34,44 @@ class PhotoAlbums extends Component {
     const reservationRef = db.database().ref('reservations');
 
     albumRef.once('value').then(snap => {
-      let data = [];
+      let data = [], queryJoins = [];
       let albums = snap.val();
-      Object.keys(albums).forEach(async key => {
-        // await reservationRef.child(key).once('value').then(snap => {
-        //   const rsrv = snap.val();
-        //   if (rsrv) {
-        //     let item = {
-        //       id: key,
-        //       albums: albums[key],
-        //       traveller: rsrv.uidMapping[rsrv.travellerId].displayName,
-        //       photographer: rsrv.uidMapping[rsrv.photographerId].displayName
-        //     }
-        //     data.push(item);
-        //   }
-        // });
 
-        let item = {
-          id: key,
-          albums: albums[key],
-          traveller: "",
-          photographer: ""
-        }
-        data.push(item);
+      for (let key in albums) {
+          queryJoins.push(
+            reservationRef.child(key)
+              .once('value').then(snap => {
+              const rsrv = snap.val();
+              if (rsrv) {
+                let item = {
+                  id: key,
+                  albums: albums[key],
+                  traveller: rsrv.uidMapping[rsrv.travellerId].displayName,
+                  photographer: rsrv.uidMapping[rsrv.photographerId].displayName,
+                  updated: rsrv.albumUpdated
+                }
+                data.push(item);
+              }
+            })
+          )
+      }
+
+      Promise.all(queryJoins).then(() => {
+        this.setState(prevState => {
+            return {
+              photoAlbums: {
+                ...prevState.photoAlbums,
+                loading: false,
+                loaded: true,
+                data: data,
+              },
+            }
+          })
+        });
       });
-      this.setState(prevState => {
-        return {
-          photoAlbums: {
-            ...prevState.photoAlbums,
-            loading: false,
-            loaded: true,
-            data: data,
-          },
-        }
-      })
-    });
-
-    //   this.setState(prevState => {
-    //     return {
-    //       photoAlbums: {
-    //         ...prevState.photoAlbums,
-    //         loading: false,
-    //         loaded: true,
-    //         data: response.data,
-    //       },
-    //     }
-    //   })
-
-
-
-    // axios.get(`${process.env.REACT_APP_API_HOSTNAME}/api/reservations`).then(response => {
-    //   // console.log(response.data);
-    //   this.setState(prevState => {
-    //     return {
-    //       photoAlbums: {
-    //         ...prevState.photoAlbums,
-    //         loading: false,
-    //         loaded: true,
-    //         data: response.data,
-    //       },
-    //     }
-    //   })
-    // })
-    
   }
 
   render() {
-    console.log(this.state.photoAlbums.data[0]);
     const columns = [
       {
         Header: 'ID Photo Album',
@@ -116,10 +87,6 @@ class PhotoAlbums extends Component {
         accessor: d => {
           return d.albums.length
         }
-      },
-      {
-        Header: 'Folder Size Default',
-        accessor: 'photographer',
       },
       {
         Header: 'Created',
