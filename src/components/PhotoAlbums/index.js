@@ -85,7 +85,7 @@ class PhotoAlbums extends Component {
         Header: 'Number of Photos',
         id: 'numberOfPhotos',
         accessor: d => {
-          return d.albums.length
+          return String(d.albums.length)
         }
       },
       {
