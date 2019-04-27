@@ -9,6 +9,7 @@ import {
 
 class Testing extends Component {
   state = { data: [] }
+
   componentDidMount() {
     let dataList = [], query = [];
     axios
@@ -26,6 +27,9 @@ class Testing extends Component {
                   const pkg = pgServices.packagesPrice;
                   dataList.push({
                     pgName: pgList[key].displayName,
+                    phoneNumber: `${pgList[key].phoneDialCode || ""}${pgList[key].phoneNumber || ""}`,
+                    email: pgList[key].email,
+                    location: pgList[key].locationAdmLevel2,
                     currency: pgList[key].currency || "",
                     pkg1: (pkg && pkg[0] ? pkg[0].price : 0),
                     pkg2: (pkg && pkg[1] ? pkg[1].price : 0),
@@ -50,11 +54,14 @@ class Testing extends Component {
     return data.map((dt, index) => ({
       "No": (index + 1),
       "PG Name": dt.pgName,
+      "Phone Number": dt.phoneNumber,
+      "Email": dt.email,
+      "Location": dt.location,
       "Currency": dt.currency,
-      "1 Hour": Number(dt.pkg1).toLocaleString(),
-      "2 Hour": Number(dt.pkg2).toLocaleString(),
-      "4 Hour": Number(dt.pkg3).toLocaleString(),
-      "8 Hour": Number(dt.pkg4).toLocaleString(),
+      // "1 Hour": Number(dt.pkg1).toLocaleString(),
+      // "2 Hour": Number(dt.pkg2).toLocaleString(),
+      // "4 Hour": Number(dt.pkg3).toLocaleString(),
+      // "8 Hour": Number(dt.pkg4).toLocaleString(),
     }));
   }
 
@@ -72,7 +79,7 @@ class Testing extends Component {
             target="_blank"
           >
             <Button block color="primary">
-              Export PG Package Price
+              Export Data PG
             </Button>
           </CSVLink>   
       </React.Fragment>
