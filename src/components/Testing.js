@@ -26,8 +26,9 @@ class Testing extends Component {
                   let pgServices = snap.val();
                   const pkg = pgServices.packagesPrice;
                   dataList.push({
+                    uid: pgList[key].uid,
                     pgName: pgList[key].displayName,
-                    phoneNumber: `${pgList[key].phoneDialCode || ""}${pgList[key].phoneNumber || ""}`,
+                    phoneNumber: `'${pgList[key].phoneDialCode || ""}${pgList[key].phoneNumber || ""}`,
                     email: pgList[key].email,
                     location: pgList[key].locationAdmLevel2,
                     currency: pgList[key].currency || "",
@@ -53,15 +54,16 @@ class Testing extends Component {
     const { data } = this.state;
     return data.map((dt, index) => ({
       "No": (index + 1),
+      "ID": dt.uid,
       "PG Name": dt.pgName,
       "Phone Number": dt.phoneNumber,
       "Email": dt.email,
       "Location": dt.location,
       "Currency": dt.currency,
-      // "1 Hour": Number(dt.pkg1).toLocaleString(),
-      // "2 Hour": Number(dt.pkg2).toLocaleString(),
-      // "4 Hour": Number(dt.pkg3).toLocaleString(),
-      // "8 Hour": Number(dt.pkg4).toLocaleString(),
+      "1 Hour": Number(dt.pkg1).toLocaleString(),
+      "2 Hour": Number(dt.pkg2).toLocaleString(),
+      "4 Hour": Number(dt.pkg3).toLocaleString(),
+      "8 Hour": Number(dt.pkg4).toLocaleString(),
     }));
   }
 
