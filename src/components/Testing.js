@@ -28,7 +28,7 @@ class Testing extends Component {
                   dataList.push({
                     uid: pgList[key].uid,
                     pgName: pgList[key].displayName,
-                    phoneNumber: `'${pgList[key].phoneDialCode || ""}${pgList[key].phoneNumber || ""}`,
+                    phoneNumber: `${pgList[key].phoneDialCode || ""}${pgList[key].phoneNumber || ""}`,
                     email: pgList[key].email,
                     location: pgList[key].locationAdmLevel2,
                     currency: pgList[key].currency || "",
