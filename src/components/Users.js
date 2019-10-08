@@ -94,8 +94,7 @@ class Users extends Component {
       if ('photographerInfo' in d) {
         if (!('cameraEquipment' in d.photographerInfo)) completion -= 10
         if (!('languages' in d.photographerInfo)) completion -= 10
-        if (!('location' in d.photographerInfo)) completion -= 10
-        if (!('meetingPoints' in d.photographerInfo)) completion -= 10
+        if (!('location' in d.photographerInfo)) completion -= 20
         if (!('packagesPrice' in d.photographerInfo)) completion -= 10
         if (!('photosPortofolio' in d.photographerInfo)) completion -= 10
         if (!('selfDescription' in d.photographerInfo)) completion -= 10
